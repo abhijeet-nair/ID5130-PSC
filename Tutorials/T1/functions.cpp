@@ -1,12 +1,21 @@
+#include "functions.h"
 #include <iostream>
-using namespace std;
+#include <iomanip>
 
 void printMatrix (double** a, int m, int n) {
+    std::cout << std::fixed << std::setprecision(4);
     for (int i = 0; i < m; i++) {
         for (int j = 0; j < n; j++) {
-            cout << a[i][j] << "\t";
+            std::cout << a[i][j] << "\t";
         }
-        cout << "\n";
+        std::cout << std::endl;
+    }
+}
+
+void printVector (double* a, int m) {
+    // std::cout << std::setprecision(4);
+    for (int i = 0; i < m; i++) {
+        std::cout << a[i] << std::endl;
     }
 }
 
@@ -64,4 +73,15 @@ int compareTwoMatrices (double** a, double** b, int m, int n) {
         }
     }
     return 1;
+}
+
+double* multiplyMatVec (double** a, double* b, int m, int n) {
+    double* prod = new double[m] {};
+
+    for (int i = 0; i < m; i ++) {
+        for (int j = 0; j < n; j ++) {
+            prod[i] += a[i][j]*b[j];
+        }
+	}
+    return prod;
 }
