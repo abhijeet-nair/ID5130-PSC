@@ -3,12 +3,13 @@
 	"tasks": [
 		{
 			"type": "cppbuild",
-			"label": "Configured GCC-13 Compiler",
+			"label": "Configured GCC-13 Compiler with OpenMP",
 			"command": "/home/linuxbrew/.linuxbrew/bin/g++-13",
 			"args": [
 				"-fdiagnostics-color=always",
 				"-std=c++20",
 				"-g",
+				"-fopenmp",
 				"${workspaceFolder}/*.cpp",
 				"-o",
 				"${fileDirname}/outfile.exe"
