@@ -51,14 +51,14 @@ void trapz_para_crit(int n, double a, double b, double *result)
 
 }
 
-void trapz_para_for (int n, double a, double b, double *result) {
+void trapz_para_for (int n, double a, double b, double *result, int thrd_cnt) {
     double h, x, total; 		/* private  */
     int i;
 
     h = (b - a)/n;
 
     total += (func(a) + func(b)) / 2.0;
-    #pragma omp parallel for
+    #pragma omp parallel for num_threads(thrd_cnt) reduction (+:total)
         for (i = 1; i <= n-1; i++) {
             x = a + i*h;
             total += func(x);
@@ -69,13 +69,13 @@ void trapz_para_for (int n, double a, double b, double *result) {
     *result = total;
 }
 
-void simps_para_for (int n, double a, double b, double* result) {
+void simps_para_for (int n, double a, double b, double* result, int thrd_cnt) {
     double h, x, total; 		/* private  */
     int i;
     h = (b - a)/n;
     total += func(a) + func(b);
 
-    #pragma omp parallel for
+    #pragma omp parallel for num_threads(thrd_cnt) reduction (+:total)
         for (i = 1; i <= n-1; i++) {
             x = a + i*h;
             if (i%2 == 1) {
@@ -127,13 +127,16 @@ int main (int argc, char* argv[]) {
 
     // Parallel Critical
     #pragma omp parallel num_threads(thrd_cnt)
+    {
         trapz_para_crit(n, a, b, &res_para_crit);
+    }
 
-    #pragma omp parallel num_threads(thrd_cnt)
-        trapz_para_for(n, a, b, &res_para_for);
+    // Parallel for
+    trapz_para_for(n, a, b, &res_para_for, thrd_cnt);
 
-    #pragma omp parallel num_threads(thrd_cnt)
-        simps_para_for(n, a, b, &res_simps_for);
+    // Parallel for Simpsons
+    simps_para_for(n, a, b, &res_simps_for, thrd_cnt);
+
 
     double act_ans = 0.198557;
     printf("\n                    Answer\tDifference");
