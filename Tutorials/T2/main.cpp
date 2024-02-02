@@ -57,7 +57,7 @@ void trapz_para_for (int n, double a, double b, double *result, int thrd_cnt) {
 
     h = (b - a)/n;
 
-    total += (func(a) + func(b)) / 2.0;
+    total = (func(a) + func(b)) / 2.0;
     #pragma omp parallel for num_threads(thrd_cnt) reduction (+:total)
         for (i = 1; i <= n-1; i++) {
             x = a + i*h;
@@ -73,16 +73,16 @@ void simps_para_for (int n, double a, double b, double* result, int thrd_cnt) {
     double h, x, total; 		/* private  */
     int i;
     h = (b - a)/n;
-    total += func(a) + func(b);
+    total = func(a) + func(b);
 
-    #pragma omp parallel for num_threads(thrd_cnt) reduction (+:total)
+    #pragma omp parallel for num_threads(thrd_cnt) reduction(+:total)
         for (i = 1; i <= n-1; i++) {
             x = a + i*h;
-            if (i%2 == 1) {
-                total += 4*func(x);
+            if (i%2 == 0) {
+                total += 2*func(x);
             }
             else {
-                total += 2*func(x);
+                total += 4*func(x);
             }
         }
     
