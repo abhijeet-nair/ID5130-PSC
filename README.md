@@ -7,3 +7,6 @@ Basic C++ practice. Adapted functions provided by the professor for matrix opera
 
 ## Tutorial 2
 Numerical integration with Trapezoidal and Simpson's Rule. Used OpenMP to parallelize the calculations. Used manual work-splitting and parallel for.
+
+## Tutorial 3
+Experimentation with *reduction* clause in OpenMP with subtraction and division. Implemented *Odd-Even Transposition Sort* with parallelized inner loops. Tested the behaviour of *private*, *firstprivate* and *threadprivate* variable clauses.
