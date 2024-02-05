@@ -114,19 +114,49 @@ int main (int argc, char* argv[]) {
 
     // private variable
     printf("Example of private variable:\n");
-    printf("Value before parallel block, a = %d\n\n", a);
+    printf("Value before parallel block, a = %d. Address = ", a);
+    std::cout << &a << "\n\n";
 
     #pragma omp parallel num_threads(thrd_cnt) private(a)
         printf("Value from thread %d, a = %d\n", omp_get_thread_num(), a);
+        a += 10;
+        printf("Value from thread %d, a = %d\n", omp_get_thread_num(), a);
 
 
-    printf("\nValue after parallel block, a = %d\n", a);
+    printf("\nValue after parallel block, a = %d. Address = ", a);
+    std::cout << &a << "\n\n";
     
     // firstprivate variable
     printf("\nExample of firstprivate variable:\n");
+    a = 10;
+
+    printf("Value before parallel block, a = %d. Address = ", a);
+    std::cout << &a << "\n\n";
+
+    #pragma omp parallel num_threads(thrd_cnt) firstprivate(a)
+        printf("Value from thread %d, a = %d\n", omp_get_thread_num(), a);
+        a += 10;
+        printf("Value from thread %d, a = %d\n", omp_get_thread_num(), a);
+
+
+    printf("\nValue after parallel block, a = %d. Address = ", a);
+    std::cout << &a << "\n\n";
 
     // threadprivate variable
     printf("\nExample of threadprivate variable:\n");
+    int b = 10;
 
+    #pragma omp parallel num_threads(thrd_cnt) threadprivate(b) copyin(b)
+        printf("Value from thread %d, b = %d\n", omp_get_thread_num(), b);
+        b += 10;
+        printf("Value from thread %d, b = %d\n", omp_get_thread_num(), b);
+
+
+    #pragma omp parallel num_threads(thrd_cnt) threadprivate(b)
+        printf("Value from thread %d, b = %d\n", omp_get_thread_num(), b);
+        b += 10;
+        printf("Value from thread %d, b = %d\n", omp_get_thread_num(), b);
+
+    
     return 0;
 }
