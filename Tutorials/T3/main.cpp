@@ -24,6 +24,7 @@ int main (int argc, char* argv[]) {
     }
     
     printf("Question 1:\n------------------------------------------\n");
+    // Subtraction
     printf("Subtraction:\n");
     double arr[10] = {1, -2.5, 3.4, -5, -6.9, 9.8, -0.45, 1, 3.14, -0.981};
     double total = 0.0;
@@ -43,7 +44,10 @@ int main (int argc, char* argv[]) {
     printf("Result with reduction operator: %.4f\n", total);
     printf("Correct answer:                 %.4f\n", act);
 
+    // Multiplication
 
+
+    // Division - Doesn't work
     // printf("\nDivision:\n");
     // total = 1.0;
     // act = 1.0;
@@ -144,7 +148,7 @@ int main (int argc, char* argv[]) {
 
     // threadprivate variable
     printf("\nExample of threadprivate variable:\n");
-    int b = 10;
+    static int b = 10;
 
     #pragma omp parallel num_threads(thrd_cnt) threadprivate(b) copyin(b)
         printf("Value from thread %d, b = %d\n", omp_get_thread_num(), b);
