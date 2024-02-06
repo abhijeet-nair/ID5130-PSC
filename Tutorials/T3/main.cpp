@@ -1,5 +1,6 @@
 #include <iostream>
 #include <math.h>
+#include <time.h>
 #ifdef _OPENMP
     #include <omp.h>
 #endif
@@ -8,6 +9,16 @@ void swap (int a[], int i, int j) {
     int tmp = a[i];
     a[i] = a[j];
     a[j] = tmp;
+}
+
+void printArray(int a[], int n) {
+    int i = 0;
+    std::cout << "[";
+    for (i = 0; i < n; i++) {
+        std::cout << a[i];
+        if (i < n-1) {std::cout << ", ";}
+    }
+    std::cout << "]" << std::endl;
 }
 
 int main (int argc, char* argv[]) {
@@ -72,17 +83,23 @@ int main (int argc, char* argv[]) {
     int arr1[n] {};
 
     printf("Array before sorting:\n");
-    std::cout << "[";
+    // std::cout << "[";
     for (i = 0; i < n; i++) {
         arr1[i] = rand() % 100;
         // std::cout << "i = " << i << ", arr[i] = " << arr1[i] << std::endl;
-        std::cout << arr1[i];
-        if (i < n-1) {std::cout << ", ";}
+        // std::cout << arr1[i];
+        // if (i < n-1) {std::cout << ", ";}
     }
-    std::cout << "]" << std::endl;
+    // std::cout << "]" << std::endl;
+    // printArray(arr1, n);
    
     // Odd-Even Transposition Sort
     int pass = 0;
+
+    clock_t t;
+    t = clock();
+    // time_t start, end;
+    // time(&start);
 
     #pragma omp parallel num_threads(thrd_cnt) default(none) shared(arr1, n) private(i, pass)
     {
@@ -101,18 +118,26 @@ int main (int argc, char* argv[]) {
             }
         }
     }
+    t = clock() - t;
+    // time(&end); 
+ 
+    // double time_taken = double(end - start);
+    double time_taken = double(t) / double(CLOCKS_PER_SEC);
 
     printf("\nArray after sorting:\n");
-    std::cout << "[";
-    for (i = 0; i < n; i++) {
-        std::cout << arr1[i];
-        if (i < n-1) {std::cout << ", ";}
-    }
-    std::cout << "]" << std::endl;
+    // std::cout << "[";
+    // for (i = 0; i < n; i++) {
+    //     std::cout << arr1[i];
+    //     if (i < n-1) {std::cout << ", ";}
+    // }
+    // std::cout << "]" << std::endl;
+    // printArray(arr1, n);
 
+    // printf("\nTime taken for sorting: %f seconds\n",((float)t)/CLOCKS_PER_SEC);
+    printf("\nTime taken for sorting: %.6f seconds\n",time_taken);
     // printf("Done\n");
 
-
+    /*
     printf("\n\nQuestion 3:\n------------------------------------------\n");
     int a = 10;
 
@@ -122,10 +147,11 @@ int main (int argc, char* argv[]) {
     std::cout << &a << "\n\n";
 
     #pragma omp parallel num_threads(thrd_cnt) private(a)
+    {
         printf("Value from thread %d, a = %d\n", omp_get_thread_num(), a);
         a += 10;
         printf("Value from thread %d, a = %d\n", omp_get_thread_num(), a);
-
+    }
 
     printf("\nValue after parallel block, a = %d. Address = ", a);
     std::cout << &a << "\n\n";
@@ -138,10 +164,11 @@ int main (int argc, char* argv[]) {
     std::cout << &a << "\n\n";
 
     #pragma omp parallel num_threads(thrd_cnt) firstprivate(a)
+    {
         printf("Value from thread %d, a = %d\n", omp_get_thread_num(), a);
         a += 10;
         printf("Value from thread %d, a = %d\n", omp_get_thread_num(), a);
-
+    }
 
     printf("\nValue after parallel block, a = %d. Address = ", a);
     std::cout << &a << "\n\n";
@@ -150,17 +177,26 @@ int main (int argc, char* argv[]) {
     printf("\nExample of threadprivate variable:\n");
     static int b = 10;
 
-    #pragma omp parallel num_threads(thrd_cnt) threadprivate(b) copyin(b)
+    #pragma omp threadprivate(b)
+    #pragma omp parallel num_threads(thrd_cnt) copyin(b)
+    {
         printf("Value from thread %d, b = %d\n", omp_get_thread_num(), b);
         b += 10;
         printf("Value from thread %d, b = %d\n", omp_get_thread_num(), b);
+    }
 
+    printf("\nFirst parallel block done...\n\n");
 
-    #pragma omp parallel num_threads(thrd_cnt) threadprivate(b)
+    // #pragma omp threadprivate(b)
+    #pragma omp parallel num_threads(thrd_cnt)
+    {
         printf("Value from thread %d, b = %d\n", omp_get_thread_num(), b);
         b += 10;
         printf("Value from thread %d, b = %d\n", omp_get_thread_num(), b);
+    }
 
-    
+    printf("\nSecond parallel block done...\n");
+    */
+
     return 0;
 }
