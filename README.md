@@ -10,3 +10,6 @@ Numerical integration with Trapezoidal and Simpson's Rule. Used OpenMP to parall
 
 ## Tutorial 3
 Experimentation with *reduction* clause in OpenMP with subtraction and division. Implemented *Odd-Even Transposition Sort* with parallelized inner loops. Tested the behaviour of *private*, *firstprivate* and *threadprivate* variable clauses.
+
+## Tutorial 4
+Starting Numerical Methods with OpenMP. Addition, multiplication and implicit & explicit finite differences.
