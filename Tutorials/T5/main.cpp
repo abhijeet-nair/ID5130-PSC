@@ -134,7 +134,7 @@ int main (int argc, char* argv[]) {
 
     double solSer[N] {};
     for (i = 0; i < N; i++){
-        // printf("%.4f\n", xk_1[i]);
+        printf("%.4f\n", xk_1[i]);
         solSer[i] = xk_1[i];
     }
 
