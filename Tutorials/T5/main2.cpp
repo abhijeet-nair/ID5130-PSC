@@ -24,7 +24,7 @@ double** addTwoMatrices (double** a, double** b, int m, int n, int thrd_cnt, dou
     int i {}, j {};
 
     t = omp_get_wtime();
-    #pragma omp parallel for collapse(2) default(none) shared(a, b, sum, m, n) private(i,j) num_threads(thrd_cnt)
+    #pragma omp parallel for collapse(2) default(none) shared(a, b, sum, m, n) private(i, j) num_threads(thrd_cnt)
         for (i = 0; i < m; i ++) {
             for (j = 0; j < n; j ++) {
                 sum[i][j] = a[i][j] + b[i][j];
