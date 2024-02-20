@@ -13,3 +13,6 @@ Experimentation with *reduction* clause in OpenMP with subtraction and division.
 
 ## Tutorial 4
 Starting Numerical Methods with OpenMP. Addition, multiplication and implicit & explicit finite differences.
+
+## Tutorial 5
+Implemented Iterative Jacobi Method for solving system of linear equations.
