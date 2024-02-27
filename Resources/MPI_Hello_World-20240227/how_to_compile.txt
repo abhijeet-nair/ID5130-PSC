@@ -1,0 +1,8 @@
+For C:
+mpicc (flags) mpi_prog.C
+
+For F90:
+mpof90 (flags) mpi_prog.F90
+
+For executing:
+mpiexec -n <# of processes> <executable name>

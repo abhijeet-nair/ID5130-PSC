@@ -17,6 +17,13 @@ double myderv (double x) {
     return fdot;
 }
 
+void printVector(double a[], int n) {
+   std::cout << std::fixed << std::setprecision(4);
+   for (int i = 0; i < n; i++) {
+        std::cout << a[i] << std::endl;
+   }
+}
+
 void printMatrix (double** a, int m, int n) {
     std::cout << std::fixed << std::setprecision(4);
     for (int i = 0; i < m; i++) {
@@ -51,13 +58,14 @@ int main (int argc, char* argv[]) {
     double xi {};
 
     for (i = 0; i <= N; i++) {
-        A[i] = new double[N+1];
+        A[i] = new double[N+1] {};
 
         xi = i*h;
         fvec[i] = myfunc(xi);
         fdvec[i] = myderv(xi);
     }
 
+    // Initializing A
     for (i = 0; i <= N; i++)  {
         // printf("(%d,%d)\n",i,N);
 
@@ -65,7 +73,7 @@ int main (int argc, char* argv[]) {
             A[i][0] = 1;
             A[i][1] = 2;
 
-            b[i] = (-2.5*fvec[0] + 2*fvec[2] + 0.5*fvec[2])/h;
+            b[i] = (-2.5*fvec[0] + 2*fvec[1] + 0.5*fvec[2])/h;
         }
         else if (i == N) {
             A[i][N-1] = 2;
@@ -82,7 +90,53 @@ int main (int argc, char* argv[]) {
         }
     }
 
-    
+    // Serial LU Decomposition
+    // Finding LU
+    double u[N+1] {};
+    // double l[N+1] {}; // Will not use l[0]. Do something later.
+    double l[N] {};
+
+    u[0] = A[0][0];
+
+    for (i = 0; i < N; i++) {
+        l[i] = A[i+1][i]/u[i];  // l_{i+1} = a_{i+1}/u_i = A_{i+1,i}/u_i
+        u[i+1] = A[i+1][i+1] - l[i]*A[i][i+1];
+        // printf("l(%d), u(%d) = %.4f, %.4f\n",i,i+1,l[i],u[i+1]);
+    }
+
+    // Forward substitution for z
+    double z[N+1] {};
+    z[0] = b[0];
+
+    for (i = 0; i < N; i++) {
+        z[i+1] = b[i+1] - l[i]*z[i];
+    }
+
+    // printf("\nf(x) = \n");
+    // printVector(fvec,N+1);
+    // printf("\nb = \n");
+    // printVector(b,N+1);
+    // printf("\nz = \n");
+    // printVector(z,N+1);
+
+    double x[N+1] {};
+    x[N] = z[N]/u[N];
+
+    for (i = N - 1; i >= 0; i--) {
+        x[i] = (z[i] - A[i][i+1]*x[i+1])/u[i];
+    }
+    // printf("\nx = \n");
+    // printVector(x,N+1);
+
+    // std::cout << std::fixed << std::setprecision(4);
+    // for (int i = 0; i <= N; i++) {
+    //     std::cout << x[i] << "\t" << fdvec[i] << std::endl;
+    // }
 
     // printMatrix(A, N+1, N+1);
+
+
+    // Parallel Recursive Doubling
+    
+    return 0;
 }
