@@ -35,7 +35,7 @@ void printMatrix (double** a, int m, int n) {
 }
 
 
-int main (int argc, char* argv[]) {
+int mai_kn (int argc, char* argv[]) {
     int thrd_cnt = 1;
 
     if (argc == 2) {
@@ -90,17 +90,28 @@ int main (int argc, char* argv[]) {
         }
     }
 
+    double ai_k[N] {};
+    double bi_k[N+1] {};
+    double ci_k[N] {};
+
+    for (i = 0; i < N; i++) {
+        ai_k[i] = A[i+1][i];
+        bi_k[i] = A[i][i];
+        ci_k[i] = A[i][i+1];
+    }
+    bi_k[N] = A[N][N];
+
     // Serial LU Decomposition
     // Finding LU
     double u[N+1] {};
     // double l[N+1] {}; // Will not use l[0]. Do something later.
     double l[N] {};
 
-    u[0] = A[0][0];
+    u[0] = b[0];
 
     for (i = 0; i < N; i++) {
-        l[i] = A[i+1][i]/u[i];  // l_{i+1} = a_{i+1}/u_i = A_{i+1,i}/u_i
-        u[i+1] = A[i+1][i+1] - l[i]*A[i][i+1];
+        l[i] = ai_k[i]/u[i];  // l_{i+1} = a_{i+1}/u_i = A_{i+1,i}/u_i
+        u[i+1] = bi_k[i+1] - l[i]*ci_k[i];
         // printf("l(%d), u(%d) = %.4f, %.4f\n",i,i+1,l[i],u[i+1]);
     }
 
@@ -123,7 +134,7 @@ int main (int argc, char* argv[]) {
     x[N] = z[N]/u[N];
 
     for (i = N - 1; i >= 0; i--) {
-        x[i] = (z[i] - A[i][i+1]*x[i+1])/u[i];
+        x[i] = (z[i] - ci_k[i]*x[i+1])/u[i];
     }
     // printf("\nx = \n");
     // printVector(x,N+1);
@@ -137,6 +148,22 @@ int main (int argc, char* argv[]) {
 
 
     // Parallel Recursive Doubling
+    int n_RD = ceil(log2(N));
+    // printf("n_RD = %d\n",n_RD);
+
     
+    double ai_kp1[N] {};
+    double bi_kp1[N+1] {};
+    double ci_kp1[N] {};
+    double alp_i_k {};
+    double bet_i_k {};
+
+    for (int k = 1; k <= n_RD; k++) {
+        for (int i = 0; i <= N; i++) {
+            
+        }
+    }
+
+
     return 0;
 }
