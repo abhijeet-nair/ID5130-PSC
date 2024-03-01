@@ -35,7 +35,7 @@ void printMatrix (double** a, int m, int n) {
 }
 
 
-int mai_kn (int argc, char* argv[]) {
+int main (int argc, char* argv[]) {
     int thrd_cnt = 1;
 
     if (argc == 2) {
@@ -136,8 +136,8 @@ int mai_kn (int argc, char* argv[]) {
     for (i = N - 1; i >= 0; i--) {
         x[i] = (z[i] - ci_k[i]*x[i+1])/u[i];
     }
-    // printf("\nx = \n");
-    // printVector(x,N+1);
+    printf("\nx = \n");
+    printVector(x,N+1);
 
     // std::cout << std::fixed << std::setprecision(4);
     // for (int i = 0; i <= N; i++) {
@@ -147,22 +147,22 @@ int mai_kn (int argc, char* argv[]) {
     // printMatrix(A, N+1, N+1);
 
 
-    // Parallel Recursive Doubling
-    int n_RD = ceil(log2(N));
-    // printf("n_RD = %d\n",n_RD);
+    // // Parallel Recursive Doubling
+    // int n_RD = ceil(log2(N));
+    // // printf("n_RD = %d\n",n_RD);
 
     
-    double ai_kp1[N] {};
-    double bi_kp1[N+1] {};
-    double ci_kp1[N] {};
-    double alp_i_k {};
-    double bet_i_k {};
+    // double ai_kp1[N] {};
+    // double bi_kp1[N+1] {};
+    // double ci_kp1[N] {};
+    // double alp_i_k {};
+    // double bet_i_k {};
 
-    for (int k = 1; k <= n_RD; k++) {
-        for (int i = 0; i <= N; i++) {
+    // for (int k = 1; k <= n_RD; k++) {
+    //     for (int i = 0; i <= N; i++) {
             
-        }
-    }
+    //     }
+    // }
 
 
     return 0;

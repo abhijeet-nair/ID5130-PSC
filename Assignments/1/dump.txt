@@ -1,0 +1,71 @@
+C++:
+Rec_Doub.cpp:
+            // if (i < N - l1) {
+            //     alpi_k[i] = 0;
+            //     beti_k[i] = -ci_k[i]/bi_k[i+l1-1];
+
+            //     bi_k1[i] += beti_k[i]*ai_k[i+l1-1];
+            //     yi_k1[i] += beti_k[i]*yi_k[i+l1-1];
+            // }
+            // else if (i >= l1) {
+            //     alpi_k[i] = -ai_k[i]/bi_k[i-l1-1];
+            //     beti_k[i] = 0;
+
+            //     bi_k1[i] += alpi_k[i]*ci_k[i-l1-1];
+            //     yi_k1[i] += alpi_k[i]*yi_k[i-l1-1];
+            // }
+            // else {
+            //     alpi_k[i] = 0;
+            //     beti_k[i] = 0;
+
+            //     bi_k1[i] += beti_k[i]*ai_k[i+l1-1] + alpi_k[i]*ci_k[i-l1-1];
+            //     yi_k1[i] += beti_k[i]*yi_k[i+l1-1] + alpi_k[i]*yi_k[i-l1-1];
+            // }
+
+            // if (i < N - l2) {
+            //     ai_k1[i] = 0;
+            //     ci_k1[i] = beti_k[i]*ci_k[i+l1-1];
+
+            // }
+            // else if (i >= l2) {
+            //     ai_k1[i] = alpi_k[i]*ai_k[i-l1-1];
+            //     ci_k1[i] = 0;
+                
+            // }
+            // else {
+            //     ai_k1[i] = 0;
+            //     ci_k1[i] = 0;
+            // }
+
+MATLAB:
+A1_test2.m:
+        % if (i < N - l1)
+        %     alpi_k(i) = 0;
+        %     beti_k(i) = -ci_k(i)/bi_k(i+l1);
+        % 
+        %     bi_k1(i) = bi_k1(i) + beti_k(i)*ai_k(i+l1);
+        %     yi_k1(i) = yi_k1(i) + beti_k(i)*yi_k(i+l1);
+        % elseif (i >= l1+1)
+        %     alpi_k(i) = -ai_k(i)/bi_k(i-l1);
+        %     beti_k(i) = 0;
+        % 
+        %     bi_k1(i) = bi_k1(i) + alpi_k(i)*ci_k(i-l1);
+        %     yi_k1(i) = yi_k1(i) + alpi_k(i)*yi_k(i-l1);
+        % else
+        %     alpi_k(i) = 0;
+        %     beti_k(i) = 0;
+        % 
+        %     bi_k1(i) = bi_k1(i) + beti_k(i)*ai_k(i+l1) + alpi_k(i)*ci_k(i-l1);
+        %     yi_k1(i) = yi_k1(i) + beti_k(i)*yi_k(i+l1) + alpi_k(i)*yi_k(i-l1);
+        % end
+
+        % if (i < N - l2)
+        %     ai_k1(i) = 0;
+        %     ci_k1(i) = beti_k(i)*ci_k(i+l1);
+        % elseif (i >= l2 + 1)
+        %     ai_k1(i) = alpi_k(i)*ai_k(i-l1);
+        %     ci_k1(i) = 0;
+        % else
+        %     ai_k1(i) = 0;
+        %     ci_k1(i) = 0;
+        % end
