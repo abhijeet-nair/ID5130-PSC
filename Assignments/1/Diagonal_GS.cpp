@@ -1,5 +1,9 @@
 #include <iostream>
+#include <fstream>
 #include <math.h>
+#ifdef _OPENMP
+    #include <omp.h>
+#endif
 
 double q (double x, double y) {
     double val = 2*(2 - pow(x, 2) - pow(y, 2));
@@ -54,6 +58,7 @@ int main (int argc, char* argv[]) {
 
     std::cout << "Enter grid spacing: ";
     std::cin >> del;
+    printf("\n");
 
     double del2 = pow(del, 2);
 
@@ -62,7 +67,6 @@ int main (int argc, char* argv[]) {
 
     N = int(2/del) + 1;
     Nd = 2*N - 1;
-    // N = del;
 
     double xi[N] {};
     double yi[N] {};
@@ -82,26 +86,23 @@ int main (int argc, char* argv[]) {
         yi[i] = -1 + i*del;
     }
 
-    // printf("xi = \n");
-    // printVector(xi,N);
-
-    for (i = 0; i < N; i++) {
-        for (j = 0; j < N; j++) {
-            qij[i][j] = q(xi[i], yi[j]);
-            solMat[i][j] = phiSol(xi[i], yi[j]);
+    #pragma omp parallel for num_threads(thrd_cnt) collapse(2) default(none) shared(qij, solMat, xi, yi, N) private(i, j)
+        for (i = 0; i < N; i++) {
+            for (j = 0; j < N; j++) {
+                qij[i][j] = q(xi[i], yi[j]);
+                solMat[i][j] = phiSol(xi[i], yi[j]);
+            }
         }
-    }
 
-    // printf("solMat = \n");
-    // printMatrix(solMat,N,N);
-
-    double err = 1, eps = 1e-2;
+    double err = 1, eps = 1e-2, t {};
     double errvec[N*N];
-    int cnt = 1;
-
-    int lim = 1e5;
+    int cnt = 1, lim = 1e5;
 
     // Diagonal numbered from 1 to 2N - 1
+    t = omp_get_wtime();
+    #pragma omp parallel num_threads(thrd_cnt) \
+    shared(phik, phik1, N, Nd, errvec, solMat, err, eps, cnt, lim, del2, qij) \
+    private(i, j, l, ibeg, iend)
     while ((err > eps) && (cnt < lim)) {
         for (l = 2; l <= Nd - 1; l++) {
             if (l < N) {
@@ -113,41 +114,63 @@ int main (int argc, char* argv[]) {
                 iend = N - 2;
             }
 
-            for (i = ibeg; i <= iend; i++) {
-                j = l - i;
-
-                // printf("l, i, j, ib, ie, Nd, N = %d, %d, %d, %d, %d, %d, %d\n",l,i,j,ibeg,iend,Nd,N);
-                
-                phik1[i][j] = 0.25*(phik[i+1][j] + phik1[i-1][j] + phik[i][j+1] + phik1[i][j-1] + del2*qij[i][j]);
-            }
+            #pragma omp for
+                for (i = ibeg; i <= iend; i++) {
+                    j = l - i;
+                    phik1[i][j] = 0.25*(phik[i+1][j] + phik1[i-1][j] + phik[i][j+1] + phik1[i][j-1] + del2*qij[i][j]);
+                }
         }
 
-        for (i = 0; i < N; i++) {
-            for (j = 0; j < N; j++) {
-                errvec[N*i + j] = phik1[i][j] - solMat[i][j];
-                phik[i][j] = phik1[i][j];
+        #pragma omp for collapse(2)
+            for (i = 0; i < N; i++) {
+                for (j = 0; j < N; j++) {
+                    errvec[N*i + j] = phik1[i][j] - solMat[i][j];
+                    phik[i][j] = phik1[i][j];
+                }
             }
-        }
         
-        err = norm(errvec, N*N);
-        if (cnt % 10 == 0) {
-            printf("cnt = %d  err = %.2f\n",cnt,err);
+        #pragma omp single
+        {
+            err = norm(errvec, N*N);
+            if (cnt % 100 == 0) {
+                printf("cnt = %d  err = %.2f\n",cnt,err);
+            }
+            cnt += 1;
         }
-        cnt += 1;
     }
+    t = omp_get_wtime() - t;
+
+    double numSolVec[N] {};
+    double actSolVec[N] {};
 
     if (err > eps) {
-        printf("Crossed iteration limit of 1e%d\n",log10(lim));
+        printf("\nCrossed iteration limit of 1e%d\n",log10(lim));
     }
     else {
-        printf("Converged to required tolerance\nNo. of iterations = %d\n",cnt);
+        printf("\nConverged to required tolerance\nNo. of iterations = %d\n",cnt);
+        printf("Time Taken = %.6f s\n",t);
+
         int yInd = int(0.5*N);
 
-        double solVec[N] {};
+        #pragma omp parallel for num_threads(thrd_cnt) default(none) \
+        shared(numSolVec, actSolVec, phik, solMat, N, yInd) private(i)
+            for (i = 0; i < N; i++) {
+                numSolVec[i] = phik[i][yInd];
+                actSolVec[i] = solMat[i][yInd];
+            }
+    }
 
+    std::ofstream oFile("./Res/GS_Dia.txt");
+
+    if (oFile.is_open()) {
         for (i = 0; i < N; i++) {
-            solVec[i] = phik[i][yInd];
+            oFile << numSolVec[i] << "," << actSolVec[i] << "\n";
         }
+        oFile.close();
+        printf("Saved in file ./Res/GS_Dia.txt\n");
+    }
+    else {
+        printf("Error opening file\n");
     }
 
     return 0;

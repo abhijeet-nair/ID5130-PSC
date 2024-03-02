@@ -43,6 +43,7 @@ int main (int argc, char* argv[]) {
 
     std::cout << "Enter grid spacing: ";
     std::cin >> del;
+    printf("\n");
 
     double del2 = pow(del, 2);
 

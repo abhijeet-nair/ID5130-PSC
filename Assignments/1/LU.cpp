@@ -31,6 +31,7 @@ int main (int argc, char* argv[]) {
     int N {}, i {}, j {};
     std::cout << "Enter number of elements (> 0) of the matrices: ";
     std::cin >> N;
+    printf("\n");
 
     double** A = new double*[N];
     double y[N] {};
