@@ -37,6 +37,37 @@ Rec_Doub.cpp:
             //     ci_k1[i] = 0;
             // }
 
+    // A[0][0] = 3;
+    // A[0][1] = -1;
+    // A[1][0] = -1;
+    // A[1][1] = 3;
+    // A[1][2] = -1;
+    // A[2][1] = -1;
+    // A[2][2] = 3;
+    // A[2][3] = -1;
+    // A[3][2] = -1;
+    // A[3][3] = 3;
+
+    // yi_k[0] = 2;
+    // yi_k[1] = 1;
+    // yi_k[2] = 1;
+    // yi_k[3] = 2;
+
+
+            // printf("alpi = \n");
+            // printVector(alpi_k, N);
+            // printf("ai = \n");
+            // printVector(ai_k1, N);
+            // printf("beti = \n");
+            // printVector(beti_k, N);
+            // printf("ci = \n");
+            // printVector(ci_k1, N);
+            // printf("bi = \n");
+            // printVector(bi_k1, N);
+            // printf("yi = \n");
+            // printVector(yi_k1, N);
+            // printf("\n");
+
 MATLAB:
 A1_test2.m:
         % if (i < N - l1)

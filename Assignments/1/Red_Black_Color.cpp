@@ -1,5 +1,8 @@
 #include <iostream>
 #include <math.h>
+#ifdef _OPENMP
+    #include <omp.h>
+#endif
 
 double q (double x, double y) {
     double val = 2*(2 - pow(x, 2) - pow(y, 2));
@@ -47,9 +50,8 @@ int main (int argc, char* argv[]) {
         return 1;
     }
 
-    int N {}, Nd {};
-    int i {}, j {}, l {};
-    int ibeg {}, iend {};
+    int N {};
+    int i {}, j {}, it {};
     double del {};
 
     std::cout << "Enter grid spacing: ";
@@ -61,7 +63,6 @@ int main (int argc, char* argv[]) {
     // std::cin >> dely;
 
     N = int(2/del) + 1;
-    Nd = 2*N - 1;
     // N = del;
 
     double xi[N] {};
@@ -85,12 +86,13 @@ int main (int argc, char* argv[]) {
     // printf("xi = \n");
     // printVector(xi,N);
 
-    for (i = 0; i < N; i++) {
-        for (j = 0; j < N; j++) {
-            qij[i][j] = q(xi[i], yi[j]);
-            solMat[i][j] = phiSol(xi[i], yi[j]);
+    #pragma omp parallel for num_threads(thrd_cnt) collapse(2) default(none) shared(qij, solMat, N, xi, yi) private(i, j)
+        for (i = 0; i < N; i++) {
+            for (j = 0; j < N; j++) {
+                qij[i][j] = q(xi[i], yi[j]);
+                solMat[i][j] = phiSol(xi[i], yi[j]);
+            }
         }
-    }
 
     // printf("solMat = \n");
     // printMatrix(solMat,N,N);
@@ -101,8 +103,62 @@ int main (int argc, char* argv[]) {
 
     int lim = 1e5;
 
-    // Diagonal numbered from 1 to 2N - 1
-    while ((err > eps) && (cnt < lim)) {
+    #pragma omp parallel num_threads(thrd_cnt) default(none) shared(phik, phik1, qij, del2, N, lim, errvec, solMat, err, eps, cnt) private(i, j)
+    {
+        while ((err > eps) && (cnt < lim)) {
+            #pragma omp for collapse(2)
+                for (i = 1; i < N - 1; i++) {
+                    for (j = 1; j < N - 1; j++) {
+                        if ((i + j) % 2 == 1) {
+                            phik1[i][j] = 0.25*(phik[i+1][j] + phik[i-1][j] + phik[i][j+1] + phik[i][j-1] + del2*qij[i][j]);
+                            // phik1[i][j] = 0.25*(phik[i+1][j] + phik1[i-1][j] + phik[i][j+1] + phik1[i][j-1] + del2*qij[i][j]);
+                        }
+                    }
+                }
 
+            #pragma omp for collapse(2)
+                for (i = 1; i < N - 1; i++) {
+                    for (j = 1; j < N - 1; j++) {
+                        if ((i + j) % 2 == 0) {
+                            phik1[i][j] = 0.25*(phik1[i+1][j] + phik1[i-1][j] + phik1[i][j+1] + phik1[i][j-1] + del2*qij[i][j]);
+                            // phik1[i][j] = 0.25*(phik[i+1][j] + phik1[i-1][j] + phik[i][j+1] + phik1[i][j-1] + del2*qij[i][j]);
+                        }
+                    }
+                }
+            
+            #pragma omp for collapse(2)
+                for (i = 0; i < N; i++) {
+                    for (j = 0; j < N; j++) {
+                        errvec[N*i + j] = phik1[i][j] - solMat[i][j];
+                        phik[i][j] = phik1[i][j];
+                    }
+                }
+            
+            // printf("cnt = %d  err = %.2f\n",cnt,err);
+            #pragma omp single
+            {
+                err = norm(errvec, N*N);
+                if (cnt % 100 == 0) {
+                    printf("cnt = %d  err = %.2f\n",cnt,err);
+                }
+                cnt += 1;
+            }
+        }
     }
+
+    if (err > eps) {
+        printf("Crossed iteration limit of 1e%d\n",log10(lim));
+    }
+    else {
+        printf("Converged to required tolerance\nNo. of iterations = %d\n",cnt);
+        int yInd = int(0.5*N);
+
+        double solVec[N] {};
+
+        for (i = 0; i < N; i++) {
+            solVec[i] = phik[i][yInd];
+        }
+    }
+
+    return 0;
 }

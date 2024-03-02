@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <math.h>
 
 double q (double x, double y) {
@@ -103,9 +104,14 @@ int main (int argc, char* argv[]) {
         }
         
         err = norm(errvec, N*N);
-        printf("cnt = %d  err = %.2f\n",cnt,err);
+        if (cnt % 10 == 0) {
+            printf("cnt = %d  err = %.2f\n",cnt,err);
+        }
         cnt += 1;
     }
+
+    double numSolVec[N] {};
+    double actSolVec[N] {};
 
     if (err > eps) {
         printf("Crossed iteration limit of 1e%d\n",log10(lim));
@@ -114,11 +120,23 @@ int main (int argc, char* argv[]) {
         printf("Converged to required tolerance\nNo. of iterations = %d\n",cnt);
         int yInd = int(0.5*N);
 
-        double solVec[N] {};
-
         for (i = 0; i < N; i++) {
-            solVec[i] = phik[i][yInd];
+            numSolVec[i] = phik[i][yInd];
+            actSolVec[i] = solMat[i][yInd];
         }
+    }
+
+    std::ofstream oFile("./Res/GS_Ser.txt");
+
+    if (oFile.is_open()) {
+        for (i = 0; i < N; i++) {
+            oFile << numSolVec[i] << "," << actSolVec[i] << "\n";
+        }
+        oFile.close();
+        printf("Saved in file ./Res/GS_Ser.txt\n");
+    }
+    else {
+        printf("Error opening file\n");
     }
 
     return 0;

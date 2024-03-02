@@ -130,8 +130,24 @@ int main (int argc, char* argv[]) {
         }
         
         err = norm(errvec, N*N);
-        printf("cnt = %d  err = %.2f\n",cnt,err);
+        if (cnt % 10 == 0) {
+            printf("cnt = %d  err = %.2f\n",cnt,err);
+        }
         cnt += 1;
+    }
+
+    if (err > eps) {
+        printf("Crossed iteration limit of 1e%d\n",log10(lim));
+    }
+    else {
+        printf("Converged to required tolerance\nNo. of iterations = %d\n",cnt);
+        int yInd = int(0.5*N);
+
+        double solVec[N] {};
+
+        for (i = 0; i < N; i++) {
+            solVec[i] = phik[i][yInd];
+        }
     }
 
     return 0;

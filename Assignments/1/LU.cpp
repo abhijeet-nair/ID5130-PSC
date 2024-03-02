@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <math.h>
 
 double myfunc (double x) {
@@ -147,8 +148,21 @@ int main (int argc, char* argv[]) {
         x[i] = (z[i] - ci[i]*x[i+1])/u[i];
     }
 
-    printf("x = \n");
+    printf("\nx = \n");
     printVector(x, N);
+
+    std::ofstream oFile("./Res/LU.txt");
+
+    if (oFile.is_open()) {
+        for (i = 0; i < N; i++) {
+            oFile << x[i] << "," << fdvec[i] << "\n";
+        }
+        oFile.close();
+        printf("Saved in file ./Res/LU.txt\n");
+    }
+    else {
+        printf("Error opening file\n");
+    }
 
     return 0;
 }
