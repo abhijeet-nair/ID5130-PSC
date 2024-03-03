@@ -96,7 +96,7 @@ int main (int argc, char* argv[]) {
 
     double err = 1, eps = 1e-2, t {};
     double errvec[N*N];
-    int cnt = 1, lim = 1e5;
+    int cnt = 1, lim = 1e7;
 
     // Diagonal numbered from 1 to 2N - 1
     t = omp_get_wtime();
@@ -144,7 +144,7 @@ int main (int argc, char* argv[]) {
     double actSolVec[N] {};
 
     if (err > eps) {
-        printf("\nCrossed iteration limit of 1e%d\n",log10(lim));
+        printf("\nCrossed iteration limit of 1e%2.0f\n",log10(lim));
     }
     else {
         printf("\nConverged to required tolerance\nNo. of iterations = %d\n",cnt);
@@ -160,18 +160,18 @@ int main (int argc, char* argv[]) {
             }
     }
 
-    std::ofstream oFile("./Res/GS_Dia.txt");
+    // std::ofstream oFile("./Res/GS_Dia.txt");
 
-    if (oFile.is_open()) {
-        for (i = 0; i < N; i++) {
-            oFile << numSolVec[i] << "," << actSolVec[i] << "\n";
-        }
-        oFile.close();
-        printf("Saved in file ./Res/GS_Dia.txt\n");
-    }
-    else {
-        printf("Error opening file\n");
-    }
+    // if (oFile.is_open()) {
+    //     for (i = 0; i < N; i++) {
+    //         oFile << numSolVec[i] << "," << actSolVec[i] << "\n";
+    //     }
+    //     oFile.close();
+    //     printf("Saved in file ./Res/GS_Dia.txt\n");
+    // }
+    // else {
+    //     printf("Error opening file\n");
+    // }
 
     return 0;
 }

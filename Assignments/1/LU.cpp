@@ -125,10 +125,10 @@ int main (int argc, char* argv[]) {
         u[i] = bi[i] - l[i]*ci[i-1];
     }
 
-    // printf("l = \n");
-    // printVector(l, N);
-    // printf("u = \n");
-    // printVector(u, N);
+    printf("l = \n");
+    printVector(l, N);
+    printf("u = \n");
+    printVector(u, N);
 
     // Forward substitution for z
     double z[N] {};

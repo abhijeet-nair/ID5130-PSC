@@ -88,8 +88,10 @@ int main (int argc, char* argv[]) {
     double errvec[N*N];
     int cnt = 1;
 
-    int lim = 1e5;
+    int lim = 1e7;
 
+    clock_t t;
+    t = clock();
     while ((err > eps) && (cnt < lim)) {      
         for (i = 1; i < N-1; i++) {
             for (j = 1; j < N-1; j++) {
@@ -105,20 +107,23 @@ int main (int argc, char* argv[]) {
         }
         
         err = norm(errvec, N*N);
-        if (cnt % 10 == 0) {
+        if (cnt % 100 == 0) {
             printf("cnt = %d  err = %.2f\n",cnt,err);
         }
         cnt += 1;
     }
+    t = clock() - t;
+    double tTaken = double(t) / double(CLOCKS_PER_SEC);
 
     double numSolVec[N] {};
     double actSolVec[N] {};
 
     if (err > eps) {
-        printf("Crossed iteration limit of 1e%d\n",log10(lim));
+        printf("Crossed iteration limit of 1e%2.0f\n",log10(lim));
     }
     else {
         printf("Converged to required tolerance\nNo. of iterations = %d\n",cnt);
+        printf("Time taken = %.6f s\n",tTaken);
         int yInd = int(0.5*N);
 
         for (i = 0; i < N; i++) {
@@ -127,18 +132,18 @@ int main (int argc, char* argv[]) {
         }
     }
 
-    std::ofstream oFile("./Res/GS_Ser.txt");
+    // std::ofstream oFile("./Res/GS_Ser.txt");
 
-    if (oFile.is_open()) {
-        for (i = 0; i < N; i++) {
-            oFile << numSolVec[i] << "," << actSolVec[i] << "\n";
-        }
-        oFile.close();
-        printf("Saved in file ./Res/GS_Ser.txt\n");
-    }
-    else {
-        printf("Error opening file\n");
-    }
+    // if (oFile.is_open()) {
+    //     for (i = 0; i < N; i++) {
+    //         oFile << numSolVec[i] << "," << actSolVec[i] << "\n";
+    //     }
+    //     oFile.close();
+    //     printf("Saved in file ./Res/GS_Ser.txt\n");
+    // }
+    // else {
+    //     printf("Error opening file\n");
+    // }
 
     return 0;
 }

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <math.h>
 #ifdef _OPENMP
     #include <omp.h>
@@ -56,6 +57,7 @@ int main (int argc, char* argv[]) {
 
     std::cout << "Enter grid spacing: ";
     std::cin >> del;
+    printf("\n");
 
     double del2 = pow(del, 2);
 
@@ -101,8 +103,9 @@ int main (int argc, char* argv[]) {
     double errvec[N*N];
     int cnt = 1;
 
-    int lim = 1e5;
+    int lim = 1e7;
 
+    double t = omp_get_wtime();
     #pragma omp parallel num_threads(thrd_cnt) default(none) shared(phik, phik1, qij, del2, N, lim, errvec, solMat, err, eps, cnt) private(i, j)
     {
         while ((err > eps) && (cnt < lim)) {
@@ -138,27 +141,47 @@ int main (int argc, char* argv[]) {
             #pragma omp single
             {
                 err = norm(errvec, N*N);
-                if (cnt % 100 == 0) {
+                if (cnt % 500 == 0) {
                     printf("cnt = %d  err = %.2f\n",cnt,err);
                 }
                 cnt += 1;
             }
         }
     }
+    t = omp_get_wtime() - t;
+
+    double numSolVec[N] {};
+    double actSolVec[N] {};
 
     if (err > eps) {
-        printf("Crossed iteration limit of 1e%d\n",log10(lim));
+        printf("\nCrossed iteration limit of 1e%2.0f\n",log10(lim));
     }
     else {
-        printf("Converged to required tolerance\nNo. of iterations = %d\n",cnt);
+        printf("\nConverged to required tolerance\nNo. of iterations = %d\n",cnt);
+        printf("Time Taken = %.6f s\n",t);
+
         int yInd = int(0.5*N);
 
-        double solVec[N] {};
-
-        for (i = 0; i < N; i++) {
-            solVec[i] = phik[i][yInd];
-        }
+        #pragma omp parallel for num_threads(thrd_cnt) default(none) \
+        shared(numSolVec, actSolVec, phik, solMat, N, yInd) private(i)
+            for (i = 0; i < N; i++) {
+                numSolVec[i] = phik[i][yInd];
+                actSolVec[i] = solMat[i][yInd];
+            }
     }
+
+    // std::ofstream oFile("./Res/GS_RBC.txt");
+
+    // if (oFile.is_open()) {
+    //     for (i = 0; i < N; i++) {
+    //         oFile << numSolVec[i] << "," << actSolVec[i] << "\n";
+    //     }
+    //     oFile.close();
+    //     printf("Saved in file ./Res/GS_RBC.txt\n");
+    // }
+    // else {
+    //     printf("Error opening file\n");
+    // }
 
     return 0;
 }
