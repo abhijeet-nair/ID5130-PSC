@@ -100,13 +100,12 @@ int main (int argc, char* argv[]) {
     // printMatrix(solMat,N,N);
 
     double err = 1, eps = 1e-2;
-    double errvec[N*N];
     int cnt = 1;
 
     int lim = 1e7;
 
     double t = omp_get_wtime();
-    #pragma omp parallel num_threads(thrd_cnt) default(none) shared(phik, phik1, qij, del2, N, lim, errvec, solMat, err, eps, cnt) private(i, j)
+    #pragma omp parallel num_threads(thrd_cnt) default(none) shared(phik, phik1, qij, del2, N, lim, solMat, err, eps, cnt) private(i, j)
     {
         while ((err > eps) && (cnt < lim)) {
             #pragma omp for collapse(2)
@@ -129,10 +128,12 @@ int main (int argc, char* argv[]) {
                     }
                 }
             
-            #pragma omp for collapse(2)
+            err = 0.0;
+            #pragma omp for collapse(2) reduction(+:err)
                 for (i = 0; i < N; i++) {
                     for (j = 0; j < N; j++) {
-                        errvec[N*i + j] = phik1[i][j] - solMat[i][j];
+                        // errvec[N*i + j] = phik1[i][j] - solMat[i][j];
+                        err += pow(phik1[i][j] - solMat[i][j],2);
                         phik[i][j] = phik1[i][j];
                     }
                 }
@@ -140,7 +141,8 @@ int main (int argc, char* argv[]) {
             // printf("cnt = %d  err = %.2f\n",cnt,err);
             #pragma omp single
             {
-                err = norm(errvec, N*N);
+                // err = norm(errvec, N*N);
+                err = sqrt(err);
                 if (cnt % 500 == 0) {
                     printf("cnt = %d  err = %.2f\n",cnt,err);
                 }

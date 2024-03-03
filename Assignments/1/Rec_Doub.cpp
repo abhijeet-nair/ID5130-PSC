@@ -192,16 +192,16 @@ int main (int argc, char* argv[]) {
     // printf("xi = \n");
     // printVector(xsol, N);
 
-    std::ofstream oFile("./Res/RDA.txt");
+    // std::ofstream oFile("./Res/RDA.txt");
 
-    if (oFile.is_open()) {
-        for (i = 0; i < N; i++) {
-            oFile << xsol[i] << "," << fdvec[i] << "\n";
-        }
-        oFile.close();
-        printf("Saved in file ./Res/RDA.txt\n");
-    }
-    else {
-        printf("Error opening file\n");
-    }
+    // if (oFile.is_open()) {
+    //     for (i = 0; i < N; i++) {
+    //         oFile << xsol[i] << "," << fdvec[i] << "\n";
+    //     }
+    //     oFile.close();
+    //     printf("Saved in file ./Res/RDA.txt\n");
+    // }
+    // else {
+    //     printf("Error opening file\n");
+    // }
 }

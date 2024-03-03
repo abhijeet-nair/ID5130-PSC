@@ -95,15 +95,17 @@ int main (int argc, char* argv[]) {
         }
 
     double err = 1, eps = 1e-2, t {};
-    double errvec[N*N];
     int cnt = 1, lim = 1e7;
 
     // Diagonal numbered from 1 to 2N - 1
+    // double t1 {}, t2 {}, t3 {}, t4 {};
+    printf("Here...\n");
     t = omp_get_wtime();
     #pragma omp parallel num_threads(thrd_cnt) \
-    shared(phik, phik1, N, Nd, errvec, solMat, err, eps, cnt, lim, del2, qij) \
+    shared(phik, phik1, N, Nd, solMat, err, eps, cnt, lim, del2, qij) \
     private(i, j, l, ibeg, iend)
     while ((err > eps) && (cnt < lim)) {
+        // t1 = omp_get_wtime();
         for (l = 2; l <= Nd - 1; l++) {
             if (l < N) {
                 ibeg = 1;
@@ -120,25 +122,39 @@ int main (int argc, char* argv[]) {
                     phik1[i][j] = 0.25*(phik[i+1][j] + phik1[i-1][j] + phik[i][j+1] + phik1[i][j-1] + del2*qij[i][j]);
                 }
         }
+        // t2 = omp_get_wtime();
 
-        #pragma omp for collapse(2)
+        err = 0.0;
+        #pragma omp for collapse(2) reduction(+:err)
             for (i = 0; i < N; i++) {
                 for (j = 0; j < N; j++) {
-                    errvec[N*i + j] = phik1[i][j] - solMat[i][j];
+                    // errvec[N*i + j] = phik1[i][j] - solMat[i][j];
+                    err += pow(phik1[i][j] - solMat[i][j],2);
                     phik[i][j] = phik1[i][j];
                 }
             }
+
+        // t3 = omp_get_wtime();
         
+        // for (int i =0; i < N*N; i++) {
+        //     err += pow(A[i],2);
+        // }
+
         #pragma omp single
         {
-            err = norm(errvec, N*N);
-            if (cnt % 100 == 0) {
+            err = sqrt(err);
+            if (cnt % 250 == 0) {
+                // err = norm(errvec, N*N);
                 printf("cnt = %d  err = %.2f\n",cnt,err);
             }
+            // t4 = omp_get_wtime();
+            // printf("cnt = %d\tt1 = %.6f\tt2 = %.6f\tt3 = %.6f\n",cnt,t2-t1,t3-t2,t4-t3);
             cnt += 1;
         }
     }
     t = omp_get_wtime() - t;
+    // t4 = omp_get_wtime() - t4;
+    // printf("tfi = %.6f\n",t4);
 
     double numSolVec[N] {};
     double actSolVec[N] {};

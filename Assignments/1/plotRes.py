@@ -136,12 +136,70 @@ import matplotlib.pyplot as plt
 # plt.show()
 # fig5.savefig("./Res/GS_RBC.png", dpi=300)
 
-# Q3 c) Time comparison
-delta = np.array([0.1, 0.01, 0.005])
-tSer = np.array([0.008798, 53.900578, 934.409124])
+# # Q3 c) Time comparison
+# delta = np.array([0.1, 0.01, 0.005])
+# tSer = np.array([0.008798, 53.900578, 934.409124])
 
-# tDia = np.array([0.012313, 42.988759, 805.271786]) # 4
-tDia = np.array([0.017157, 61.307862, 1078.219453]) # 8
+# # tDia = np.array([0.012313, 42.988759, 805.271786]) # 4
+# # tDia = np.array([0.017157, 61.307862, 1078.219453]) # 8
+# tDia2 = np.array([0.009243, 29.999306, 523.061110]) # 2
+# tDia4 = np.array([0.009048, 17.905741, 352.446755]) # 4
+# tDia8 = np.array([0.009218, 15.954448, 336.355502]) # 8
+# tDiaL = np.array([523.061110, 352.446755, 336.355502]) # 2, 4, 8
 
-tRBC = np.array([0.007855, 39.185373, 762.295155]) # 4
-tRBC = np.array([0.008133, 53.647345, 1006.334569]) # 8
+# # tRBC = np.array([0.007855, 39.185373, 762.295155]) # 4
+# # tRBC = np.array([0.008133, 53.647345, 1006.334569]) # 8
+# tRBC2 = np.array([0.006428, 27.041639, 487.444447]) # 2
+# tRBC4 = np.array([0.005856, 13.946496, 310.227622]) # 4
+# tRBC8 = np.array([0.005207, 11.504038, 226.176504]) # 8
+# tRBCL = np.array([487.444447, 310.227622, 226.176504]) # 2, 4, 8
+
+# plt.figure(figsize=(8,6))
+# ax = plt.subplot(111)
+# plt.loglog(delta, tSer, 'r', lw=1.5, label="Serial", marker='o', ms=5)
+# plt.loglog(delta, tDia8, 'b', lw=1.5, label="Diagonal", marker='o', ms=5)
+# plt.loglog(delta, tRBC8, 'k', lw=1.5, label="Red-Black Color", marker='o', ms=5)
+# plt.xlabel(r"$\Delta$", size=14)
+# plt.ylabel("Time taken (in s)", size=14)
+# plt.title("Time taken for different methods with 8 threads", size=14)
+# plt.grid()
+# box = ax.get_position()
+# ax.set_position([box.x0, box.y0 + box.height * 0.1,
+#                  box.width, box.height * 0.9])
+# plt.legend(fontsize=14, loc="upper center", ncol=2, bbox_to_anchor=(0.5,-0.1))
+# fig6 = plt.gcf()
+# plt.show()
+# # fig6.savefig("./Res/Q3_c_Time_log.png", dpi=300)
+
+# plt.figure(figsize=(8,6))
+# ax = plt.subplot(111)
+# plt.plot(delta, tSer, 'r', lw=1.5, label="Serial", marker='o', ms=5)
+# plt.plot(delta, tDia8, 'b', lw=1.5, label="Diagonal", marker='o', ms=5)
+# plt.plot(delta, tRBC8, 'k', lw=1.5, label="Red-Black Color", marker='o', ms=5)
+# plt.xlabel(r"$\Delta$", size=14)
+# plt.ylabel("Time taken (in s)", size=14)
+# plt.title("Time taken for different methods with 8 threads", size=14)
+# plt.grid()
+# box = ax.get_position()
+# ax.set_position([box.x0, box.y0 + box.height * 0.1,
+#                  box.width, box.height * 0.9])
+# plt.legend(fontsize=14, loc="upper center", ncol=2, bbox_to_anchor=(0.5,-0.1))
+# fig7 = plt.gcf()
+# plt.show()
+# # fig7.savefig("./Res/Q3_c_Time_plot.png", dpi=300)
+
+# plt.figure(figsize=(8,6))
+# ax = plt.subplot(111)
+# plt.plot([2, 4, 8], tDiaL, 'b', lw=1.5, label="Diagonal", marker='o', ms=5)
+# plt.plot([2, 4, 8], tRBCL, 'k', lw=1.5, label="Red-Black Color", marker='o', ms=5)
+# plt.xlabel("No. of threads", size=14)
+# plt.ylabel("Time taken (in s)", size=14)
+# plt.title("Time taken for the two methods with different no. of threads", size=14)
+# plt.grid()
+# box = ax.get_position()
+# ax.set_position([box.x0, box.y0 + box.height * 0.1,
+#                  box.width, box.height * 0.9])
+# plt.legend(fontsize=14, loc="upper center", ncol=2, bbox_to_anchor=(0.5,-0.1))
+# fig8 = plt.gcf()
+# plt.show()
+# # fig8.savefig("./Res/Q3_d_Time.png", dpi=300)
