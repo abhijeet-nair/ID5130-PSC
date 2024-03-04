@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 # num = np.loadtxt(file1, delimiter=",", usecols=0)
 # act = np.loadtxt(file1, delimiter=",", usecols=1)
 
+# print(np.linalg.norm(num - act))
+
 # x = np.linspace(0, 3, num=num.size)
 
 # plt.figure(figsize=(8,6))
@@ -23,7 +25,7 @@ import matplotlib.pyplot as plt
 # plt.legend(fontsize=14, loc="upper center", ncol=2, bbox_to_anchor=(0.5,-0.1))
 # fig1 = plt.gcf()
 # plt.show()
-# fig1.savefig("./Res/LU.png", dpi=300)
+# fig1.savefig("./Res/LU.png", dpi=300, bbox_inches='tight')
 
 
 
@@ -31,6 +33,8 @@ import matplotlib.pyplot as plt
 # file2 = "./Res/RDA.txt"
 # num = np.loadtxt(file2, delimiter=",", usecols=0)
 # act = np.loadtxt(file2, delimiter=",", usecols=1)
+
+# print(np.linalg.norm(num - act))
 
 # x = np.linspace(0, 3, num=num.size)
 
@@ -48,7 +52,7 @@ import matplotlib.pyplot as plt
 # plt.legend(fontsize=14, loc="upper center", ncol=2, bbox_to_anchor=(0.5,-0.1))
 # fig2 = plt.gcf()
 # plt.show()
-# fig2.savefig("./Res/RDA.png", dpi=300)
+# # fig2.savefig("./Res/RDA.png", dpi=300, bbox_inches='tight')
 
 
 # # Q2 b) RDA Time 
@@ -63,7 +67,7 @@ import matplotlib.pyplot as plt
 # plt.grid()
 # fig3 = plt.gcf()
 # plt.show()
-# # fig3.savefig("./Res/RDA_Time.png", dpi=300)
+# # fig3.savefig("./Res/RDA_Time.png", dpi=300, bbox_inches='tight')
 
 
 # # Q3 a) GS Serial
@@ -88,7 +92,7 @@ import matplotlib.pyplot as plt
 # plt.legend(fontsize=14, loc="upper center", ncol=2, bbox_to_anchor=(0.5,-0.1))
 # fig3 = plt.gcf()
 # plt.show()
-# fig3.savefig("./Res/GS_Ser.png", dpi=300)
+# fig3.savefig("./Res/GS_Ser.png", dpi=300, bbox_inches='tight')
 
 
 # # Q3 c) GS Serial, Diagonal, Red-Black
@@ -118,7 +122,7 @@ import matplotlib.pyplot as plt
 # plt.legend(fontsize=14, loc="upper center", ncol=2, bbox_to_anchor=(0.5,-0.1))
 # fig4 = plt.gcf()
 # plt.show()
-# fig4.savefig("./Res/GS_Dia.png", dpi=300)
+# fig4.savefig("./Res/GS_Dia.png", dpi=300, bbox_inches='tight')
 
 # plt.figure(figsize=(8,6))
 # ax = plt.subplot(111)
@@ -134,7 +138,7 @@ import matplotlib.pyplot as plt
 # plt.legend(fontsize=14, loc="upper center", ncol=2, bbox_to_anchor=(0.5,-0.1))
 # fig5 = plt.gcf()
 # plt.show()
-# fig5.savefig("./Res/GS_RBC.png", dpi=300)
+# fig5.savefig("./Res/GS_RBC.png", dpi=300, bbox_inches='tight')
 
 # # Q3 c) Time comparison
 # delta = np.array([0.1, 0.01, 0.005])
@@ -169,7 +173,7 @@ import matplotlib.pyplot as plt
 # plt.legend(fontsize=14, loc="upper center", ncol=2, bbox_to_anchor=(0.5,-0.1))
 # fig6 = plt.gcf()
 # plt.show()
-# # fig6.savefig("./Res/Q3_c_Time_log.png", dpi=300)
+# fig6.savefig("./Res/Q3_c_Time_log.png", dpi=300, bbox_inches='tight')
 
 # plt.figure(figsize=(8,6))
 # ax = plt.subplot(111)
@@ -186,7 +190,7 @@ import matplotlib.pyplot as plt
 # plt.legend(fontsize=14, loc="upper center", ncol=2, bbox_to_anchor=(0.5,-0.1))
 # fig7 = plt.gcf()
 # plt.show()
-# # fig7.savefig("./Res/Q3_c_Time_plot.png", dpi=300)
+# fig7.savefig("./Res/Q3_c_Time_plot.png", dpi=300, bbox_inches='tight')
 
 # plt.figure(figsize=(8,6))
 # ax = plt.subplot(111)
@@ -202,4 +206,4 @@ import matplotlib.pyplot as plt
 # plt.legend(fontsize=14, loc="upper center", ncol=2, bbox_to_anchor=(0.5,-0.1))
 # fig8 = plt.gcf()
 # plt.show()
-# # fig8.savefig("./Res/Q3_d_Time.png", dpi=300)
+# fig8.savefig("./Res/Q3_d_Time.png", dpi=300, bbox_inches='tight')
