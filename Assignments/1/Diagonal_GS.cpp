@@ -94,62 +94,80 @@ int main (int argc, char* argv[]) {
             }
         }
 
-    double err = 1, eps = 1e-2, t {};
+    double myerr = 1, eps = 1e-2;
     int cnt = 1, lim = 1e7;
+    double errtmp {};
+    int N2 = N*N;
+    double errvec[N2] {};
 
     // Diagonal numbered from 1 to 2N - 1
     // double t1 {}, t2 {}, t3 {}, t4 {};
     printf("Here...\n");
-    t = omp_get_wtime();
-    #pragma omp parallel num_threads(thrd_cnt) \
-    shared(phik, phik1, N, Nd, solMat, err, eps, cnt, lim, del2, qij) \
+    double t = omp_get_wtime();
+    #pragma omp parallel num_threads(thrd_cnt) default(none) \
+    shared(phik, phik1, N, N2, Nd, solMat, myerr, errvec, errtmp, eps, cnt, lim, del2, qij) \
     private(i, j, l, ibeg, iend)
-    while ((err > eps) && (cnt < lim)) {
-        // t1 = omp_get_wtime();
-        for (l = 2; l <= Nd - 1; l++) {
-            if (l < N) {
-                ibeg = 1;
-                iend = l - 1;
-            }
-            else {
-                ibeg = l - N + 2;
-                iend = N - 2;
-            }
-
-            #pragma omp for
-                for (i = ibeg; i <= iend; i++) {
-                    j = l - i;
-                    phik1[i][j] = 0.25*(phik[i+1][j] + phik1[i-1][j] + phik[i][j+1] + phik1[i][j-1] + del2*qij[i][j]);
+    {
+        while ((myerr > eps) && (cnt < lim)) {
+            // t1 = omp_get_wtime();
+            for (l = 2; l <= Nd - 1; l++) {
+                if (l < N) {
+                    ibeg = 1;
+                    iend = l - 1;
                 }
-        }
-        // t2 = omp_get_wtime();
-
-        err = 0.0;
-        #pragma omp for collapse(2) reduction(+:err)
-            for (i = 0; i < N; i++) {
-                for (j = 0; j < N; j++) {
-                    // errvec[N*i + j] = phik1[i][j] - solMat[i][j];
-                    err += pow(phik1[i][j] - solMat[i][j],2);
-                    phik[i][j] = phik1[i][j];
+                else {
+                    ibeg = l - N + 2;
+                    iend = N - 2;
                 }
+
+                #pragma omp for
+                    for (i = ibeg; i <= iend; i++) {
+                        j = l - i;
+                        phik1[i][j] = 0.25*(phik[i+1][j] + phik1[i-1][j] + phik[i][j+1] + phik1[i][j-1] + del2*qij[i][j]);
+                    }
+            }
+            // t2 = omp_get_wtime();
+
+            // errtmp = 0.0;
+            #pragma omp for collapse(2) // reduction(+:errtmp)
+                for (i = 0; i < N; i++) {
+                    for (j = 0; j < N; j++) {
+                        errvec[N*i + j] = phik1[i][j] - solMat[i][j];
+                        // errtmp += pow(phik1[i][j] - solMat[i][j],2);
+                        phik[i][j] = phik1[i][j];
+                    }
+                }
+            
+            errtmp = 0.0;
+            // int N2 = N*N;
+            #pragma omp barrier
+            #pragma omp for reduction(+:errtmp)
+                for (i = 0; i < N2; i++) {
+                    errtmp += pow(errvec[i],2);
+                }
+
+            #pragma omp barrier
+
+            if (omp_get_thread_num() == 0) {
+                myerr = sqrt(errtmp);
+                if (cnt % 500 == 0) {
+                    printf("cnt = %d  err = %.4f\n",cnt,myerr);
+                }
+                cnt += 1;
             }
 
-        // t3 = omp_get_wtime();
-        
-        // for (int i =0; i < N*N; i++) {
-        //     err += pow(A[i],2);
-        // }
+            #pragma omp barrier
 
-        #pragma omp single
-        {
-            err = sqrt(err);
-            if (cnt % 250 == 0) {
-                // err = norm(errvec, N*N);
-                printf("cnt = %d  err = %.2f\n",cnt,err);
-            }
-            // t4 = omp_get_wtime();
-            // printf("cnt = %d\tt1 = %.6f\tt2 = %.6f\tt3 = %.6f\n",cnt,t2-t1,t3-t2,t4-t3);
-            cnt += 1;
+            // printf("cnt = %d  err = %.2f\n",cnt,err);
+            // #pragma omp single
+            // {
+            //     // err = norm(errvec, N*N);
+            //     myerr = sqrt(errtmp);
+            //     if (cnt % 5 == 0) {
+            //         printf("cnt = %d  err = %.4f\n",cnt,myerr);
+            //     }
+            //     cnt += 1;
+            // }
         }
     }
     t = omp_get_wtime() - t;
@@ -159,11 +177,11 @@ int main (int argc, char* argv[]) {
     double numSolVec[N] {};
     double actSolVec[N] {};
 
-    if (err > eps) {
+    if (myerr > eps) {
         printf("\nCrossed iteration limit of 1e%2.0f\n",log10(lim));
     }
     else {
-        printf("\nConverged to required tolerance\nNo. of iterations = %d\n",cnt);
+        printf("\nConverged to required tolerance\nError = %.3f\nNo. of iterations = %d\n",myerr,cnt);
         printf("Time Taken = %.6f s\n",t);
 
         int yInd = int(0.5*N);

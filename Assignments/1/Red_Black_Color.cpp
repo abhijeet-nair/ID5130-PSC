@@ -99,15 +99,20 @@ int main (int argc, char* argv[]) {
     // printf("solMat = \n");
     // printMatrix(solMat,N,N);
 
-    double err = 1, eps = 1e-2;
+    double myerr = 1, eps = 1e-2;
     int cnt = 1;
+    int N2 = N*N;
 
     int lim = 1e7;
+    double errvec[N*N] {};
+    double numSolVec[N] {};
+    double actSolVec[N] {};
 
+    double errtmp {};
     double t = omp_get_wtime();
-    #pragma omp parallel num_threads(thrd_cnt) default(none) shared(phik, phik1, qij, del2, N, lim, solMat, err, eps, cnt) private(i, j)
+    #pragma omp parallel num_threads(thrd_cnt) default(none) shared(phik, phik1, qij, del2, N, N2, lim, solMat, myerr, errtmp, errvec, eps, cnt) private(i, j)
     {
-        while ((err > eps) && (cnt < lim)) {
+        while ((myerr > eps) && (cnt < lim)) {
             #pragma omp for collapse(2)
                 for (i = 1; i < N - 1; i++) {
                     for (j = 1; j < N - 1; j++) {
@@ -128,39 +133,64 @@ int main (int argc, char* argv[]) {
                     }
                 }
             
-            err = 0.0;
-            #pragma omp for collapse(2) reduction(+:err)
+            // errtmp = 0.0;
+            #pragma omp for collapse(2) // reduction(+:errtmp)
                 for (i = 0; i < N; i++) {
                     for (j = 0; j < N; j++) {
-                        // errvec[N*i + j] = phik1[i][j] - solMat[i][j];
-                        err += pow(phik1[i][j] - solMat[i][j],2);
+                        errvec[N*i + j] = phik1[i][j] - solMat[i][j];
+                        // errtmp += pow(phik1[i][j] - solMat[i][j],2);
                         phik[i][j] = phik1[i][j];
                     }
                 }
             
-            // printf("cnt = %d  err = %.2f\n",cnt,err);
-            #pragma omp single
-            {
-                // err = norm(errvec, N*N);
-                err = sqrt(err);
+            errtmp = 0.0;
+            // int N2 = N*N;
+            #pragma omp barrier
+            #pragma omp for reduction(+:errtmp)
+                for (i = 0; i < N2; i++) {
+                    errtmp += pow(errvec[i],2);
+                }
+
+            #pragma omp barrier
+
+            if (omp_get_thread_num() == 0) {
+                myerr = sqrt(errtmp);
                 if (cnt % 500 == 0) {
-                    printf("cnt = %d  err = %.2f\n",cnt,err);
+                    printf("cnt = %d  err = %.4f\n",cnt,myerr);
                 }
                 cnt += 1;
             }
+
+            #pragma omp barrier
+
+            // printf("cnt = %d  err = %.2f\n",cnt,err);
+            // #pragma omp single
+            // {
+            //     // err = norm(errvec, N*N);
+            //     myerr = sqrt(errtmp);
+            //     if (cnt % 5 == 0) {
+            //         printf("cnt = %d  err = %.4f\n",cnt,myerr);
+            //     }
+            //     cnt += 1;
+            // }
         }
     }
     t = omp_get_wtime() - t;
 
-    double numSolVec[N] {};
-    double actSolVec[N] {};
-
-    if (err > eps) {
+    if (myerr > eps) {
         printf("\nCrossed iteration limit of 1e%2.0f\n",log10(lim));
     }
     else {
-        printf("\nConverged to required tolerance\nNo. of iterations = %d\n",cnt);
+        printf("\nConverged to required tolerance\nError = %.3f\nNo. of iterations = %d\n",myerr,cnt);
         printf("Time Taken = %.6f s\n",t);
+
+        double errvec[N*N];
+        for (i = 0; i < N; i++) {
+            for (j = 0; j < N; j++) {
+                errvec[N*i + j] = phik1[i][j] - solMat[i][j];
+            }
+        }
+        printf("ERR = %.4f\n",norm(errvec, N*N));
 
         int yInd = int(0.5*N);
 
