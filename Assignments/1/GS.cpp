@@ -2,6 +2,7 @@
 #include <fstream>
 #include <math.h>
 
+// Functions
 double q (double x, double y) {
     double val = 2*(2 - pow(x, 2) - pow(y, 2));
     return val;
@@ -37,6 +38,7 @@ double norm (double A[], int n) {
 }
 
 
+
 int main (int argc, char* argv[]) {
     int N {}, i {}, j {};
     double del {};
@@ -47,11 +49,7 @@ int main (int argc, char* argv[]) {
 
     double del2 = pow(del, 2);
 
-    // std::cout << "Enter y-grid spacing: ";
-    // std::cin >> dely;
-
     N = int(2/del) + 1;
-    // N = del;
 
     double xi[N] {};
     double yi[N] {};
@@ -71,18 +69,12 @@ int main (int argc, char* argv[]) {
         yi[i] = -1 + i*del;
     }
 
-    // printf("xi = \n");
-    // printVector(xi,N);
-
     for (i = 0; i < N; i++) {
         for (j = 0; j < N; j++) {
             qij[i][j] = q(xi[i], yi[j]);
             solMat[i][j] = phiSol(xi[i], yi[j]);
         }
     }
-
-    // printf("solMat = \n");
-    // printMatrix(solMat,N,N);
 
     double err = 1, eps = 1e-2;
     double errvec[N*N];
@@ -132,6 +124,8 @@ int main (int argc, char* argv[]) {
         }
     }
 
+    // The following code is to output to a .txt file to plot the solution
+    
     // std::ofstream oFile("./Res/GS_Ser.txt");
 
     // if (oFile.is_open()) {

@@ -1,8 +1,11 @@
+## CODE FOR PLOTTING THE RESULTS
+
 import numpy as np
 import matplotlib.pyplot as plt
 
 
 # # Q2 a) LU Plot
+
 # file1 = "./Res/LU.txt"
 # num = np.loadtxt(file1, delimiter=",", usecols=0)
 # act = np.loadtxt(file1, delimiter=",", usecols=1)
@@ -30,6 +33,7 @@ import matplotlib.pyplot as plt
 
 
 # # Q2 b) RDA Plot
+
 # file2 = "./Res/RDA.txt"
 # num = np.loadtxt(file2, delimiter=",", usecols=0)
 # act = np.loadtxt(file2, delimiter=",", usecols=1)
@@ -55,7 +59,9 @@ import matplotlib.pyplot as plt
 # # fig2.savefig("./Res/RDA.png", dpi=300, bbox_inches='tight')
 
 
+
 # # Q2 b) RDA Time 
+
 # p = np.array([2,4,8])
 # t = np.array([0.000221, 0.000132, 0.000113])
 
@@ -70,7 +76,9 @@ import matplotlib.pyplot as plt
 # # fig3.savefig("./Res/RDA_Time.png", dpi=300, bbox_inches='tight')
 
 
+
 # # Q3 a) GS Serial
+
 # file3 = "./Res/GS_Ser.txt"
 # num = np.loadtxt(file3, delimiter=",", usecols=0)
 # act = np.loadtxt(file3, delimiter=",", usecols=1)
@@ -95,7 +103,9 @@ import matplotlib.pyplot as plt
 # # fig4.savefig("./Res/GS_Ser.png", dpi=300, bbox_inches='tight')
 
 
+
 # # Q3 c) GS Serial, Diagonal, Red-Black
+
 # file3 = "./Res/GS_Ser.txt"
 # ser = np.loadtxt(file3, delimiter=",", usecols=0)
 
@@ -140,19 +150,18 @@ import matplotlib.pyplot as plt
 # plt.show()
 # # fig6.savefig("./Res/GS_RBC.png", dpi=300, bbox_inches='tight')
 
-# Q3 c) Time comparison
+
+
+# # Q3 c) Time comparison
+
 delta = np.array([0.1, 0.01, 0.005])
 tSer = np.array([0.008798, 53.900578, 934.409124])
 
-# tDia = np.array([0.012313, 42.988759, 805.271786]) # 4
-# tDia = np.array([0.017157, 61.307862, 1078.219453]) # 8
 tDia2 = np.array([0.009740, 28.370349, 523.307475]) # 2
 tDia4 = np.array([0.009253, 16.878647, 354.868330]) # 4
 tDia8 = np.array([0.010253, 17.277044, 341.673147]) # 8
 tDiaL = np.array([523.307475, 354.868330, 341.673147]) # 2, 4, 8
 
-# tRBC = np.array([0.007855, 39.185373, 762.295155]) # 4
-# tRBC = np.array([0.008133, 53.647345, 1006.334569]) # 8
 tRBC2 = np.array([0.006658, 25.491354, 476.610747]) # 2
 tRBC4 = np.array([0.005585, 13.249810, 309.675813]) # 4
 tRBC8 = np.array([0.005845, 11.993845, 286.962596]) # 8
@@ -175,7 +184,7 @@ ax.set_position([box.x0, box.y0 + box.height * 0.1,
 plt.legend(fontsize=14, loc="upper center", ncol=2, bbox_to_anchor=(0.5,-0.1))
 fig7 = plt.gcf()
 plt.show()
-fig7.savefig("./Res/Q3_c_Time_log.png", dpi=300, bbox_inches='tight')
+# fig7.savefig("./Res/Q3_c_Time_log.png", dpi=300, bbox_inches='tight')
 
 plt.figure(figsize=(8,6))
 ax = plt.subplot(111)
@@ -192,7 +201,7 @@ ax.set_position([box.x0, box.y0 + box.height * 0.1,
 plt.legend(fontsize=14, loc="upper center", ncol=2, bbox_to_anchor=(0.5,-0.1))
 fig8 = plt.gcf()
 plt.show()
-fig8.savefig("./Res/Q3_c_Time_plot.png", dpi=300, bbox_inches='tight')
+# fig8.savefig("./Res/Q3_c_Time_plot.png", dpi=300, bbox_inches='tight')
 
 plt.figure(figsize=(8,6))
 ax = plt.subplot(111)
@@ -208,4 +217,4 @@ ax.set_position([box.x0, box.y0 + box.height * 0.1,
 plt.legend(fontsize=14, loc="upper center", ncol=2, bbox_to_anchor=(0.5,-0.1))
 fig9 = plt.gcf()
 plt.show()
-fig9.savefig("./Res/Q3_d_Time.png", dpi=300, bbox_inches='tight')
+# fig9.savefig("./Res/Q3_d_Time.png", dpi=300, bbox_inches='tight')

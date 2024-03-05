@@ -5,6 +5,7 @@
     #include <omp.h>
 #endif
 
+// Functions
 double q (double x, double y) {
     double val = 2*(2 - pow(x, 2) - pow(y, 2));
     return val;
@@ -40,6 +41,7 @@ double norm (double A[], int n) {
 }
 
 
+
 int main (int argc, char* argv[]) {
     int thrd_cnt = 1;
 
@@ -61,11 +63,7 @@ int main (int argc, char* argv[]) {
 
     double del2 = pow(del, 2);
 
-    // std::cout << "Enter y-grid spacing: ";
-    // std::cin >> dely;
-
     N = int(2/del) + 1;
-    // N = del;
 
     double xi[N] {};
     double yi[N] {};
@@ -85,9 +83,6 @@ int main (int argc, char* argv[]) {
         yi[i] = -1 + i*del;
     }
 
-    // printf("xi = \n");
-    // printVector(xi,N);
-
     #pragma omp parallel for num_threads(thrd_cnt) collapse(2) default(none) shared(qij, solMat, N, xi, yi) private(i, j)
         for (i = 0; i < N; i++) {
             for (j = 0; j < N; j++) {
@@ -95,9 +90,6 @@ int main (int argc, char* argv[]) {
                 solMat[i][j] = phiSol(xi[i], yi[j]);
             }
         }
-
-    // printf("solMat = \n");
-    // printMatrix(solMat,N,N);
 
     double myerr = 1, eps = 1e-2;
     int cnt = 1;
@@ -110,7 +102,8 @@ int main (int argc, char* argv[]) {
 
     double errtmp {};
     double t = omp_get_wtime();
-    #pragma omp parallel num_threads(thrd_cnt) default(none) shared(phik, phik1, qij, del2, N, N2, lim, solMat, myerr, errtmp, errvec, eps, cnt) private(i, j)
+    #pragma omp parallel num_threads(thrd_cnt) default(none) \
+    shared(phik, phik1, qij, del2, N, N2, lim, solMat, myerr, errtmp, errvec, eps, cnt) private(i, j)
     {
         while ((myerr > eps) && (cnt < lim)) {
             #pragma omp for collapse(2)
@@ -118,7 +111,6 @@ int main (int argc, char* argv[]) {
                     for (j = 1; j < N - 1; j++) {
                         if ((i + j) % 2 == 1) {
                             phik1[i][j] = 0.25*(phik[i+1][j] + phik[i-1][j] + phik[i][j+1] + phik[i][j-1] + del2*qij[i][j]);
-                            // phik1[i][j] = 0.25*(phik[i+1][j] + phik1[i-1][j] + phik[i][j+1] + phik1[i][j-1] + del2*qij[i][j]);
                         }
                     }
                 }
@@ -128,24 +120,21 @@ int main (int argc, char* argv[]) {
                     for (j = 1; j < N - 1; j++) {
                         if ((i + j) % 2 == 0) {
                             phik1[i][j] = 0.25*(phik1[i+1][j] + phik1[i-1][j] + phik1[i][j+1] + phik1[i][j-1] + del2*qij[i][j]);
-                            // phik1[i][j] = 0.25*(phik[i+1][j] + phik1[i-1][j] + phik[i][j+1] + phik1[i][j-1] + del2*qij[i][j]);
                         }
                     }
                 }
             
-            // errtmp = 0.0;
-            #pragma omp for collapse(2) // reduction(+:errtmp)
+            #pragma omp for collapse(2)
                 for (i = 0; i < N; i++) {
                     for (j = 0; j < N; j++) {
                         errvec[N*i + j] = phik1[i][j] - solMat[i][j];
-                        // errtmp += pow(phik1[i][j] - solMat[i][j],2);
                         phik[i][j] = phik1[i][j];
                     }
                 }
             
-            errtmp = 0.0;
-            // int N2 = N*N;
             #pragma omp barrier
+
+            errtmp = 0.0;
             #pragma omp for reduction(+:errtmp)
                 for (i = 0; i < N2; i++) {
                     errtmp += pow(errvec[i],2);
@@ -162,17 +151,6 @@ int main (int argc, char* argv[]) {
             }
 
             #pragma omp barrier
-
-            // printf("cnt = %d  err = %.2f\n",cnt,err);
-            // #pragma omp single
-            // {
-            //     // err = norm(errvec, N*N);
-            //     myerr = sqrt(errtmp);
-            //     if (cnt % 5 == 0) {
-            //         printf("cnt = %d  err = %.4f\n",cnt,myerr);
-            //     }
-            //     cnt += 1;
-            // }
         }
     }
     t = omp_get_wtime() - t;

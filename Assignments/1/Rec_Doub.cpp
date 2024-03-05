@@ -5,6 +5,7 @@
     #include <omp.h>
 #endif
 
+// Functions
 double myfunc (double x) {
     double f = sin(5*x);
     return f;
@@ -29,6 +30,8 @@ void printMatrix (double** a, int m, int n) {
         printf("\n");
     }
 }
+
+
 
 int main (int argc, char* argv[]) {
     int thrd_cnt = 1;
@@ -182,16 +185,17 @@ int main (int argc, char* argv[]) {
     double xsol[N] {};
     
     #pragma omp parallel for num_threads(thrd_cnt) default(none) shared(xsol, yi_k1, bi_k1, N) private(i)
-    for (i = 0; i < N; i++) {
-        xsol[i] = yi_k1[i]/bi_k1[i];
-    }
+        for (i = 0; i < N; i++) {
+            xsol[i] = yi_k1[i]/bi_k1[i];
+        }
+
     t = omp_get_wtime() - t;
 
     printf("Completed...\n");
     printf("Time Taken = %.6f s\n",t);
-    // printf("xi = \n");
-    // printVector(xsol, N);
 
+    // The following code is to output to a .txt file to plot the solution
+    
     // std::ofstream oFile("./Res/RDA.txt");
 
     // if (oFile.is_open()) {

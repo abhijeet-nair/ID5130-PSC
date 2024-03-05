@@ -5,6 +5,7 @@
     #include <omp.h>
 #endif
 
+// Functions
 double q (double x, double y) {
     double val = 2*(2 - pow(x, 2) - pow(y, 2));
     return val;
@@ -39,7 +40,7 @@ double norm (double A[], int n) {
     return res;
 }
 
-
+// Main code
 int main (int argc, char* argv[]) {
     int thrd_cnt = 1;
 
@@ -61,9 +62,6 @@ int main (int argc, char* argv[]) {
     printf("\n");
 
     double del2 = pow(del, 2);
-
-    // std::cout << "Enter y-grid spacing: ";
-    // std::cin >> dely;
 
     N = int(2/del) + 1;
     Nd = 2*N - 1;
@@ -100,16 +98,12 @@ int main (int argc, char* argv[]) {
     int N2 = N*N;
     double errvec[N2] {};
 
-    // Diagonal numbered from 1 to 2N - 1
-    // double t1 {}, t2 {}, t3 {}, t4 {};
-    printf("Here...\n");
     double t = omp_get_wtime();
     #pragma omp parallel num_threads(thrd_cnt) default(none) \
     shared(phik, phik1, N, N2, Nd, solMat, myerr, errvec, errtmp, eps, cnt, lim, del2, qij) \
     private(i, j, l, ibeg, iend)
     {
         while ((myerr > eps) && (cnt < lim)) {
-            // t1 = omp_get_wtime();
             for (l = 2; l <= Nd - 1; l++) {
                 if (l < N) {
                     ibeg = 1;
@@ -126,21 +120,18 @@ int main (int argc, char* argv[]) {
                         phik1[i][j] = 0.25*(phik[i+1][j] + phik1[i-1][j] + phik[i][j+1] + phik1[i][j-1] + del2*qij[i][j]);
                     }
             }
-            // t2 = omp_get_wtime();
-
-            // errtmp = 0.0;
-            #pragma omp for collapse(2) // reduction(+:errtmp)
+        
+            #pragma omp for collapse(2)
                 for (i = 0; i < N; i++) {
                     for (j = 0; j < N; j++) {
                         errvec[N*i + j] = phik1[i][j] - solMat[i][j];
-                        // errtmp += pow(phik1[i][j] - solMat[i][j],2);
                         phik[i][j] = phik1[i][j];
                     }
                 }
             
-            errtmp = 0.0;
-            // int N2 = N*N;
             #pragma omp barrier
+
+            errtmp = 0.0;
             #pragma omp for reduction(+:errtmp)
                 for (i = 0; i < N2; i++) {
                     errtmp += pow(errvec[i],2);
@@ -157,22 +148,9 @@ int main (int argc, char* argv[]) {
             }
 
             #pragma omp barrier
-
-            // printf("cnt = %d  err = %.2f\n",cnt,err);
-            // #pragma omp single
-            // {
-            //     // err = norm(errvec, N*N);
-            //     myerr = sqrt(errtmp);
-            //     if (cnt % 5 == 0) {
-            //         printf("cnt = %d  err = %.4f\n",cnt,myerr);
-            //     }
-            //     cnt += 1;
-            // }
         }
     }
     t = omp_get_wtime() - t;
-    // t4 = omp_get_wtime() - t4;
-    // printf("tfi = %.6f\n",t4);
 
     double numSolVec[N] {};
     double actSolVec[N] {};
@@ -194,6 +172,8 @@ int main (int argc, char* argv[]) {
             }
     }
 
+    // The following code is to output to a .txt file to plot the solution
+    
     // std::ofstream oFile("./Res/GS_Dia.txt");
 
     // if (oFile.is_open()) {
