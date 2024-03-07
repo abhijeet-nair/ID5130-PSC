@@ -26,3 +26,6 @@ Implemented *serial Gauss-Seidel algorithm* for finding solution to the Poisson 
 
 ## Tutorial 6
 Installed *OpenMPI*. Run a sample Hello World program for MPI provided by the professor for testing.
+
+## Tutorial 7
+Wrote MPI programs to send and receive messages between the processes. Sent integers, strings and arrays.
