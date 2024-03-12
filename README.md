@@ -29,3 +29,6 @@ Installed *OpenMPI*. Run a sample Hello World program for MPI provided by the pr
 
 ## Tutorial 7
 Wrote MPI programs to send and receive messages between the processes. Sent integers, strings and arrays.
+
+## Tutorial 8
+Numerical integration with *Trapezoidal* and *Simpson's Rule*. Used *OpenMPI* to parallelize the calculations. Made sure that the important values can be taken from the user and then passed on to other processes. Used *MPI_Reduce* function as well as an alternative to *MPI_Send*/*MPI_Recv*.
