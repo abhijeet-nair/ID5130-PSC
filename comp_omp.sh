@@ -6,7 +6,7 @@ echo "OpenMP. Files included:"
 for n in $@
 do
     echo $n
-    mycmd+="${n} "
+    mycmd+="$PWD/${n} "
 done
 mycmd+="-o outfile.exe"
 eval $mycmd

@@ -10,7 +10,7 @@ echo "Compiling with OpenMPI. Files included:"
 for n in ${@:1:$#-1}
 do
     echo $n
-    mycmd+="${n} "
+    mycmd+="$PWD/${n} "
 done
 mycmd+="-o outfile.exe"
 # echo "$mycmd"

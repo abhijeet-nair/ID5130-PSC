@@ -6,9 +6,9 @@ echo "Files included:"
 for n in $@
 do
     echo $n
-    mycmd+="${n} "
+    mycmd+="$PWD/${n} "
     # echo $mycmd$'\n'
 done
 mycmd+="-o outfile.exe"
-# echo $mycmd
+echo $mycmd
 eval $mycmd
