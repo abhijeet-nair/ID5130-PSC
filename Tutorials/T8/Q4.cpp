@@ -23,7 +23,7 @@ double myTrapz (double la, double lb, double h, int ln) {
 
 
 int main (int argc, char* argv[]) {
-    double a, b, fSum, la, lb, lsum, h;
+    double a, b, fSum {}, la, lb, lsum, h;
     int myid, np, i, n, ln;
     double dat[4] {};
 
@@ -68,6 +68,7 @@ int main (int argc, char* argv[]) {
     lsum = myTrapz(la, lb, h, ln);
 
     MPI_Reduce(&lsum, &fSum, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+
     if (myid == 0) {
         printf("\nResult = %.6f\n",fSum);
     }
