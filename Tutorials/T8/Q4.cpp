@@ -48,7 +48,7 @@ int main (int argc, char* argv[]) {
             dat[0] = a + (i - 1)*ln*h;
             dat[1] = a + i*ln*h;
             dat[2] = h;
-            dat[3] = ln;
+            dat[3] = double(ln);
 
             MPI_Send(&dat, 4, MPI_DOUBLE, i, i*10, MPI_COMM_WORLD);
         }
@@ -67,18 +67,9 @@ int main (int argc, char* argv[]) {
 
     lsum = myTrapz(la, lb, h, ln);
 
+    MPI_Reduce(&lsum, &fSum, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
     if (myid == 0) {
-        fSum = lsum;
-
-        for (i = 1; i < np; i++) {
-            MPI_Recv(&lsum, 1, MPI_DOUBLE, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            fSum += lsum;
-        }
-
         printf("\nResult = %.6f\n",fSum);
-    }
-    else {
-        MPI_Send(&lsum, 1, MPI_DOUBLE, 0, myid*11, MPI_COMM_WORLD);
     }
 
     MPI_Finalize();
