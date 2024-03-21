@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 # Compiling using G++-13 including OpenMP.
 mycmd="/home/linuxbrew/.linuxbrew/bin/g++-13 -fdiagnostics-color=always -std=c++20 -g -fopenmp "
 N=$#

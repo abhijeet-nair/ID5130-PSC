@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 # Compiling using OpenMPI.
 # $1, $2 and so on are the cmd line args in order
 # $@ is the array of all cmd line args
@@ -15,7 +15,7 @@ do
     mycmd+="${n} "
 done
 mycmd+="-o outfile.exe"
-# echo "$mycmd"
+echo "$mycmd"
 eval $mycmd
 printf "\n"
 fi
