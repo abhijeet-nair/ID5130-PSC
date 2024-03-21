@@ -15,7 +15,7 @@ do
     mycmd+="${n} "
 done
 mycmd+="-o outfile.exe"
-echo "$mycmd"
+# echo "$mycmd"
 eval $mycmd
 printf "\n"
 fi

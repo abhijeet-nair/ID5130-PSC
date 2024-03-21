@@ -4,7 +4,7 @@
 
 int main (int argc, char* argv[]) {
     int n;
-    int myid, np, i;
+    int myid, np, i, j;
 
     MPI_Init(NULL, NULL);
     MPI_Comm_rank(MPI_COMM_WORLD, &myid);
@@ -17,16 +17,28 @@ int main (int argc, char* argv[]) {
     if (myid == 0) {
         printf("Enter size of the array: ");
         std::cin >> n;
+    }
+    
+    MPI_Bcast(&n, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    int *send, *recv;
 
-        int arr[n] {};
-        // printf("Enter elements of the array:\n");
+    if (myid == 0) {
+        send = new int[n];
+
         for (i = 0; i < n; i++) {
-            // printf("arr[%d]: ", i);
-            // std::cin >> arr[i];
-            arr[i] = i + 1;
-        }
+            send[i] = i + 1;
+            printf("send[%d]: %d\n",i, send[i]);
+        }        
+    }
+    int ln = n/np;
+    MPI_Scatter(send, ln, MPI_INT, recv, ln, MPI_INT, 0, MPI_COMM_WORLD);
 
-        MPI_Scatter(&arr,v )
+    for (i = 0; i < np; i++) {
+        if (myid == i) {
+            for (j = 0; j < ln; j++) {
+                printf("arr[%d, %d]:%d\n", myid, j, recv[i]);
+            }
+        }
     }
 
     MPI_Finalize();
