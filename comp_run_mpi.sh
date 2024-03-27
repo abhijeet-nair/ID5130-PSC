@@ -21,6 +21,6 @@ printf "\n"
 fi
 
 printf "Running the output file with ${@: -1} processes...\n"
-mycmd2="mpiexec -n ${@: -1} outfile.exe"
+mycmd2="mpiexec --use-hwthread-cpus -n ${@: -1} outfile.exe"
 # echo "$mycmd2"
 eval $mycmd2
