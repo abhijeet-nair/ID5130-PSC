@@ -28,7 +28,17 @@ Implemented *serial Gauss-Seidel algorithm* for finding solution to the Poisson 
 Installed *OpenMPI*. Run a sample Hello World program for MPI provided by the professor for testing.
 
 ## Tutorial 7
-Wrote MPI programs to send and receive messages between the processes. Sent integers, strings and arrays.
+Wrote *MPI* programs to send and receive messages between the processes. Sent integers, strings and arrays.
 
 ## Tutorial 8
 Numerical integration with *Trapezoidal* and *Simpson's Rule*. Used *OpenMPI* to parallelize the calculations. Made sure that the important values can be taken from the user and then passed on to other processes. Used *MPI_Reduce* function as well as an alternative to *MPI_Send*/*MPI_Recv*.
+
+## Tutorial 9
+Wrote an example program for the usage of *MPI* Collective Communication (CC) functions, like *MPI_Reduce*, *MPI_Allreduce*, *MPI_Scatter*, *MPI_Gather*, *MPI_Allgather*.
+
+Developed an *MPI* program which performs matrix-vector multiplication, with the matrix and vector being block-decomposed along rows. Used only *MPI* CC functions. Verified the results.
+
+## Tutorial 10
+Developed an *MPI* program for computing derivatives of a function using explicit first and second-order accurate schemes. Verified the results.
+
+Learnt about new functions such as *MPI_Gatherv*, *MPI_Scatterv*, *MPI_Dims_create*, *MPI_Cart_create*, *MPI_Cart_rank*, *MPI_Cart_coords*.

@@ -46,7 +46,7 @@ int main (int argc, char* argv[]) {
     // Can be modified for the other case as well...
     for (i = 0; i < lm; i++) {
         for (j = 0; j < n; j++){
-            lA[i][j] = myid*(j+1)*10;
+            lA[i][j] = (myid + 1)*(j+1)*10;
         }
     }
     
