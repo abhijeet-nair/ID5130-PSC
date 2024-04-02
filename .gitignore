@@ -1,4 +1,4 @@
-Assignments/1/dump.txt
+Assignments/1_OpenMP/dump.txt
 Tutorials/T1/Dump/
 Tutorials/T2/Dump/
 Tutorials/T4/Dump/
@@ -7,5 +7,5 @@ Tutorials/T2/.vscode/
 Tutorials/T3/.vscode/
 Tutorials/T4/.vscode/
 Tutorials/T5/.vscode/
-Assignments/1/.vscode/
+Assignments/1_OpenMP/.vscode/
 Tutorials/T8/tmp.cpp
