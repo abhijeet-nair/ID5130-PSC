@@ -49,9 +49,9 @@ int main (int argc, char* argv[]) {
     lnxe = lnx + 3;
 
     double ui_t[lnxe] {}, ui_t1[lnxe] {};
-    double uMat[3][lnx] {};
-    double uMat_UP[2][lnx] {};
-    double uMat_QK[2][lnx] {};
+    double l_uMat[3][lnx] {};
+    double l_uMat_UP[2][lnx] {};
+    double l_uMat_QK[2][lnx] {};
 
     // Initial conditions
     double res;
@@ -62,7 +62,7 @@ int main (int argc, char* argv[]) {
         // else {ui_t[i+2] = res;}
         ui_t[i+2] = res;
         
-        uMat[0][i] = res;
+        l_uMat[0][i] = res;
     }
 
     int cnt   = 1;
@@ -79,32 +79,32 @@ int main (int argc, char* argv[]) {
         if (myid == 0) {
             ui_t1[2] = 0;
             is = 3;
-            ie = lnx - 1;
+            ie = lnx + 1;
 
             // Upsend
-            MPI_Sendrecv(&ui_t[lnx-1],1,MPI_DOUBLE,upprt,tag21,&ui_t[lnxe-1],1,MPI_DOUBLE,upprt,tag22,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+            MPI_Sendrecv(&ui_t[lnx+1],1,MPI_DOUBLE,upprt,tag21,&ui_t[lnx+2],1,MPI_DOUBLE,upprt,tag22,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 
         }
         else if (myid == np - 1) {
             ui_t1[lnxe-2] = 0;
             is = 2;
-            ie = lnx - 2;
+            ie = lnx;
 
             // Downsend
             MPI_Sendrecv(&ui_t[2],1,MPI_DOUBLE,dnprt,tag11,&ui_t[1],1,MPI_DOUBLE,dnprt,tag12,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
         }
         else {
             is = 2;
-            ie = lnx - 1;
+            ie = lnx + 1;
 
             // Upsend
             MPI_Sendrecv(&ui_t[2],1,MPI_DOUBLE,dnprt,tag11,&ui_t[1],1,MPI_DOUBLE,dnprt,tag12,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
             // Downsend
-            MPI_Sendrecv(&ui_t[lnx-1],1,MPI_DOUBLE,upprt,tag21,&ui_t[lnxe-1],1,MPI_DOUBLE,upprt,tag22,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+            MPI_Sendrecv(&ui_t[lnx+1],1,MPI_DOUBLE,upprt,tag21,&ui_t[lnx+2],1,MPI_DOUBLE,upprt,tag22,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
         }
 
-        // Usable range of values --> [1,lnxe-1]
-        // Owned range of values  --> [2,lnxe-2]
+        // Usable range of values --> [1,lnxe+2]
+        // Owned range of values  --> [2,lnxe+1]
 
         for (i = is; i <= ie; i++) {
             ui_t1[i] = ct_x_1*ui_t[i] + ct_x*ui_t[i-1];
@@ -112,15 +112,79 @@ int main (int argc, char* argv[]) {
 
         ti = t0 + j*delt;
         if (ti == tr[cnt]) {
-            for (i = 0; i < lnx; i++) {
+            for (i = 2; i <= lnx + 1; i++) {
                 xi = i*delx;
-                uMat[cnt][i] = u0(xi - c*ti);
-                uMat_UP[cnt-1][i] = ui_t1[i];
-                // if (cnt == 1) { printf("uMat[%d] = %.4f\tuMatUP[%d] = %.4f\tval = %.4f\n",i,uMat[cnt][i],i,uMat_UP[cnt-1][i],xi - c*ti); }
+                l_uMat[cnt][i-2] = u0(xi - c*ti);
+                l_uMat_UP[cnt-1][i-2] = ui_t1[i];
+                // if (cnt == 1) { printf("l_uMat[%d] = %.4f\tl_uMatUP[%d] = %.4f\tval = %.4f\n",i,l_uMat[cnt][i],i,l_uMat_UP[cnt-1][i],xi - c*ti); }
             }
             cnt += 1;
         }
-        memcpy(ui_t, ui_t1, nx*sizeof(double));
+        memcpy(ui_t, ui_t1, lnxe*sizeof(double));
+    }
+
+
+    // Reinitializing the array...
+    for (i = 0; i < lnx; i++) { ui_t[i+2] = u0((i-2)*delx); }
+
+    delt  = 1e-4;
+    nt    = (tf - t0)/delt + 1; // No. of time steps
+    ct_x  = c*delt/delx;
+    ct_x8 = ct_x/8;
+    cnt   = 1;
+
+    // QUICK scheme with Euler explicit time discretization
+    for (j = 1; j < nt; j++) {
+        if (myid == 0) {
+            ui_t1[2] = 0;
+            ui_t1[3] = ct_x_1*ui_t[3] + ct_x*ui_t[2];
+            is = 3;
+            ie = lnx + 1;
+
+            // Upsend
+            MPI_Sendrecv(&ui_t[lnx],2,MPI_DOUBLE,upprt,tag21,&ui_t[lnx+2],1,MPI_DOUBLE,upprt,tag22,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+
+        }
+        else if (myid == np - 1) {
+            ui_t1[lnxe-2] = 0;
+            is = 2;
+            ie = lnx;
+
+            // Downsend
+            MPI_Sendrecv(&ui_t[2],1,MPI_DOUBLE,dnprt,tag11,&ui_t[0],2,MPI_DOUBLE,dnprt,tag12,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+        }
+        else {
+            is = 2;
+            ie = lnx + 1;
+
+            // Upsend
+            MPI_Sendrecv(&ui_t[2],1,MPI_DOUBLE,dnprt,tag11,&ui_t[0],2,MPI_DOUBLE,dnprt,tag12,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+            // Downsend
+            MPI_Sendrecv(&ui_t[lnx],2,MPI_DOUBLE,upprt,tag21,&ui_t[lnx+2],1,MPI_DOUBLE,upprt,tag22,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+        }
+
+        // Usable range of values --> [1,lnxe+2]
+        // Owned range of values  --> [2,lnxe+1]
+
+        for (i = is; i <= ie; i++) {
+            ui_t1[i] = ui_t[i] - ct_x8*(3*ui_t[i] - 7*ui_t[i-1] + ui_t[i-2] + 3*ui_t[i+1]);
+        }
+
+        ti = t0 + j*delt;
+        if (ti == tr[cnt]) {
+            for (i = 2; i <= lnx + 1; i++) {
+                l_uMat_QK[cnt-1][i-2] = ui_t1[i];
+                // if (cnt == 1) { printf("l_uMat[%d] = %.4f\tl_uMatUP[%d] = %.4f\tval = %.4f\n",i,l_uMat[cnt][i],i,l_uMat_UP[cnt-1][i],xi - c*ti); }
+            }
+            cnt += 1;
+        }
+        memcpy(ui_t, ui_t1, lnxe*sizeof(double));
+    }
+
+    double **uMat, **uMat_UP, **uMat_QK;
+    if (myid == 0) {
+        // uMat = (double *)malloc(n*sizeof(double));
+        // act = (double *)malloc(n*sizeof(double));
     }
 
 
