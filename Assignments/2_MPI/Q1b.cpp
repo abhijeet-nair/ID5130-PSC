@@ -51,13 +51,13 @@ int main (int argc, char* argv[]) {
         uMat = (double *)malloc(3*nx*sizeof(double));
         uMat_UP = (double *)malloc(2*nx*sizeof(double));
         uMat_QK = (double *)malloc(2*nx*sizeof(double));
-
-        cnts[0] = lnx;
-        for (i = 1; i < np; i++) {
-            cnts[i] = int(nx/np);
-            dsplc[i] = lnx + (i-1)*int(nx/np);
-        }
     }
+    
+    for (i = 1; i < np; i++) {
+        cnts[i] = int(nx/np);
+        dsplc[i] = nx - (np - i)*int(nx/np);
+    }
+    cnts[0] = dsplc[1];
 
     // Initial conditions
     double res;
@@ -138,7 +138,7 @@ int main (int argc, char* argv[]) {
     }
 
     // Reinitializing the array...
-    for (i = 0; i < lnx; i++) { ui_t[i+2] = u0((i-2)*delx); }
+    for (i = 0; i < lnx; i++) { ui_t[i+2] = u0((dsplc[myid] + i)*delx); }
 
     delt  = 1e-4;
     nt    = (tf - t0)/delt + 1; // No. of time steps
@@ -160,15 +160,15 @@ int main (int argc, char* argv[]) {
         
         if (myid % 2 == 0) {
             // Upsend
-            MPI_Sendrecv(&ui_t[lnx+1],1,MPI_DOUBLE,prtnr[1],tagu1,&ui_t[lnx+2],1,MPI_DOUBLE,prtnr[1],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+            MPI_Sendrecv(&ui_t[lnx],2,MPI_DOUBLE,prtnr[1],tagu1,&ui_t[lnx+2],1,MPI_DOUBLE,prtnr[1],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
             // Downsend
-            MPI_Sendrecv(&ui_t[2],1,MPI_DOUBLE,prtnr[0],tagd2,&ui_t[1],1,MPI_DOUBLE,prtnr[0],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+            MPI_Sendrecv(&ui_t[2],1,MPI_DOUBLE,prtnr[0],tagd2,&ui_t[0],2,MPI_DOUBLE,prtnr[0],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
         }
         else {
             // Downsend
-            MPI_Sendrecv(&ui_t[2],1,MPI_DOUBLE,prtnr[0],tagd1,&ui_t[1],1,MPI_DOUBLE,prtnr[0],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+            MPI_Sendrecv(&ui_t[2],1,MPI_DOUBLE,prtnr[0],tagd1,&ui_t[0],2,MPI_DOUBLE,prtnr[0],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
             // Upsend
-            MPI_Sendrecv(&ui_t[lnx+1],1,MPI_DOUBLE,prtnr[1],tagu2,&ui_t[lnx+2],1,MPI_DOUBLE,prtnr[1],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+            MPI_Sendrecv(&ui_t[lnx],2,MPI_DOUBLE,prtnr[1],tagu2,&ui_t[lnx+2],1,MPI_DOUBLE,prtnr[1],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
         }
 
         for (i = is; i <= ie; i++) {
@@ -183,6 +183,27 @@ int main (int argc, char* argv[]) {
             cnt += 1;
         }
         memcpy(ui_t, ui_t1, lnxe*sizeof(double));
+    }
+
+    int sts = 0;
+    if (myid == 0) {
+        for (i = 0; i < lnx; i++) {
+            printf("uMatQK[%d] = %.4f\n",i,l_uMat_QK[i]);
+        }
+        MPI_Send(&sts, 1, MPI_INT, myid+1,10,MPI_COMM_WORLD);
+    }
+    else if (myid == np - 1) {
+        MPI_Recv(&sts, 1, MPI_INT,myid-1,MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+        for (i = 0; i < lnx; i++) {
+            printf("uMatQK[%d] = %.4f\n",dsplc[myid]+i,l_uMat_QK[i]);
+        }
+    }
+    else {
+        MPI_Recv(&sts, 1, MPI_INT,myid-1,MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+        for (i = 0; i < lnx; i++) {
+            printf("uMatQK[%d] = %.4f\n",dsplc[myid]+i,l_uMat_QK[i]);
+        }
+        MPI_Send(&sts, 1, MPI_INT, myid+1,10,MPI_COMM_WORLD);
     }
 
     MPI_Gatherv(&l_uMat[0], lnx, MPI_DOUBLE, &uMat[0], cnts, dsplc, MPI_DOUBLE, 0, MPI_COMM_WORLD);
