@@ -48,7 +48,7 @@ int main (int argc, char* argv[]) {
         }
     }
 
-    double err = 1, eps = 1e-2;
+    double err = 1, eps = 1e-4;
     double errvec[N*N];
     int cnt = 1;
     int lim = 1e7;
@@ -60,7 +60,7 @@ int main (int argc, char* argv[]) {
                 phik1[i][j] = 0.25*(phik[i+1][j] + phik[i-1][j] + phik[i][j+1] + phik[i][j-1] + del2*qij[i][j]);
             }
         }
-        
+
         for (i = 1; i < N-1; i++) {
             phik1[N-1][i] = (4*phik1[N-2][i] - phik1[N-3][i])/3;
         }
@@ -73,8 +73,8 @@ int main (int argc, char* argv[]) {
         }
         
         err = norm(errvec, N*N);
-        if (cnt % 100 == 0) {
-            printf("cnt = %d  err = %.2f\n",cnt,err);
+        if (cnt % 10 == 0) {
+            printf("cnt = %d  err = %.4f\n",cnt,err);
         }
         cnt += 1;
     }
