@@ -79,7 +79,6 @@ int main (int argc, char* argv[]) {
     double err = 1, eps = 1e-2;
     double errvec[N*N];
     int cnt = 1;
-
     int lim = 1e7;
 
     clock_t t;
