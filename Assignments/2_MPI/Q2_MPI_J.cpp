@@ -84,7 +84,18 @@ int main (int argc, char* argv[]) {
     int lim = 1e7;
 
     while ((err > eps) && (cnt < lim)) {
-        
+        if (myid % 2 == 0) {
+            // Upsend
+            MPI_Sendrecv(&phik[nx-1][],,MPI_DOUBLE,prtnr[1],tagu1,&ui_t[lnx+2],1,MPI_DOUBLE,prtnr[1],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+            // Downsend
+            MPI_Sendrecv(&ui_t[2],1,MPI_DOUBLE,prtnr[0],tagd2,&ui_t[1],1,MPI_DOUBLE,prtnr[0],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+        }
+        else {
+            // Downsend
+            MPI_Sendrecv(&ui_t[2],1,MPI_DOUBLE,prtnr[0],tagd1,&ui_t[1],1,MPI_DOUBLE,prtnr[0],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+            // Upsend
+            MPI_Sendrecv(&ui_t[lnx+1],1,MPI_DOUBLE,prtnr[1],tagu2,&ui_t[lnx+2],1,MPI_DOUBLE,prtnr[1],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+        }
     }
 
 
