@@ -1,6 +1,6 @@
-#include<iostream>
-#include<math.h>
-#include<mpi.h>
+#include <iostream>
+#include <math.h>
+#include <mpi.h>
 #include <fstream>
 #include <string.h>
 
@@ -38,8 +38,14 @@ int main (int argc, char* argv[]) {
     
     lnxe = lnx + 3;
 
-    // Usable range of values --> [1,lnxe+2]
-    // Owned range of values  --> [2,lnxe+1]
+    // For Upwind:
+    // Usable range of values --> [1,lnx+2]
+    // Owned range of values  --> [2,lnx+1]
+
+    // For QUICK:
+    // Usable range of values --> [0,lnx+2]
+    // Owned range of values  --> [2,lnx+1]
+
     double ui_t[lnxe] {}, ui_t1[lnxe] {};
     double l_uMat[3*lnx] {};
     double l_uMat_UP[2*lnx] {};

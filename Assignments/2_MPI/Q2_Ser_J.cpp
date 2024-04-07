@@ -53,7 +53,7 @@ int main (int argc, char* argv[]) {
     int cnt = 1;
     int lim = 1e7;
 
-    while ((err > eps) && (cnt < lim)) {      
+    while ((err > eps) && (cnt < lim)) {
         for (i = 1; i < N-1; i++) {
             phik1[0][i] = sin(2*M_PI*yi[i]);
             for (j = 1; j < N-1; j++) {
