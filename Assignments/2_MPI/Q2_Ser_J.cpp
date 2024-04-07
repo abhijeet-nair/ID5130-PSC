@@ -56,6 +56,8 @@ int main (int argc, char* argv[]) {
     while ((err > eps) && (cnt < lim)) {
         for (i = 1; i < N-1; i++) {
             phik1[0][i] = sin(2*M_PI*yi[i]);
+            phik1[i][0] = 0;
+            phik1[i][N-1] = 0;
             for (j = 1; j < N-1; j++) {
                 phik1[i][j] = 0.25*(phik[i+1][j] + phik[i-1][j] + phik[i][j+1] + phik[i][j-1] + del2*qij[i][j]);
             }
@@ -73,11 +75,20 @@ int main (int argc, char* argv[]) {
         }
         
         err = norm2(errvec, N*N);
-        if (cnt % 10 == 0) {
+        if (cnt % 100 == 0) {
             printf("cnt = %d  err = %.4f\n",cnt,err);
         }
         cnt += 1;
     }
+
+    printf("\ncnt = %d\terr = %.6f\n\n",cnt,err);
+
+    // for (i = 0; i < N; i++) {
+    //     for (j = 0; j < N; j++) {
+    //         printf("(%2.0f,%2.0f) \t %.4f\n",double(i),double(j),phik1[i][j]);
+    //     }
+    //     printf("\n");
+    // }
 
     return 0;
 }

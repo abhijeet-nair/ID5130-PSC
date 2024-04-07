@@ -142,10 +142,10 @@ int main (int argc, char* argv[]) {
     int rind = int(0.5*nx) + 1;
     int val = rind - dsplc[myid];
 
-    double* phivsx0;
+    double* phivsx0,* phivsy0;
     if (myid == 0) {
         phivsx0 = (double *)malloc(nx*sizeof(double));
-        double phivsy0[ny] {};
+        phivsy0 = (double *)malloc(ny*sizeof(double));
         int src {};
 
         for (i = 0; i < np; i++) {
@@ -159,13 +159,56 @@ int main (int argc, char* argv[]) {
         if (src != 0) {
             MPI_Recv(&phivsy0[0],ny,MPI_DOUBLE,src,100,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
         }
+
+        printf("\nPrinting phivsy0 in P0...\n");
+        for (i = 0; i < ny; i++) {
+            printf("val[%d] = %.4f\n",i,phivsy0[i]);
+        }
     }
 
     if ((val >= 0) && (val < lnx) && (myid != 0)) {
+        val += 1;
         // printf("myid = %d\n",myid);
+        // printf("\nPrinting phivsy0 in P%d...\n",myid);
+        // for (i = 0; i < ny; i++) {
+        //     printf("val[%d] = %.4f\n",i,phik1[val][i]);
+        // }
         MPI_Send(&phik1[val][0],ny,MPI_DOUBLE,0,100,MPI_COMM_WORLD);
     }
 
+    // // Use for printing sequentially...
+    // int sts = 0;
+    // if (myid == 0) {
+    //     printf("\n");
+    //     for (i = 0; i < lnx; i++) {
+    //         for (j = 0; j < ny; j++) {
+    //             printf("%d - (%2.0f,%2.0f) \t %.4f\n",myid,double(dsplc[myid]+i),double(j),phik1[i+1][j]);
+    //         }
+    //         printf("\n");
+    //     }
+    //     MPI_Send(&sts, 1, MPI_INT, myid+1,10,MPI_COMM_WORLD);
+    // }
+    // else if (myid == np - 1) {
+    //     MPI_Recv(&sts, 1, MPI_INT,myid-1,MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+    //     for (i = 0; i < lnx; i++) {
+    //         for (j = 0; j < ny; j++) {
+    //             printf("%d - (%2.0f,%2.0f) \t %.4f\n",myid,double(dsplc[myid]+i),double(j),phik1[i+1][j]);
+    //         }
+    //         printf("\n");
+    //     }
+    // }
+    // else {
+    //     MPI_Recv(&sts, 1, MPI_INT,myid-1,MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+    //     for (i = 0; i < lnx; i++) {
+    //         for (j = 0; j < ny; j++) {
+    //             printf("%d - (%2.0f,%2.0f) \t %.4f\n",myid,double(dsplc[myid]+i),double(j),phik1[i+1][j]);
+    //         }
+    //         printf("\n");
+    //     }
+    //     MPI_Send(&sts, 1, MPI_INT, myid+1,10,MPI_COMM_WORLD);
+    // }
+
+    rind = int(0.5*ny) + 1;
     cnt = lnx;
     int BL = 1;
     int ST = ny;
@@ -173,10 +216,21 @@ int main (int argc, char* argv[]) {
     MPI_Datatype my_type;
     MPI_Type_vector(cnt,BL,ST,MPI_DOUBLE,&my_type);
     MPI_Type_commit(&my_type);
+    // for (i = 0; i < cnt; i++) {
+    //     for (j = 0; j < BL; j++) {
+    //         printf("%d - val[%d] = %.4f\n",myid,rind+ST*i+j,)
+    //     }
+    // }
 
-    MPI_Gatherv(&phik1[1][rind],1,my_type,&phivsx0[0],cnts,dsplc,MPI_DOUBLE,0,MPI_COMM_WORLD);
+    // MPI_Gatherv(&phik1[1][rind],1,my_type,&phivsx0[0],cnts,dsplc,MPI_DOUBLE,0,MPI_COMM_WORLD);
+    if (myid == 1) {
+        MPI_Send(&phik1[1][rind],1,my_type,0,100,MPI_COMM_WORLD);
+    }
+    
 
     if (myid == 0) {
+        MPI_Recv(&phivsx0[0],1,my_type,1,100,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+        printf("\nPrinting phivsx0 in P0...\n");
         for (i = 0; i < nx; i++) {
             printf("val[%d] = %.4f\n",i,phivsx0[i]);
         }
