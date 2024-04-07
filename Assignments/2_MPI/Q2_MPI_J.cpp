@@ -58,7 +58,6 @@ int main (int argc, char* argv[]) {
         }
     }
 
-    // For Upwind:
     // Usable range of values --> [0,lnx+1]
     // Owned range of values  --> [1,lnx]
 
@@ -248,6 +247,7 @@ int main (int argc, char* argv[]) {
         }
     }
 
+    MPI_Type_free(&my_type);
     MPI_Finalize();
     return 0;
 }
