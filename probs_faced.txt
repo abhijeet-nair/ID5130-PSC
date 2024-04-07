@@ -1,0 +1,5 @@
+Add all the problems faced till now, how it was solved (if it was) and what to do to avoid it (if possible):
+
+A2 - Q2_MPI_J.cpp
+1) Was defining phik1 matrix with dynamically. Because of that, MPI_Type_vector was failing, since the relative locations of the points is not the same.
+   Thus, if you need to use the relative location property for some purpose, do not define dynamically.

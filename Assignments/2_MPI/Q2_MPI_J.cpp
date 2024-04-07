@@ -35,18 +35,15 @@ int main (int argc, char* argv[]) {
     else {lnx = int(nx/np);};
 
     double** phik = new double*[lnx+2];
-    double** phik1 = new double*[lnx+2];
+    double phik1[lnx+2][ny];
     double** qij = new double*[lnx];
 
     for (i = 0; i < lnx; i++) {
         phik[i] = new double[ny] {};
-        phik1[i] = new double[ny] {};
         qij[i] = new double[ny] {};
     }
     phik[lnx] = new double[ny] {};
     phik[lnx+1] = new double[ny] {};
-    phik1[lnx] = new double[ny] {};
-    phik1[lnx+1] = new double[ny] {};
 
     int cnts[np] {}, dsplc[np] {};
     for (i = 1; i < np; i++) {
@@ -139,7 +136,7 @@ int main (int argc, char* argv[]) {
         cnt += 1;
     }
 
-    int rind = int(0.5*nx) + 1;
+    int rind = int(0.5*nx); // Index for (nx/2)+1-th element
     int val = rind - dsplc[myid];
 
     double* phivsx0,* phivsy0;
@@ -208,7 +205,7 @@ int main (int argc, char* argv[]) {
     //     MPI_Send(&sts, 1, MPI_INT, myid+1,10,MPI_COMM_WORLD);
     // }
 
-    rind = int(0.5*ny) + 1;
+    rind = int(0.5*ny); // Index for (ny/2)+1-th element
     cnt = lnx;
     int BL = 1;
     int ST = ny;
@@ -216,20 +213,35 @@ int main (int argc, char* argv[]) {
     MPI_Datatype my_type;
     MPI_Type_vector(cnt,BL,ST,MPI_DOUBLE,&my_type);
     MPI_Type_commit(&my_type);
+    // double* pntr = &phik1[1][rind];
     // for (i = 0; i < cnt; i++) {
     //     for (j = 0; j < BL; j++) {
-    //         printf("%d - val[%d] = %.4f\n",myid,rind+ST*i+j,)
+    //         int tmp = rind + ST*i + j + ny;
+    //         printf("%d - val[%d][%d] = %.4f\n",myid,int(tmp/ny),(tmp%ny),*(pntr + ST*i + j));
     //     }
     // }
 
-    // MPI_Gatherv(&phik1[1][rind],1,my_type,&phivsx0[0],cnts,dsplc,MPI_DOUBLE,0,MPI_COMM_WORLD);
-    if (myid == 1) {
-        MPI_Send(&phik1[1][rind],1,my_type,0,100,MPI_COMM_WORLD);
-    }
+    // for (i = 0; i < lnx; i++) {
+    //     printf("%d - val[%2.0f][%d] = %.4f\t",myid,double(dsplc[myid]+i),rind,phik1[i][rind]);
+    //     std::cout << &phik1[i][rind] << "\t" << &phik1[i][rind] - &phik1[i-1][rind] << "\n";
+    // }
+
+    // if (myid == 0) {
+    //     for (i = 0; i < lnx; i++) {
+    //         for (j = 0; j < ny; j++) {
+    //             std::cout << i << ", " << j << "\t" << &phik1[i][j] << "\n";
+    //         }
+    //     }
+    // }
+
+    MPI_Gatherv(&phik1[1][rind],1,my_type,&phivsx0[0],cnts,dsplc,MPI_DOUBLE,0,MPI_COMM_WORLD);
+    // if (myid == 1) {
+    //     MPI_Send(&phik1[1][rind],1,my_type,0,100,MPI_COMM_WORLD);
+    // }
     
 
     if (myid == 0) {
-        MPI_Recv(&phivsx0[0],1,my_type,1,100,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+        // MPI_Recv(&phivsx0[0],1,my_type,1,100,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
         printf("\nPrinting phivsx0 in P0...\n");
         for (i = 0; i < nx; i++) {
             printf("val[%d] = %.4f\n",i,phivsx0[i]);
