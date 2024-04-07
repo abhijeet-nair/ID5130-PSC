@@ -8,7 +8,7 @@ double q (double x, double y) {
     return val;
 }
 
-double norm (double A[], int n) {
+double norm2 (double A[], int n) {
     double res {};
     for (int i =0; i < n; i++) {
         res += pow(A[i],2);
@@ -72,7 +72,7 @@ int main (int argc, char* argv[]) {
             }
         }
         
-        err = norm(errvec, N*N);
+        err = norm2(errvec, N*N);
         if (cnt % 10 == 0) {
             printf("cnt = %d  err = %.4f\n",cnt,err);
         }
