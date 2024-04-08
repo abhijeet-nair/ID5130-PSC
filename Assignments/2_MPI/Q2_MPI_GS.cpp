@@ -34,16 +34,13 @@ int main (int argc, char* argv[]) {
     if (myid == 0) {lnx = nx - int(nx/np)*(np - 1);}
     else {lnx = int(nx/np);};
 
-    double** phik = new double*[lnx+2];
+    double phik[lnx+2][ny];
     double phik1[lnx+2][ny];
     double** qij = new double*[lnx];
 
     for (i = 0; i < lnx; i++) {
-        phik[i] = new double[ny] {};
         qij[i] = new double[ny] {};
     }
-    phik[lnx] = new double[ny] {};
-    phik[lnx+1] = new double[ny] {};
 
     int cnts[np] {}, dsplc[np] {};
     for (i = 1; i < np; i++) {
@@ -106,7 +103,7 @@ int main (int argc, char* argv[]) {
 
         // Dirichlet Boundary Conditions on x = -1 face
         if (myid == 0) {
-            if (cnt % 10 == 0) {printf("cnt = %d\terr = %.5f\n",cnt,err);}
+            if (cnt % 100 == 0) {printf("cnt = %d\terr = %.5f\n",cnt,err);}
             for (j = 0; j < ny; j++) {
                 phik1[1][j] = sin(2*M_PI*(-1 + j*del));
             }
@@ -163,35 +160,35 @@ int main (int argc, char* argv[]) {
         if (myid % 2 == 0) {
             // Upsend
             if (dsplc[myid+1] % 2 == 1) {
-                MPI_Recv(&phik[lnx+1][0],1,mtype_1,prtnr[1],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                MPI_Recv(&phik1[lnx+1][0],1,mtype_1,prtnr[1],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
             }
             else {
-                MPI_Send(&phik[lnx][0],1,mtype_1,prtnr[1],tagu1,MPI_COMM_WORLD);
+                MPI_Send(&phik1[lnx][0],1,mtype_1,prtnr[1],tagu1,MPI_COMM_WORLD);
             }
 
             // Downsend
             if (dsplc[myid] % 2 == 1) {
-                MPI_Send(&phik[1][0],1,mtype_1,prtnr[0],tagd2,MPI_COMM_WORLD);
+                MPI_Send(&phik1[1][0],1,mtype_1,prtnr[0],tagd2,MPI_COMM_WORLD);
             }
             else {
-                MPI_Recv(&phik[0][0],1,mtype_1,prtnr[0],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                MPI_Recv(&phik1[0][0],1,mtype_1,prtnr[0],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
             }
         }
         else {
             // Downsend
             if (dsplc[myid] % 2 == 1) {
-                MPI_Send(&phik[1][0],1,mtype_1,prtnr[0],tagd2,MPI_COMM_WORLD);
+                MPI_Send(&phik1[1][0],1,mtype_1,prtnr[0],tagd2,MPI_COMM_WORLD);
             }
             else {
-                MPI_Recv(&phik[0][0],1,mtype_1,prtnr[0],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                MPI_Recv(&phik1[0][0],1,mtype_1,prtnr[0],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
             }
 
             // Upsend
             if (dsplc[myid+1] % 2 == 1) {
-                MPI_Recv(&phik[lnx+1][0],1,mtype_1,prtnr[1],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                MPI_Recv(&phik1[lnx+1][0],1,mtype_1,prtnr[1],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
             }
             else {
-                MPI_Send(&phik[lnx][0],1,mtype_1,prtnr[1],tagu1,MPI_COMM_WORLD);
+                MPI_Send(&phik1[lnx][0],1,mtype_1,prtnr[1],tagu1,MPI_COMM_WORLD);
             }
         }
 
@@ -199,7 +196,7 @@ int main (int argc, char* argv[]) {
         for (i = is; i <= ie; i++) {
             for (j = 1; j < (ny - 1); j++) {
                 if ((dsplc[myid] + i + j) % 2 == 0) {
-                    phik1[i][j] = 0.25*(phik[i+1][j] + phik[i-1][j] + phik[i][j+1] + phik[i][j-1] + del2*qij[i-1][j]);
+                    phik1[i][j] = 0.25*(phik1[i+1][j] + phik1[i-1][j] + phik1[i][j+1] + phik1[i][j-1] + del2*qij[i-1][j]);
                 }
             }
         }
@@ -231,6 +228,8 @@ int main (int argc, char* argv[]) {
 
     double* phivsx0,* phivsy0;
     if (myid == 0) {
+        printf("Iterations = %d\terr = %.6f\n",cnt,err);
+        
         phivsx0 = (double *)malloc(nx*sizeof(double));
         phivsy0 = (double *)malloc(ny*sizeof(double));
         int src {};
