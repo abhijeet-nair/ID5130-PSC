@@ -13,7 +13,7 @@ double q (double x, double y) {
 // Norm function
 double norm2 (double A[], int n) {
     double res {};
-    for (int i =0; i < n; i++) {
+    for (int i = 0; i < n; i++) {
         res += pow(A[i],2);
     }
     return res;
@@ -22,7 +22,7 @@ double norm2 (double A[], int n) {
 
 int main (int argc, char* argv[]) {
     int i, j, myid, np;
-    double del = 0.1, del2 = pow(del, 2);    
+    double del = 0.2, del2 = pow(del, 2);    
 
     MPI_Init(NULL, NULL);
     MPI_Comm_rank(MPI_COMM_WORLD, &myid);
@@ -34,8 +34,8 @@ int main (int argc, char* argv[]) {
     if (myid == 0) {lnx = nx - int(nx/np)*(np - 1);}
     else {lnx = int(nx/np);};
 
-    double phik[lnx+2][ny];
-    double phik1[lnx+2][ny];
+    double phik[lnx+2][ny] {};
+    double phik1[lnx+2][ny] {};
     double** qij = new double*[lnx];
 
     for (i = 0; i < lnx; i++) {
@@ -78,7 +78,7 @@ int main (int argc, char* argv[]) {
     double lerr {};
     double errvec[lnx*ny];
     int cnt = 1;
-    int lim = 1e7;
+    int lim = 3;
 
     MPI_Datatype mtype_1; // Red-type
     MPI_Datatype mtype_2; // Blue-type
@@ -91,6 +91,7 @@ int main (int argc, char* argv[]) {
     MPI_Type_vector(CT,BL,ST,MPI_DOUBLE,&mtype_2);
     MPI_Type_commit(&mtype_2);
 
+    int inds[4] = {0, 1, lnx, lnx + 1}; // Remove after fixing
 
     // Starting index of P0 (0) is red.
     // So, if (dsplc[myid] + i) is odd, it is red (i is the row index) and so on.
@@ -103,10 +104,15 @@ int main (int argc, char* argv[]) {
 
         // Dirichlet Boundary Conditions on x = -1 face
         if (myid == 0) {
-            if (cnt % 100 == 0) {printf("cnt = %d\terr = %.5f\n",cnt,err);}
             for (j = 0; j < ny; j++) {
                 phik1[1][j] = sin(2*M_PI*(-1 + j*del));
             }
+            // for (i = 1; i < lnx; i++) {
+            //     for (j = 0; j < ny; j++) {
+            //         printf("phik1[%d][%d] = %.4f\n",i,j,phik1[i][j]);
+            //     }
+            //     printf("\n");
+            // }
         }
         
         // Blue-send for red points
@@ -131,7 +137,7 @@ int main (int argc, char* argv[]) {
         else {
             // Downsend
             if (dsplc[myid] % 2 == 0) {
-                MPI_Send(&phik[1][1],1,mtype_2,prtnr[0],tagd2,MPI_COMM_WORLD);
+                MPI_Send(&phik[1][1],1,mtype_2,prtnr[0],tagd1,MPI_COMM_WORLD);
             }
             else {
                 MPI_Recv(&phik[0][1],1,mtype_2,prtnr[0],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
@@ -145,11 +151,11 @@ int main (int argc, char* argv[]) {
                 MPI_Send(&phik[lnx][1],1,mtype_2,prtnr[1],tagu1,MPI_COMM_WORLD);
             }
         }
-
+        
         // Red-calculations
         for (i = is; i <= ie; i++) {
             for (j = 1; j < (ny - 1); j++) {
-                if ((dsplc[myid] + i + j) % 2 == 1) {
+                if ((dsplc[myid] + i + j) % 2 == 0) {
                     phik1[i][j] = 0.25*(phik[i+1][j] + phik[i-1][j] + phik[i][j+1] + phik[i][j-1] + del2*qij[i-1][j]);
                 }
             }
@@ -177,7 +183,7 @@ int main (int argc, char* argv[]) {
         else {
             // Downsend
             if (dsplc[myid] % 2 == 1) {
-                MPI_Send(&phik1[1][0],1,mtype_1,prtnr[0],tagd2,MPI_COMM_WORLD);
+                MPI_Send(&phik1[1][0],1,mtype_1,prtnr[0],tagd1,MPI_COMM_WORLD);
             }
             else {
                 MPI_Recv(&phik1[0][0],1,mtype_1,prtnr[0],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
@@ -192,10 +198,42 @@ int main (int argc, char* argv[]) {
             }
         }
 
+        // Use for printing sequentially...
+        int sts = 0;
+        if (myid == 0) {
+            printf("\n");
+            for (i = 0; i < 4; i++) {
+                for (j = 0; j < ny; j++) {
+                    printf("%d - (%2.0f,%2.0f) \t %.4f\n",myid,double(dsplc[myid]+inds[i]-1),double(j),phik1[inds[i]][j]);
+                }
+                printf("\n");
+            }
+            MPI_Send(&sts, 1, MPI_INT, myid+1,10,MPI_COMM_WORLD);
+        }
+        else if (myid == np - 1) {
+            MPI_Recv(&sts, 1, MPI_INT,myid-1,MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+            for (i = 0; i < 4; i++) {
+                for (j = 0; j < ny; j++) {
+                    printf("%d - (%2.0f,%2.0f) \t %.4f\n",myid,double(dsplc[myid]+inds[i]-1),double(j),phik1[inds[i]][j]);
+                }
+                printf("\n");
+            }
+        }
+        else {
+            MPI_Recv(&sts, 1, MPI_INT,myid-1,MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+            for (i = 0; i < 4; i++) {
+                for (j = 0; j < ny; j++) {
+                    printf("%d - (%2.0f,%2.0f) \t %.4f\n",myid,double(dsplc[myid]+inds[i]-1),double(j),phik1[inds[i]][j]);
+                }
+                printf("\n");
+            }
+            MPI_Send(&sts, 1, MPI_INT, myid+1,10,MPI_COMM_WORLD);
+        }
+
         // Blue calculations
         for (i = is; i <= ie; i++) {
             for (j = 1; j < (ny - 1); j++) {
-                if ((dsplc[myid] + i + j) % 2 == 0) {
+                if ((dsplc[myid] + i + j) % 2 == 1) {
                     phik1[i][j] = 0.25*(phik1[i+1][j] + phik1[i-1][j] + phik1[i][j+1] + phik1[i][j-1] + del2*qij[i-1][j]);
                 }
             }
@@ -216,11 +254,14 @@ int main (int argc, char* argv[]) {
             }
         }
         lerr = norm2(errvec, lnx*ny);
+        // printf("%d - lerr = %.6f\n",myid,lerr);
 
         err = 0;
         MPI_Allreduce(&lerr, &err, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
         err = sqrt(err);
+        if (myid == 0) {if (cnt % 1 == 0) {printf("cnt = %5.0f\terr = %.5f\n",double(cnt),err);}}
         cnt += 1;
+        // MPI_Barrier(MPI_COMM_WORLD);
     }
 
     int rind = int(0.5*nx); // Index for (nx/2)+1-th element
@@ -229,7 +270,7 @@ int main (int argc, char* argv[]) {
     double* phivsx0,* phivsy0;
     if (myid == 0) {
         printf("Iterations = %d\terr = %.6f\n",cnt,err);
-        
+
         phivsx0 = (double *)malloc(nx*sizeof(double));
         phivsy0 = (double *)malloc(ny*sizeof(double));
         int src {};
@@ -242,11 +283,6 @@ int main (int argc, char* argv[]) {
         }
         if (src != 0) {
             MPI_Recv(&phivsy0[0],ny,MPI_DOUBLE,src,100,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-        }
-
-        printf("\nPrinting phivsy0 in P0...\n");
-        for (i = 0; i < ny; i++) {
-            printf("val[%d] = %.4f\n",i,phivsy0[i]);
         }
     }
 
@@ -267,6 +303,11 @@ int main (int argc, char* argv[]) {
     MPI_Gatherv(&phik1[1][rind],1,mtype_3,&phivsx0[0],cnts,dsplc,MPI_DOUBLE,0,MPI_COMM_WORLD);
 
     if (myid == 0) {
+        printf("\nPrinting phivsy0 in P0...\n");
+        for (i = 0; i < ny; i++) {
+            printf("val[%d] = %.4f\n",i,phivsy0[i]);
+        }
+
         printf("\nPrinting phivsx0 in P0...\n");
         for (i = 0; i < nx; i++) {
             printf("val[%d] = %.4f\n",i,phivsx0[i]);
