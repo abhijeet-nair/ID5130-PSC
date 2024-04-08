@@ -13,7 +13,7 @@ double q (double x, double y) {
 // Norm function
 double norm2 (double A[], int n) {
     double res {};
-    for (int i =0; i < n; i++) {
+    for (int i = 0; i < n; i++) {
         res += pow(A[i],2);
     }
     return res;

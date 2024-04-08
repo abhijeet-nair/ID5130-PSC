@@ -1,0 +1,34 @@
+if (myid % 2 == 0) {
+    // Upsend
+    if (dsplc[myid+1] % 2 == 0) {
+        MPI_Sendrecv(&phik[lnx][0],1,mtype_1,prtnr[1],tagu1,&phik[lnx+1][1],1,mtype_2,prtnr[1],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+    }
+    else {
+        MPI_Sendrecv(&phik[lnx][1],1,mtype_2,prtnr[1],tagu1,&phik[lnx+1][0],1,mtype_1,prtnr[1],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+    }
+
+    // Downsend
+    if (dsplc[myid] % 2 == 0) {
+        MPI_Sendrecv(&phik[1][1],1,mtype_2,prtnr[0],tagd2,&phik[0][0],1,mtype_1,prtnr[0],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+    }
+    else {
+        MPI_Sendrecv(&phik[1][0],1,mtype_1,prtnr[0],tagd2,&phik[0][1],1,mtype_2,prtnr[0],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+    }
+}
+else {
+    // Downsend
+    if (dsplc[myid] % 2 == 0) {
+        MPI_Sendrecv(&phik[1][1],1,mtype_2,prtnr[0],tagd1,&phik[0][0],1,mtype_1,prtnr[0],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+    }
+    else {
+        MPI_Sendrecv(&phik[1][0],1,mtype_1,prtnr[0],tagd1,&phik[0][1],1,mtype_2,prtnr[0],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+    }
+    
+    // Upsend
+    if (dsplc[myid+1] % 2 == 0) {
+        MPI_Sendrecv(&phik[lnx][0],1,mtype_1,prtnr[1],tagu2,&phik[lnx+1][1],1,mtype_2,prtnr[1],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+    }
+    else {
+        MPI_Sendrecv(&phik[lnx][1],1,mtype_2,prtnr[1],tagu2,&phik[lnx+1][0],1,mtype_1,prtnr[1],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+    }
+}
