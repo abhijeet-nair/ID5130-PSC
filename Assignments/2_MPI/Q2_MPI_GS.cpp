@@ -22,7 +22,7 @@ double norm2 (double A[], int n) {
 
 int main (int argc, char* argv[]) {
     int i, j, myid, np;
-    double del = 0.01, del2 = pow(del, 2);    
+    double del = 0.1, del2 = pow(del, 2);    
 
     MPI_Init(NULL, NULL);
     MPI_Comm_rank(MPI_COMM_WORLD, &myid);
@@ -175,7 +175,7 @@ int main (int argc, char* argv[]) {
         // Red-calculations
         for (i = is; i <= ie; i++) {
             for (j = 1; j < (ny - 1); j++) {
-                if ((dsplc[myid] + i + j) % 2 == 0) {
+                if ((dsplc[myid] + i - 1 + j) % 2 == 0) {
                     phik1[i][j] = 0.25*(phik[i+1][j] + phik[i-1][j] + phik[i][j+1] + phik[i][j-1] + del2*qij[i-1][j]);
                 }
             }
@@ -186,42 +186,42 @@ int main (int argc, char* argv[]) {
             // Upsend
             if (dsplc[myid+1] % 2 == 1) { // Next proc has a blue at (i,j) = (0,0)
                 // MPI_Recv(&phik1[lnx+1][0],1,mtype_1,prtnr[1],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-                MPI_Sendrecv(&phik[lnx][0],1,mtype_1,prtnr[1],tagu1,&phik[lnx+1][1],1,mtype_2,prtnr[1],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                MPI_Sendrecv(&phik1[lnx][0],1,mtype_1,prtnr[1],tagu1,&phik1[lnx+1][1],1,mtype_2,prtnr[1],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
             }
             else {                        // Next proc has a red at (i,j) = (0,0)
                 // MPI_Send(&phik1[lnx][0],1,mtype_1,prtnr[1],tagu1,MPI_COMM_WORLD);
-                MPI_Sendrecv(&phik[lnx][1],1,mtype_2,prtnr[1],tagu1,&phik[lnx+1][0],1,mtype_1,prtnr[1],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                MPI_Sendrecv(&phik1[lnx][1],1,mtype_2,prtnr[1],tagu1,&phik1[lnx+1][0],1,mtype_1,prtnr[1],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
             }
 
             // Downsend
             if (dsplc[myid] % 2 == 1) { // This proc has a blue at (i,j) = (0,0)
                 // MPI_Send(&phik1[1][0],1,mtype_1,prtnr[0],tagd2,MPI_COMM_WORLD);
-                MPI_Sendrecv(&phik[1][1],1,mtype_2,prtnr[0],tagd2,&phik[0][0],1,mtype_1,prtnr[0],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                MPI_Sendrecv(&phik1[1][1],1,mtype_2,prtnr[0],tagd2,&phik1[0][0],1,mtype_1,prtnr[0],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
             }
             else {                      // This proc has a red at (i,j) = (0,0)
                 // MPI_Recv(&phik1[0][0],1,mtype_1,prtnr[0],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-                MPI_Sendrecv(&phik[1][0],1,mtype_1,prtnr[0],tagd2,&phik[0][1],1,mtype_2,prtnr[0],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                MPI_Sendrecv(&phik1[1][0],1,mtype_1,prtnr[0],tagd2,&phik1[0][1],1,mtype_2,prtnr[0],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
             }
         }
         else {
             // Downsend
             if (dsplc[myid] % 2 == 1) { // This proc has a blue at (i,j) = (0,0)
                 // MPI_Send(&phik1[1][0],1,mtype_1,prtnr[0],tagd2,MPI_COMM_WORLD);
-                MPI_Sendrecv(&phik[1][1],1,mtype_2,prtnr[0],tagd1,&phik[0][0],1,mtype_1,prtnr[0],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                MPI_Sendrecv(&phik1[1][1],1,mtype_2,prtnr[0],tagd1,&phik1[0][0],1,mtype_1,prtnr[0],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
             }
             else {                      // This proc has a red at (i,j) = (0,0)
                 // MPI_Recv(&phik1[0][0],1,mtype_1,prtnr[0],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-                MPI_Sendrecv(&phik[1][0],1,mtype_1,prtnr[0],tagd1,&phik[0][1],1,mtype_2,prtnr[0],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                MPI_Sendrecv(&phik[1][0],1,mtype_1,prtnr[0],tagd1,&phik1[0][1],1,mtype_2,prtnr[0],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
             }
 
             // Upsend
             if (dsplc[myid+1] % 2 == 1) { // Next proc has a blue at (i,j) = (0,0)
                 // MPI_Recv(&phik1[lnx+1][0],1,mtype_1,prtnr[1],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-                MPI_Sendrecv(&phik[lnx][0],1,mtype_1,prtnr[1],tagu2,&phik[lnx+1][1],1,mtype_2,prtnr[1],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                MPI_Sendrecv(&phik1[lnx][0],1,mtype_1,prtnr[1],tagu2,&phik1[lnx+1][1],1,mtype_2,prtnr[1],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
             }
             else {                        // Next proc has a red at (i,j) = (0,0)
                 // MPI_Send(&phik1[lnx][0],1,mtype_1,prtnr[1],tagu1,MPI_COMM_WORLD);
-                MPI_Sendrecv(&phik[lnx][1],1,mtype_2,prtnr[1],tagu2,&phik[lnx+1][0],1,mtype_1,prtnr[1],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+                MPI_Sendrecv(&phik1[lnx][1],1,mtype_2,prtnr[1],tagu2,&phik1[lnx+1][0],1,mtype_1,prtnr[1],MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
             }
         }
 
@@ -260,11 +260,43 @@ int main (int argc, char* argv[]) {
         // Blue calculations
         for (i = is; i <= ie; i++) {
             for (j = 1; j < (ny - 1); j++) {
-                if ((dsplc[myid] + i + j) % 2 == 1) {
+                if ((dsplc[myid] + i - 1 + j) % 2 == 1) {
                     phik1[i][j] = 0.25*(phik1[i+1][j] + phik1[i-1][j] + phik1[i][j+1] + phik1[i][j-1] + del2*qij[i-1][j]);
                 }
             }
         }
+
+        // // Use for printing sequentially...
+        // int sts = 0;
+        // if (myid == 0) {
+        //     printf("\n");
+        //     for (i = 0; i < lnx; i++) {
+        //         for (j = 0; j < ny; j++) {
+        //             printf("%d - (%2.0f,%2.0f) \t %.4f\n",myid,double(dsplc[myid]+i),double(j),phik1[i+1][j]);
+        //         }
+        //         printf("\n");
+        //     }
+        //     MPI_Send(&sts, 1, MPI_INT, myid+1,10,MPI_COMM_WORLD);
+        // }
+        // else if (myid == np - 1) {
+        //     MPI_Recv(&sts, 1, MPI_INT,myid-1,MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+        //     for (i = 0; i < lnx; i++) {
+        //         for (j = 0; j < ny; j++) {
+        //             printf("%d - (%2.0f,%2.0f) \t %.4f\n",myid,double(dsplc[myid]+i),double(j),phik1[i+1][j]);
+        //         }
+        //         printf("\n");
+        //     }
+        // }
+        // else {
+        //     MPI_Recv(&sts, 1, MPI_INT,myid-1,MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+        //     for (i = 0; i < lnx; i++) {
+        //         for (j = 0; j < ny; j++) {
+        //             printf("%d - (%2.0f,%2.0f) \t %.4f\n",myid,double(dsplc[myid]+i),double(j),phik1[i+1][j]);
+        //         }
+        //         printf("\n");
+        //     }
+        //     MPI_Send(&sts, 1, MPI_INT, myid+1,10,MPI_COMM_WORLD);
+        // }
 
         // Neumann Boundary Conditions on x = 1 face
         if (myid == (np - 1)) {
@@ -272,6 +304,38 @@ int main (int argc, char* argv[]) {
                 phik1[lnx][j] = (4*phik1[lnx-1][j] - phik1[lnx-2][j])/3;
             }
         }
+
+        // // Use for printing sequentially...
+        // int sts = 0;
+        // if (myid == 0) {
+        //     printf("\n");
+        //     for (i = 0; i < lnx; i++) {
+        //         for (j = 0; j < ny; j++) {
+        //             printf("%d - (%2.0f,%2.0f) \t %.4f\n",myid,double(dsplc[myid]+i),double(j),phik1[i+1][j]);
+        //         }
+        //         printf("\n");
+        //     }
+        //     MPI_Send(&sts, 1, MPI_INT, myid+1,10,MPI_COMM_WORLD);
+        // }
+        // else if (myid == np - 1) {
+        //     MPI_Recv(&sts, 1, MPI_INT,myid-1,MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+        //     for (i = 0; i < lnx; i++) {
+        //         for (j = 0; j < ny; j++) {
+        //             printf("%d - (%2.0f,%2.0f) \t %.4f\n",myid,double(dsplc[myid]+i),double(j),phik1[i+1][j]);
+        //         }
+        //         printf("\n");
+        //     }
+        // }
+        // else {
+        //     MPI_Recv(&sts, 1, MPI_INT,myid-1,MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+        //     for (i = 0; i < lnx; i++) {
+        //         for (j = 0; j < ny; j++) {
+        //             printf("%d - (%2.0f,%2.0f) \t %.4f\n",myid,double(dsplc[myid]+i),double(j),phik1[i+1][j]);
+        //         }
+        //         printf("\n");
+        //     }
+        //     MPI_Send(&sts, 1, MPI_INT, myid+1,10,MPI_COMM_WORLD);
+        // }
 
         // Norm calculations
         for (i = 1; i <= lnx; i++) {
@@ -296,7 +360,7 @@ int main (int argc, char* argv[]) {
 
     double* phivsx0,* phivsy0;
     if (myid == 0) {
-        printf("Iterations = %d\terr = %.6f\n",cnt,err);
+        printf("Iterations = %d\terr = %.6f\n",cnt-1,err);
 
         phivsx0 = (double *)malloc(nx*sizeof(double));
         phivsy0 = (double *)malloc(ny*sizeof(double));
