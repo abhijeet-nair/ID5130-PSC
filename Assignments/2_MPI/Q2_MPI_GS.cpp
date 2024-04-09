@@ -22,7 +22,7 @@ double norm2 (double A[], int n) {
 
 int main (int argc, char* argv[]) {
     int i, j, myid, np;
-    double del = 0.1, del2 = pow(del, 2);    
+    double del = 0.005, del2 = pow(del, 2);    
 
     MPI_Init(NULL, NULL);
     MPI_Comm_rank(MPI_COMM_WORLD, &myid);
@@ -350,7 +350,7 @@ int main (int argc, char* argv[]) {
         err = 0;
         MPI_Allreduce(&lerr, &err, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
         err = sqrt(err);
-        if (myid == 0) {if (cnt % 10 == 0) {printf("cnt = %5.0f\terr = %.5f\n",double(cnt),err);}}
+        if (myid == 0) {if (cnt % 500 == 0) {printf("cnt = %5.0f\terr = %.5f\n",double(cnt),err);}}
         cnt += 1;
         // MPI_Barrier(MPI_COMM_WORLD);
     }
