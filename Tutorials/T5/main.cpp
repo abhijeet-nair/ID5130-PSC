@@ -2,9 +2,7 @@
 #include <math.h>
 #include <time.h>
 #include <iomanip>
-#ifdef _OPENMP
-    #include <omp.h>
-#endif
+#include <omp.h>
 
 
 double norm (double A[], int n) {

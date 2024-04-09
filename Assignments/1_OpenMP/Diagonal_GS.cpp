@@ -1,9 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <math.h>
-#ifdef _OPENMP
-    #include <omp.h>
-#endif
+#include <omp.h>
 
 // Functions
 double q (double x, double y) {

@@ -1,8 +1,6 @@
 #include <iostream>
 #include <math.h>
-#ifdef _OPENMP
-    #include <omp.h>
-#endif
+#include <omp.h>
 
 #define PI 3.14159265358
 

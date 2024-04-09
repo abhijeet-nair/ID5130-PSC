@@ -1,9 +1,7 @@
 #include <iostream>
 #include <math.h>
 #include <time.h>
-#ifdef _OPENMP
-    #include <omp.h>
-#endif
+#include <omp.h>
 
 // void printMatrix (double** a, int m, int n) {
 //     std::cout << std::fixed; // << std::setprecision(4);

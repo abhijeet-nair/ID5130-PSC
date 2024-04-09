@@ -1,9 +1,7 @@
 #include <iostream>
 #include <math.h>
 #include <time.h>
-#ifdef _OPENMP
-    #include <omp.h>
-#endif
+#include <omp.h>
 
 void swap (int a[], int i, int j) {
     int tmp = a[i];
