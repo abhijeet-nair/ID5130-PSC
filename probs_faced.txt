@@ -3,3 +3,6 @@ Add all the problems faced till now, how it was solved (if it was) and what to d
 A2 - Q2_MPI_J.cpp
 1) Was defining phik1 matrix with dynamically. Because of that, MPI_Type_vector was failing, since the relative locations of the points is not the same.
    Thus, if you need to use the relative location property for some purpose, do not define dynamically.
+
+A2 - Qw_MPI_GS.cpp
+1) Had Halo points in the array itself. But, when checking for odd or even parity of the point, didn't consider that. Instead of doing ((dsplc[myid] + i - 1 + j) % 2 == 0), was doing ((dsplc[myid] + i + j) % 2 == 0). So, updating blue instead of red and then sending the un-updated red.
