@@ -19,12 +19,10 @@ double norm2 (double A[], int n) {
 
 
 int main (int argc, char* argv[]) {
-    int N {}, i {}, j {};
-    double del = 0.1;
+    int i, j;
+    double del = 0.1, del2 = pow(del, 2);
 
-    double del2 = pow(del, 2);
-
-    N = int(2/del) + 1;
+    int N = int(2/del) + 1;
 
     double xi[N] {};
     double yi[N] {};
@@ -83,12 +81,28 @@ int main (int argc, char* argv[]) {
 
     printf("\ncnt = %d\terr = %.6f\n\n",cnt,err);
 
-    // for (i = 0; i < N; i++) {
-    //     for (j = 0; j < N; j++) {
-    //         printf("(%2.0f,%2.0f) \t %.4f\n",double(i),double(j),phik1[i][j]);
-    //     }
-    //     printf("\n");
-    // }
+    double phivsx0[N] {}, phivsy0[N] {};
+    int rind = int(0.5*N); // Index for (N/2)+1-th element
+
+    for (i = 0; i < N; i++) {
+        phivsx0[i] = phik1[i][rind];
+        phivsy0[i] = phik1[rind][i];
+    }
+
+    char fname[20] = "./Res/Q2_Ser.txt";
+    std::ofstream oFile(fname);
+
+    if (oFile.is_open()) {
+        for (i = 0; i < N; i++) {
+            oFile << phivsx0[i] << "," << phivsy0[i] << "\n";
+        }
+
+        oFile.close();
+        printf("Saved in file %s\n",fname);
+    }
+    else {
+        printf("Error opening file\n");
+    }
 
     return 0;
 }
