@@ -1,6 +1,13 @@
 #include <iostream>
 #include <math.h>
+#include <string.h>
 #include <omp.h>
+
+void getIndVel(double g, double x, double y, double x0, double y0, double uv[2]) {
+    double den = pow((x - x0), 2) + pow((y - y0), 2);
+    uv[0] = (g*(y - y0))/(2*M_PI*den);
+    uv[1] = -(g*(x - x0))/(2*M_PI*den);
+}
 
 int main () {
     int i, j;           // Indices
@@ -24,7 +31,24 @@ int main () {
     }
     plate[N] = N*dx;
 
-    double A[N][N], B[N];
+    double A[N][N], B[N], gIVRes[2];
+
+    for (i = 0; i < N; i++) {
+        for (j = 0; j < N; j++) {
+            getIndVel(1, colcloc[i], 0, vorloc[j], 0, gIVRes);
+            A[i][j] = gIVRes[1];
+        }
+        getIndVel(1, colcloc[i], 0, (c + 0.1*dx), 0, gIVRes);
+        B[i] = gIVRes[1];
+    }
+
+    double C[N+1][N+1] {};
+
+    for (i = 0; i <= N; i++) {
+        for (j = 0; j <= N; j++) {
+            
+        }
+    }
 
     return 0;
 }
