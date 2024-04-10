@@ -44,7 +44,7 @@ double hdot (double t, int f1, int f2, int a) {
 
 
 int main () {
-    int i, j, m;        // Indices
+    int i, j, k, m, p;  // Indices
 
     int Nl = 10;        // No. of collocation points
     double u   = 20;    // Freestream velocity
@@ -85,7 +85,7 @@ int main () {
         B[i] = gIVRes[1];
     }
 
-    double C[Nl+1][Nl+1] {};
+    double C[Nl+1][Nl+1] {}, U[Nl+1] {}, U1[Nl+1] {};
 
     for (i = 0; i <= Nl; i++) {
         for (j = 0; j <= Nl; j++) {
@@ -104,8 +104,11 @@ int main () {
     double ydot, t_cur, extflow, x0, y0;
     double xw[Nt], yw[Nt];
     double clx, cly;
-    double R[Nl+1], gw[Nt];
-    double Bjs;
+    double R[Nl+1], gw[Nt], gbm[Nl];
+    double Bjs, uw, vw;
+
+    double err, eps = 1e-6, sum;
+    int cnt;
 
     for (m = 0; m < Nt; m++) {
         t_cur = m*dt;
@@ -135,6 +138,58 @@ int main () {
             R[Nl] += gw[j];
         }
         R[Nl] = -R[Nl];
+
+        // Gauss-Seidel
+        err = 1;
+        cnt = 1;
+        while (err > eps) {
+            for (i = 0; i <= Nl; i++) {
+                sum = 0;
+                for (j = 0; j <= Nl; j++) {
+                    if (j < i) {
+                        sum += C[i][j]*U1[j];
+                    }
+                    else if (j > i) {
+                        sum += C[i][j]*U[j];
+                    }
+                }
+                U1[i] = (R[i] - sum)/C[i][i];
+            }
+
+            err = 0;
+            for (i = 0; i <= Nl; i++) {
+                err += pow(U1[i] - U[i], 2);
+                U[i] = U1[i];
+            }
+            err = sqrt(err);
+            cnt += 1;
+        }
+        printf("m = %d\titer = %d\n",m,cnt-1);
+
+        for (i = 0; i < Nl; i++) {
+            gbm[i] = U[i];
+        }
+        gw[m] = U[Nl];
+
+        for (k = 0; k < m; k++) {
+            uw = 0;
+            vw = 0;
+            for (i = 0; i < Nl; i++) {
+                getIndVel(gbm[i], xw[k], yw[k], vorloc[i]*cs + x0, -vorloc[i]*sn + y0, gIVRes);
+                uw += gIVRes[0];
+                vw += gIVRes[1];
+            }
+            
+            for (p = 0; p < m; p++) {
+                if (p != k) {
+                    getIndVel(gw[p], xw[k], yw[k], xw[p], yw[p], gIVRes);
+                    uw += gIVRes[0];
+                    vw += gIVRes[1];
+                }
+            }
+            xw[k] += uw*dt;
+            yw[k] += vw*dt;
+        }
 
     }
 
