@@ -245,6 +245,21 @@ int main (int argc, char* argv[]) {
         for (i = 0; i < nx; i++) {
             printf("val[%d] = %.4f\n",i,phivsx0[i]);
         }
+
+        char fname[20] = "./Res/Q2_MPI_J.txt";
+        std::ofstream oFile(fname);
+
+        if (oFile.is_open()) {
+            for (i = 0; i < nx; i++) {
+                oFile << phivsx0[i] << "," << phivsy0[i] << "\n";
+            }
+
+            oFile.close();
+            printf("Saved in file %s\n",fname);
+        }
+        else {
+            printf("Error opening file\n");
+        }
     }
 
     MPI_Type_free(&my_type);

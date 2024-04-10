@@ -22,7 +22,7 @@ double norm2 (double A[], int n) {
 
 int main (int argc, char* argv[]) {
     int i, j, myid, np;
-    double del = 0.005, del2 = pow(del, 2);    
+    double del = 0.01, del2 = pow(del, 2);    
 
     MPI_Init(NULL, NULL);
     MPI_Comm_rank(MPI_COMM_WORLD, &myid);
@@ -93,6 +93,7 @@ int main (int argc, char* argv[]) {
 
     int inds[4] = {0, 1, lnx, lnx + 1}; // Remove after fixing
 
+    double runT = MPI_Wtime();
     // Starting index of P0 (0) is red.
     // So, if (dsplc[myid] + i + j) is even, it is red (i-row & j-col index) and so on.
     while ((err > eps) && (cnt < lim)) {
@@ -360,8 +361,6 @@ int main (int argc, char* argv[]) {
 
     double* phivsx0,* phivsy0;
     if (myid == 0) {
-        printf("Iterations = %d\terr = %.6f\n",cnt-1,err);
-
         phivsx0 = (double *)malloc(nx*sizeof(double));
         phivsy0 = (double *)malloc(ny*sizeof(double));
         int src {};
@@ -392,16 +391,34 @@ int main (int argc, char* argv[]) {
     MPI_Type_commit(&mtype_3);
 
     MPI_Gatherv(&phik1[1][rind],1,mtype_3,&phivsx0[0],cnts,dsplc,MPI_DOUBLE,0,MPI_COMM_WORLD);
+    runT = MPI_Wtime()- runT;
 
     if (myid == 0) {
-        printf("\nPrinting phivsy0 in P0...\n");
-        for (i = 0; i < ny; i++) {
-            printf("val[%d] = %.4f\n",i,phivsy0[i]);
-        }
+        printf("Iterations = %d\terr = %.8f\tTime = %.4f s\n",cnt-1,err,runT);
 
-        printf("\nPrinting phivsx0 in P0...\n");
-        for (i = 0; i < nx; i++) {
-            printf("val[%d] = %.4f\n",i,phivsx0[i]);
+        // printf("\nPrinting phivsy0 in P0...\n");
+        // for (i = 0; i < ny; i++) {
+        //     printf("val[%d] = %.4f\n",i,phivsy0[i]);
+        // }
+
+        // printf("\nPrinting phivsx0 in P0...\n");
+        // for (i = 0; i < nx; i++) {
+        //     printf("val[%d] = %.4f\n",i,phivsx0[i]);
+        // }
+
+        char fname[20] = "./Res/Q2_MPI_GS.txt";
+        std::ofstream oFile(fname);
+
+        if (oFile.is_open()) {
+            for (i = 0; i < nx; i++) {
+                oFile << phivsx0[i] << "," << phivsy0[i] << "\n";
+            }
+
+            oFile.close();
+            printf("Saved in file %s\n",fname);
+        }
+        else {
+            printf("Error opening file\n");
         }
     }
 
