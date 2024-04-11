@@ -160,14 +160,14 @@ int main (int argc, char* argv[]) {
         }
         else {
             for (i = 0; i < ny; i++) {
-                phivsy0[i] = phik1[rind][i];
+                phivsy0[i] = phik1[rind+1][i];
             }
         }
 
-        printf("\nPrinting phivsy0 in P0...\n");
-        for (i = 0; i < ny; i++) {
-            printf("val[%d] = %.4f\n",i,phivsy0[i]);
-        }
+        // printf("\nPrinting phivsy0 in P0...\n");
+        // for (i = 0; i < ny; i++) {
+        //     printf("val[%d] = %.4f\n",i,phivsy0[i]);
+        // }
     }
 
     if ((val >= 0) && (val < lnx) && (myid != 0)) {

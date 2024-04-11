@@ -32,23 +32,34 @@ import matplotlib.pyplot as plt
 
 # Q2 b) Jacobi
 
-# file1 = "./Res/Q2_Ser_e2.txt"
-# phivsx0s = np.loadtxt(file1, delimiter=",", usecols=0)
-# phivsy0s = np.loadtxt(file1, delimiter=",", usecols=1)
+file1 = "./Res/Q2_Ser_e2.txt"
+phivsx0s = np.loadtxt(file1, delimiter=",", usecols=0)
+phivsy0s = np.loadtxt(file1, delimiter=",", usecols=1)
 
-# file2 = "./Res/Q2_MPI_J2.txt"
-# phivsx01 = np.loadtxt(file2, delimiter=",", usecols=0)
-# phivsy01 = np.loadtxt(file2, delimiter=",", usecols=1)
+file2 = "./Res/Q2_MPI_J2.txt"
+phivsx01 = np.loadtxt(file2, delimiter=",", usecols=0)
+phivsy01 = np.loadtxt(file2, delimiter=",", usecols=1)
 
-# file3 = "./Res/Q2_MPI_J4.txt"
-# phivsx02 = np.loadtxt(file3, delimiter=",", usecols=0)
-# phivsy02 = np.loadtxt(file3, delimiter=",", usecols=1)
+file3 = "./Res/Q2_MPI_J4.txt"
+phivsx02 = np.loadtxt(file3, delimiter=",", usecols=0)
+phivsy02 = np.loadtxt(file3, delimiter=",", usecols=1)
 
-# file4 = "./Res/Q2_MPI_J8.txt"
-# phivsx03 = np.loadtxt(file4, delimiter=",", usecols=0)
-# phivsy03 = np.loadtxt(file4, delimiter=",", usecols=1)
+file4 = "./Res/Q2_MPI_J8.txt"
+phivsx03 = np.loadtxt(file4, delimiter=",", usecols=0)
+phivsy03 = np.loadtxt(file4, delimiter=",", usecols=1)
 
-# x = np.linspace(1, -1, num=phivsx01.size)
+x = np.linspace(1, -1, num=phivsx01.size)
+
+errx1 = max(abs(phivsx01 - phivsx0s))
+errx2 = max(abs(phivsx02 - phivsx0s))
+errx3 = max(abs(phivsx03 - phivsx0s))
+
+erry1 = max(abs(phivsy01 - phivsy0s))
+erry2 = max(abs(phivsy02 - phivsy0s))
+erry3 = max(abs(phivsy03 - phivsy0s))
+
+print(errx1,errx2,errx3,sep="\t",end="\n\n")
+print(erry1,erry2,erry3,sep="\t",end="\n\n")
 
 # plt.figure(figsize=(8,6))
 # ax = plt.subplot(111)
@@ -108,6 +119,17 @@ import matplotlib.pyplot as plt
 # phivsy03 = np.loadtxt(file4, delimiter=",", usecols=1)
 
 # x = np.linspace(1, -1, num=phivsx01.size)
+
+# errx1 = max(abs(phivsx01 - phivsx0s))
+# errx2 = max(abs(phivsx02 - phivsx0s))
+# errx3 = max(abs(phivsx03 - phivsx0s))
+
+# erry1 = max(abs(phivsy01 - phivsy0s))
+# erry2 = max(abs(phivsy02 - phivsy0s))
+# erry3 = max(abs(phivsy03 - phivsy0s))
+
+# print(errx1,errx2,errx3,sep="\t",end="\n\n")
+# print(erry1,erry2,erry3,sep="\t",end="\n\n")
 
 # plt.figure(figsize=(8,6))
 # ax = plt.subplot(111)
