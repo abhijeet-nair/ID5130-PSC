@@ -371,8 +371,14 @@ int main (int argc, char* argv[]) {
                 break;
             }
         }
+
         if (src != 0) {
             MPI_Recv(&phivsy0[0],ny,MPI_DOUBLE,src,100,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+        }
+        else {
+            for (i = 0; i < ny; i++) {
+                phivsy0[i] = phik1[rind][i];
+            }
         }
     }
 
@@ -406,7 +412,7 @@ int main (int argc, char* argv[]) {
         //     printf("val[%d] = %.4f\n",i,phivsx0[i]);
         // }
 
-        char fname[20] = "./Res/Q2_MPI_GS.txt";
+        char fname[21] = "./Res/Q2_MPI_GS8.txt";
         std::ofstream oFile(fname);
 
         if (oFile.is_open()) {
