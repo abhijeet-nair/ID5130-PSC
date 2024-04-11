@@ -20,7 +20,7 @@ double norm2 (double A[], int n) {
 
 int main (int argc, char* argv[]) {
     int i, j;
-    double del = 0.1, del2 = pow(del, 2);
+    double del = 0.01, del2 = pow(del, 2);
 
     int N = int(2/del) + 1;
 
@@ -89,7 +89,7 @@ int main (int argc, char* argv[]) {
         phivsy0[i] = phik1[rind][i];
     }
 
-    char fname[20] = "./Res/Q2_Ser.txt";
+    char fname[20] = "./Res/Q2_Ser_e2.txt";
     std::ofstream oFile(fname);
 
     if (oFile.is_open()) {

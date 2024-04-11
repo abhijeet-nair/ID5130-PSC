@@ -6,18 +6,18 @@ import matplotlib.pyplot as plt
 
 # Q2 a) Serial
 
-file1 = "./Res/Q2_Ser.txt"
-phivsx0s = np.loadtxt(file1, delimiter=",", usecols=0)
-phivsy0s = np.loadtxt(file1, delimiter=",", usecols=1)
+# file1 = "./Res/Q2_Ser_e1.txt"
+# phivsx0 = np.loadtxt(file1, delimiter=",", usecols=0)
+# phivsy0 = np.loadtxt(file1, delimiter=",", usecols=1)
 
-# x = np.linspace(1, -1, num=phivsx0s.size)
+# x = np.linspace(1, -1, num=phivsx0.size)
 
 # plt.figure(figsize=(8,6))
 # ax = plt.subplot(111)
-# plt.plot(np.flip(x), phivsx0s, 'r', lw=1.5, label=r'$\phi$(x) vs x', marker='o', ms=3, mec='k', mfc='k')
-# plt.plot(x, phivsy0s, 'k--', lw=1.5, label=r'$\phi$(x) vs y', marker='o', ms=3, mec='k', mfc='k')
+# plt.plot(np.flip(x), phivsx0, 'r', lw=1.5, label=r'$\phi$ vs x', marker='o', ms=3, mec='k', mfc='k')
+# plt.plot(x, phivsy0, 'k--', lw=1.5, label=r'$\phi$ vs y', marker='o', ms=3, mec='k', mfc='k')
 # plt.xlabel("x", size=14)
-# plt.ylabel(r'$\phi$(x)', size=14)
+# plt.ylabel(r'$\phi$', size=14)
 # plt.title("Solutions at x = 0 and y = 0", size=14)
 # plt.grid()
 # box = ax.get_position()
@@ -29,19 +29,24 @@ phivsy0s = np.loadtxt(file1, delimiter=",", usecols=1)
 # # fig1.savefig("./Res/Q2_a.png", dpi=300, bbox_inches='tight')
 
 
+
 # Q2 b) Jacobi
 
-# file1 = "./Res/Q2_MPI_J2.txt"
-# phivsx01 = np.loadtxt(file1, delimiter=",", usecols=0)
-# phivsy01 = np.loadtxt(file1, delimiter=",", usecols=1)
+# file1 = "./Res/Q2_Ser_e2.txt"
+# phivsx0s = np.loadtxt(file1, delimiter=",", usecols=0)
+# phivsy0s = np.loadtxt(file1, delimiter=",", usecols=1)
 
-# file2 = "./Res/Q2_MPI_J4.txt"
-# phivsx02 = np.loadtxt(file1, delimiter=",", usecols=0)
-# phivsy02 = np.loadtxt(file1, delimiter=",", usecols=1)
+# file2 = "./Res/Q2_MPI_J2.txt"
+# phivsx01 = np.loadtxt(file2, delimiter=",", usecols=0)
+# phivsy01 = np.loadtxt(file2, delimiter=",", usecols=1)
 
-# file3 = "./Res/Q2_MPI_J8.txt"
-# phivsx03 = np.loadtxt(file1, delimiter=",", usecols=0)
-# phivsy03 = np.loadtxt(file1, delimiter=",", usecols=1)
+# file3 = "./Res/Q2_MPI_J4.txt"
+# phivsx02 = np.loadtxt(file3, delimiter=",", usecols=0)
+# phivsy02 = np.loadtxt(file3, delimiter=",", usecols=1)
+
+# file4 = "./Res/Q2_MPI_J8.txt"
+# phivsx03 = np.loadtxt(file4, delimiter=",", usecols=0)
+# phivsy03 = np.loadtxt(file4, delimiter=",", usecols=1)
 
 # x = np.linspace(1, -1, num=phivsx01.size)
 
@@ -52,7 +57,7 @@ phivsy0s = np.loadtxt(file1, delimiter=",", usecols=1)
 # plt.plot(np.flip(x), phivsx03, 'k--', lw=1.5, label="p = 8")
 # plt.plot(np.flip(x), phivsx0s, 'g--', lw=1.5, label="Serial")
 # plt.xlabel("x", size=14)
-# plt.ylabel(r'$\phi$(x)', size=14)
+# plt.ylabel(r'$\phi$', size=14)
 # plt.title("Solutions at x = 0 for different p", size=14)
 # plt.grid()
 # box = ax.get_position()
@@ -71,7 +76,7 @@ phivsy0s = np.loadtxt(file1, delimiter=",", usecols=1)
 # plt.plot(x, phivsy03, 'k--', lw=1.5, label="p = 8")
 # plt.plot(x, phivsy0s, 'g--', lw=1.5, label="Serial")
 # plt.xlabel("x", size=14)
-# plt.ylabel(r'$\phi$(x)', size=14)
+# plt.ylabel(r'$\phi$', size=14)
 # plt.title("Solutions at y = 0 for different p", size=14)
 # plt.grid()
 # box = ax.get_position()
@@ -84,19 +89,23 @@ phivsy0s = np.loadtxt(file1, delimiter=",", usecols=1)
 
 
 
-# # Q2 c) Gauss-Seidel
+# Q2 c) Gauss-Seidel
 
-# file1 = "./Res/Q2_MPI_GS2.txt"
-# phivsx01 = np.loadtxt(file1, delimiter=",", usecols=0)
-# phivsy01 = np.loadtxt(file1, delimiter=",", usecols=1)
+# file1 = "./Res/Q2_Ser_e2.txt"
+# phivsx0s = np.loadtxt(file1, delimiter=",", usecols=0)
+# phivsy0s = np.loadtxt(file1, delimiter=",", usecols=1)
 
-# file2 = "./Res/Q2_MPI_GS4.txt"
-# phivsx02 = np.loadtxt(file1, delimiter=",", usecols=0)
-# phivsy02 = np.loadtxt(file1, delimiter=",", usecols=1)
+# file2 = "./Res/Q2_MPI_GS2.txt"
+# phivsx01 = np.loadtxt(file2, delimiter=",", usecols=0)
+# phivsy01 = np.loadtxt(file2, delimiter=",", usecols=1)
 
-# file3 = "./Res/Q2_MPI_GS8.txt"
-# phivsx03 = np.loadtxt(file1, delimiter=",", usecols=0)
-# phivsy03 = np.loadtxt(file1, delimiter=",", usecols=1)
+# file3 = "./Res/Q2_MPI_GS4.txt"
+# phivsx02 = np.loadtxt(file3, delimiter=",", usecols=0)
+# phivsy02 = np.loadtxt(file3, delimiter=",", usecols=1)
+
+# file4 = "./Res/Q2_MPI_GS8.txt"
+# phivsx03 = np.loadtxt(file4, delimiter=",", usecols=0)
+# phivsy03 = np.loadtxt(file4, delimiter=",", usecols=1)
 
 # x = np.linspace(1, -1, num=phivsx01.size)
 
@@ -107,7 +116,7 @@ phivsy0s = np.loadtxt(file1, delimiter=",", usecols=1)
 # plt.plot(np.flip(x), phivsx03, 'k--', lw=1.5, label="p = 8")
 # plt.plot(np.flip(x), phivsx0s, 'g--', lw=1.5, label="Serial")
 # plt.xlabel("x", size=14)
-# plt.ylabel(r'$\phi$(x)', size=14)
+# plt.ylabel(r'$\phi$', size=14)
 # plt.title("Solutions at x = 0 for different p", size=14)
 # plt.grid()
 # box = ax.get_position()
@@ -126,7 +135,7 @@ phivsy0s = np.loadtxt(file1, delimiter=",", usecols=1)
 # plt.plot(x, phivsy03, 'k--', lw=1.5, label="p = 8")
 # plt.plot(x, phivsy0s, 'g--', lw=1.5, label="Serial")
 # plt.xlabel("x", size=14)
-# plt.ylabel(r'$\phi$(x)', size=14)
+# plt.ylabel(r'$\phi$', size=14)
 # plt.title("Solutions at y = 0 for different p", size=14)
 # plt.grid()
 # box = ax.get_position()
