@@ -103,7 +103,7 @@ int main (int argc, char* argv[]) {
         }
         
         if (myid == 0) {
-            if (cnt % 100 == 0) {printf("cnt = %d\terr = %.5f\n",cnt,err);}
+            if (cnt % 500 == 0) {printf("cnt = %d\terr = %.5f\n",cnt,err);}
             for (j = 0; j < ny; j++) {
                 phik1[1][j] = sin(2*M_PI*(-1 + j*del));
             }
@@ -140,6 +140,9 @@ int main (int argc, char* argv[]) {
 
     double* phivsx0,* phivsy0;
     if (myid == 0) {
+        printf("\ncnt = %d\terr = %.6f\n\n",cnt-1,err);
+        // printf("Iterations = %d\terr = %.8f\tTime = %.4f s\n",cnt-1,err,runT);
+
         phivsx0 = (double *)malloc(nx*sizeof(double));
         phivsy0 = (double *)malloc(ny*sizeof(double));
         int src {};
@@ -154,6 +157,11 @@ int main (int argc, char* argv[]) {
         // printf("src = %d\n",src);
         if (src != 0) {
             MPI_Recv(&phivsy0[0],ny,MPI_DOUBLE,src,100,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+        }
+        else {
+            for (i = 0; i < ny; i++) {
+                phivsy0[i] = phik1[rind][i];
+            }
         }
 
         printf("\nPrinting phivsy0 in P0...\n");
@@ -241,12 +249,12 @@ int main (int argc, char* argv[]) {
 
     if (myid == 0) {
         // MPI_Recv(&phivsx0[0],1,my_type,1,100,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-        printf("\nPrinting phivsx0 in P0...\n");
-        for (i = 0; i < nx; i++) {
-            printf("val[%d] = %.4f\n",i,phivsx0[i]);
-        }
+        // printf("\nPrinting phivsx0 in P0...\n");
+        // for (i = 0; i < nx; i++) {
+        //     printf("val[%d] = %.4f\n",i,phivsx0[i]);
+        // }
 
-        char fname[20] = "./Res/Q2_MPI_J.txt";
+        char fname[20] = "./Res/Q2_MPI_J2.txt";
         std::ofstream oFile(fname);
 
         if (oFile.is_open()) {

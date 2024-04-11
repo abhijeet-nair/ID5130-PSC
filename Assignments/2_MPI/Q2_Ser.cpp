@@ -20,7 +20,7 @@ double norm2 (double A[], int n) {
 
 int main (int argc, char* argv[]) {
     int i, j;
-    double del = 0.1, del2 = pow(del, 2);
+    double del = 0.01, del2 = pow(del, 2);
 
     int N = int(2/del) + 1;
 
@@ -79,7 +79,7 @@ int main (int argc, char* argv[]) {
         cnt += 1;
     }
 
-    printf("\ncnt = %d\terr = %.6f\n\n",cnt,err);
+    printf("\ncnt = %d\terr = %.6f\n\n",cnt-1,err);
 
     double phivsx0[N] {}, phivsy0[N] {};
     int rind = int(0.5*N); // Index for (N/2)+1-th element
