@@ -57,7 +57,7 @@ int main (int argc, char* argv[]) {
             phik1[i][0] = 0;
             phik1[i][N-1] = 0;
             for (j = 1; j < N-1; j++) {
-                phik1[i][j] = 0.25*(phik[i+1][j] + phik[i-1][j] + phik[i][j+1] + phik[i][j-1] + del2*qij[i][j]);
+                phik1[i][j] = 0.25*(phik[i+1][j] + phik1[i-1][j] + phik[i][j+1] + phik1[i][j-1] + del2*qij[i][j]);
             }
         }
 
@@ -73,9 +73,7 @@ int main (int argc, char* argv[]) {
         }
         
         err = norm2(errvec, N*N);
-        if (cnt % 100 == 0) {
-            printf("cnt = %d  err = %.4f\n",cnt,err);
-        }
+        if (cnt % 500 == 0) {printf("cnt = %d  err = %.4f\n",cnt,err);}
         cnt += 1;
     }
 
@@ -89,7 +87,9 @@ int main (int argc, char* argv[]) {
         phivsy0[i] = phik1[rind][i];
     }
 
-    char fname[20] = "./Res/Q2_Ser_e2.txt";
+    char fname[25];
+    sprintf(fname, "./Res/Q2_Ser_GS_e%d.txt",-int(log10(del)));
+
     std::ofstream oFile(fname);
 
     if (oFile.is_open()) {
