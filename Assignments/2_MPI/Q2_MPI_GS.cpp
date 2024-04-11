@@ -377,13 +377,13 @@ int main (int argc, char* argv[]) {
         }
         else {
             for (i = 0; i < ny; i++) {
-                phivsy0[i] = phik1[rind][i];
+                phivsy0[i] = phik1[rind+1][i]; // +1 because of the halo row 0
             }
         }
     }
 
     if ((val >= 0) && (val < lnx) && (myid != 0)) {
-        val += 1;
+        val += 1; // +1 because of the halo row 0. Essentially, MATLAB indexing now.
         MPI_Send(&phik1[val][0],ny,MPI_DOUBLE,0,100,MPI_COMM_WORLD);
     }
 
@@ -412,7 +412,9 @@ int main (int argc, char* argv[]) {
         //     printf("val[%d] = %.4f\n",i,phivsx0[i]);
         // }
 
-        char fname[21] = "./Res/Q2_MPI_GS8.txt";
+        char fname[25];
+        sprintf(fname, "./Res/Q2_MPI_GS%d.txt", np);
+
         std::ofstream oFile(fname);
 
         if (oFile.is_open()) {

@@ -160,7 +160,7 @@ int main (int argc, char* argv[]) {
         }
         else {
             for (i = 0; i < ny; i++) {
-                phivsy0[i] = phik1[rind+1][i];
+                phivsy0[i] = phik1[rind+1][i]; // +1 because of the halo row 0
             }
         }
 
@@ -254,7 +254,10 @@ int main (int argc, char* argv[]) {
         //     printf("val[%d] = %.4f\n",i,phivsx0[i]);
         // }
 
-        char fname[20] = "./Res/Q2_MPI_J2.txt";
+        char fname[25];
+        sprintf(fname, "./Res/Q2_MPI_J%d.txt", np);
+        printf("\n");
+
         std::ofstream oFile(fname);
 
         if (oFile.is_open()) {
