@@ -20,7 +20,7 @@ double norm2 (double A[], int n) {
 
 int main (int argc, char* argv[]) {
     int i, j;
-    double del = 0.01, del2 = pow(del, 2);
+    double del = 0.1, del2 = pow(del, 2);
 
     int N = int(2/del) + 1;
 
@@ -51,6 +51,9 @@ int main (int argc, char* argv[]) {
     int cnt = 1;
     int lim = 1e7;
 
+    clock_t t;
+    t = clock();
+
     while ((err > eps) && (cnt < lim)) {
         for (i = 1; i < N-1; i++) {
             phik1[0][i] = sin(2*M_PI*yi[i]);
@@ -73,11 +76,13 @@ int main (int argc, char* argv[]) {
         }
         
         err = norm2(errvec, N*N);
-        if (cnt % 500 == 0) {printf("cnt = %d  err = %.4f\n",cnt,err);}
+        if (cnt % 500 == 0) {printf("cnt = %d  err = %.6f\n",cnt,err);}
         cnt += 1;
     }
+    t = clock() - t;
+    double totT = double(t) / double(CLOCKS_PER_SEC);
 
-    printf("\ncnt = %d\terr = %.6f\n\n",cnt-1,err);
+    printf("\ncnt = %d\terr = %.6f\tTime taken = %.4f s\n\n",cnt-1,err,totT);
 
     double phivsx0[N] {}, phivsy0[N] {};
     int rind = int(0.5*N); // Index for (N/2)+1-th element
@@ -87,22 +92,26 @@ int main (int argc, char* argv[]) {
         phivsy0[i] = phik1[rind][i];
     }
 
-    char fname[25];
-    sprintf(fname, "./Res/Q2_Ser_GS_e%d.txt",-int(log10(del)));
+    // char fname[25];
+    // sprintf(fname, "./Res/Q2_Ser_GS_e%d.txt",-int(log10(del)));
 
-    std::ofstream oFile(fname);
+    // std::ofstream oFile(fname);
 
-    if (oFile.is_open()) {
-        for (i = 0; i < N; i++) {
-            oFile << phivsx0[i] << "," << phivsy0[i] << "\n";
-        }
+    // if (oFile.is_open()) {
+    //     for (i = 0; i < N; i++) {
+    //         oFile << phivsx0[i] << "," << phivsy0[i] << "\n";
+    //     }
 
-        oFile.close();
-        printf("Saved in file %s\n",fname);
-    }
-    else {
-        printf("Error opening file\n");
-    }
+    //     oFile.close();
+    //     printf("Saved in file %s\n",fname);
+    // }
+    // else {
+    //     printf("Error opening file\n");
+    // }
+
+    delete phik1;
+    delete phik;
+    delete qij;
 
     return 0;
 }

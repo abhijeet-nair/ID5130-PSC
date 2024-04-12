@@ -34,17 +34,13 @@ int main (int argc, char* argv[]) {
     if (myid == 0) {lnx = nx - int(nx/np)*(np - 1);}
     else {lnx = int(nx/np);};
 
-    double** phik = new double*[lnx+2];
-    double phik1[lnx+2][ny];
+    double phik[lnx+2][ny] {};
+    double phik1[lnx+2][ny] {};
     double** qij = new double*[lnx];
 
     for (i = 0; i < lnx; i++) {
-        phik[i] = new double[ny] {};
         qij[i] = new double[ny] {};
     }
-    phik[lnx] = new double[ny] {};
-    phik[lnx+1] = new double[ny] {};
-
     int cnts[np] {}, dsplc[np] {};
     for (i = 1; i < np; i++) {
         cnts[i] = int(nx/np);
@@ -83,6 +79,7 @@ int main (int argc, char* argv[]) {
     int cnt = 1;
     int lim = 1e7;
     
+    double runT = MPI_Wtime();
     while ((err > eps) && (cnt < lim)) {
         if (myid % 2 == 0) {
             // Upsend
@@ -103,7 +100,7 @@ int main (int argc, char* argv[]) {
         }
         
         if (myid == 0) {
-            if (cnt % 500 == 0) {printf("cnt = %d\terr = %.5f\n",cnt,err);}
+            if (cnt % 500 == 0) {printf("cnt = %d\terr = %.6f\n",cnt,err);}
             for (j = 0; j < ny; j++) {
                 phik1[1][j] = sin(2*M_PI*(-1 + j*del));
             }
@@ -140,7 +137,7 @@ int main (int argc, char* argv[]) {
 
     double* phivsx0,* phivsy0;
     if (myid == 0) {
-        printf("\ncnt = %d\terr = %.6f\n\n",cnt-1,err);
+        // printf("\ncnt = %d\terr = %.6f\n\n",cnt-1,err);
         // printf("Iterations = %d\terr = %.8f\tTime = %.4f s\n",cnt-1,err,runT);
 
         phivsx0 = (double *)malloc(nx*sizeof(double));
@@ -213,12 +210,12 @@ int main (int argc, char* argv[]) {
     // }
 
     rind = int(0.5*ny); // Index for (ny/2)+1-th element
-    cnt = lnx;
+    int CT = lnx;
     int BL = 1;
     int ST = ny;
 
     MPI_Datatype my_type;
-    MPI_Type_vector(cnt,BL,ST,MPI_DOUBLE,&my_type);
+    MPI_Type_vector(CT,BL,ST,MPI_DOUBLE,&my_type);
     MPI_Type_commit(&my_type);
     // double* pntr = &phik1[1][rind];
     // for (i = 0; i < cnt; i++) {
@@ -245,34 +242,36 @@ int main (int argc, char* argv[]) {
     // if (myid == 1) {
     //     MPI_Send(&phik1[1][rind],1,my_type,0,100,MPI_COMM_WORLD);
     // }
-    
+    runT = MPI_Wtime()- runT;
 
     if (myid == 0) {
+        printf("Iterations = %d\terr = %.8f\tTime = %.4f s\n",cnt-1,err,runT);
         // MPI_Recv(&phivsx0[0],1,my_type,1,100,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
         // printf("\nPrinting phivsx0 in P0...\n");
         // for (i = 0; i < nx; i++) {
         //     printf("val[%d] = %.4f\n",i,phivsx0[i]);
         // }
 
-        char fname[25];
-        sprintf(fname, "./Res/Q2_MPI_J%d.txt", np);
-        printf("\n");
+        // char fname[25];
+        // sprintf(fname, "./Res/Q2_MPI_J%d.txt", np);
+        // printf("\n");
 
-        std::ofstream oFile(fname);
+        // std::ofstream oFile(fname);
 
-        if (oFile.is_open()) {
-            for (i = 0; i < nx; i++) {
-                oFile << phivsx0[i] << "," << phivsy0[i] << "\n";
-            }
+        // if (oFile.is_open()) {
+        //     for (i = 0; i < nx; i++) {
+        //         oFile << phivsx0[i] << "," << phivsy0[i] << "\n";
+        //     }
 
-            oFile.close();
-            printf("Saved in file %s\n",fname);
-        }
-        else {
-            printf("Error opening file\n");
-        }
+        //     oFile.close();
+        //     printf("Saved in file %s\n",fname);
+        // }
+        // else {
+        //     printf("Error opening file\n");
+        // }
     }
 
+    delete qij;
     MPI_Type_free(&my_type);
     MPI_Finalize();
     return 0;
