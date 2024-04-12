@@ -267,3 +267,6 @@ import matplotlib.pyplot as plt
 # fig8 = plt.gcf()
 # plt.show()
 # # fig8.savefig("./Res/Q2_d.png", dpi=300, bbox_inches='tight')
+
+
+tJ8 = np.array([107.2237, 9.2339, ])
