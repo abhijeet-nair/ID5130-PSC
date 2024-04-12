@@ -249,13 +249,13 @@ import matplotlib.pyplot as plt
 # tGS = np.array([473.8178, 438.8389, 133.3876, 81.5027, 43.8397])
 # p   = np.array([2, 4, 8, 16])
 
-# psiJ  = tJ[0]/tJ[1:5]
-# psiGS = tGS[0]/tGS[1:5]
+# psiJp  = tJ[0]/tJ[1:5]
+# psiGSp = tGS[0]/tGS[1:5]
 
 # plt.figure(figsize=(8,6))
 # ax = plt.subplot(111)
-# plt.plot(p, psiJ, 'r', lw=1.5, label='Jacobi', marker='o', ms=5, mec='k', mfc='k')
-# plt.plot(p, psiGS, 'b--', lw=1.5, label='Gauss-Seidel', marker='o', ms=5, mec='k', mfc='k')
+# plt.plot(p, psiJp, 'r', lw=1.5, label='Jacobi', marker='o', ms=5, mec='k', mfc='k')
+# plt.plot(p, psiGSp, 'b--', lw=1.5, label='Gauss-Seidel', marker='o', ms=5, mec='k', mfc='k')
 # plt.xlabel(r'No. of processors $p$', size=14)
 # plt.ylabel(r'Speed-up $\psi\,(n, p)$', size=14)
 # plt.title('Speed-up as a function of processor count', size=16)
@@ -266,7 +266,35 @@ import matplotlib.pyplot as plt
 # plt.legend(fontsize=14, loc="upper center", ncol=2, bbox_to_anchor=(0.5,-0.1))
 # fig8 = plt.gcf()
 # plt.show()
-# # fig8.savefig("./Res/Q2_d.png", dpi=300, bbox_inches='tight')
+# # fig8.savefig("./Res/Q2_d_1.png", dpi=300, bbox_inches='tight')
 
+# delx = np.array([0.005, 0.01, 0.1])
+# n    = 2/delx + 1
+# print(n)
 
-tJ8 = np.array([107.2237, 9.2339, ])
+# tJ4  = np.array([193.0720, 16.3816, 0.0107])
+# tJS  = np.array([736.3647, 60.7004, 0.0172])
+
+# tGS4 = np.array([133.3876, 11.9735, 0.0101])
+# tGSS = np.array([473.8178, 38.0178, 0.0163])
+
+# psiJn  = tJS/tJ4
+# psiGSn = tGSS/tGS4
+
+# plt.figure(figsize=(8,6))
+# ax = plt.subplot(111)
+# plt.plot(n, psiJn, 'r', lw=1.5, label='Jacobi', marker='o', ms=5, mec='k', mfc='k')
+# plt.plot(n, psiGSn, 'b--', lw=1.5, label='Gauss-Seidel', marker='o', ms=5, mec='k', mfc='k')
+# plt.xlim(0, 420)
+# plt.ylim(1.5, 4)
+# plt.xlabel(r'No. of grid points $n$', size=14)
+# plt.ylabel(r'Speed-up $\psi\,(n, p)$', size=14)
+# plt.title('Speed-up as a function of problem size', size=16)
+# plt.grid()
+# box = ax.get_position()
+# ax.set_position([box.x0, box.y0 + box.height * 0.1,
+#                  box.width, box.height * 0.9])
+# plt.legend(fontsize=14, loc="upper center", ncol=2, bbox_to_anchor=(0.5,-0.1))
+# fig9 = plt.gcf()
+# plt.show()
+# # fig9.savefig("./Res/Q2_d_2.png", dpi=300, bbox_inches='tight')

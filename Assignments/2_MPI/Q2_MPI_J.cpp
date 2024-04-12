@@ -22,7 +22,7 @@ double norm2 (double A[], int n) {
 
 int main (int argc, char* argv[]) {
     int i, j, myid, np;
-    double del = 0.01, del2 = pow(del, 2);    
+    double del = 0.1, del2 = pow(del, 2);    
 
     MPI_Init(NULL, NULL);
     MPI_Comm_rank(MPI_COMM_WORLD, &myid);
