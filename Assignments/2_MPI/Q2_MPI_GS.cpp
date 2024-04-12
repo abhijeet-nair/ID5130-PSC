@@ -351,7 +351,7 @@ int main (int argc, char* argv[]) {
         err = 0;
         MPI_Allreduce(&lerr, &err, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
         err = sqrt(err);
-        if (myid == 0) {if (cnt % 500 == 0) {printf("cnt = %5.0f\terr = %.5f\n",double(cnt),err);}}
+        if (myid == 0) {if (cnt % 500 == 0) {printf("cnt = %5.0f\terr = %.6f\n",double(cnt),err);}}
         cnt += 1;
         // MPI_Barrier(MPI_COMM_WORLD);
     }
@@ -412,24 +412,25 @@ int main (int argc, char* argv[]) {
         //     printf("val[%d] = %.4f\n",i,phivsx0[i]);
         // }
 
-        char fname[25];
-        sprintf(fname, "./Res/Q2_MPI_GS%d.txt", np);
+        // char fname[25];
+        // sprintf(fname, "./Res/Q2_MPI_GS%d.txt", np);
 
-        std::ofstream oFile(fname);
+        // std::ofstream oFile(fname);
 
-        if (oFile.is_open()) {
-            for (i = 0; i < nx; i++) {
-                oFile << phivsx0[i] << "," << phivsy0[i] << "\n";
-            }
+        // if (oFile.is_open()) {
+        //     for (i = 0; i < nx; i++) {
+        //         oFile << phivsx0[i] << "," << phivsy0[i] << "\n";
+        //     }
 
-            oFile.close();
-            printf("Saved in file %s\n",fname);
-        }
-        else {
-            printf("Error opening file\n");
-        }
+        //     oFile.close();
+        //     printf("Saved in file %s\n",fname);
+        // }
+        // else {
+        //     printf("Error opening file\n");
+        // }
     }
 
+    delete qij;
     MPI_Type_free(&mtype_1);
     MPI_Type_free(&mtype_2);
     MPI_Type_free(&mtype_3);

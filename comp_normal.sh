@@ -1,6 +1,7 @@
 #!/bin/bash
 # Compiling using G++-13.
-mycmd="/home/linuxbrew/.linuxbrew/bin/g++-13 -fdiagnostics-color=always -std=c++20 -g "
+# mycmd="/home/linuxbrew/.linuxbrew/bin/g++-13 -fdiagnostics-color=always -std=c++20 -g "
+mycmd="g++ "
 N=$#
 echo "Files included:"
 for n in $@
