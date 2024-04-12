@@ -240,3 +240,30 @@ import matplotlib.pyplot as plt
 # fig7 = plt.gcf()
 # plt.show()
 # # fig7.savefig("./Res/Q2_c_4.png", dpi=300, bbox_inches='tight')
+
+
+
+# # Q2 d) Speed-up Calculation
+
+# tJ  = np.array([736.3647, 635.5497, 193.0720, 107.2237, 62.8907])
+# tGS = np.array([473.8178, 438.8389, 133.3876, 81.5027, 43.8397])
+# p   = np.array([2, 4, 8, 16])
+
+# psiJ  = tJ[0]/tJ[1:5]
+# psiGS = tGS[0]/tGS[1:5]
+
+# plt.figure(figsize=(8,6))
+# ax = plt.subplot(111)
+# plt.plot(p, psiJ, 'r', lw=1.5, label='Jacobi', marker='o', ms=5, mec='k', mfc='k')
+# plt.plot(p, psiGS, 'b--', lw=1.5, label='Gauss-Seidel', marker='o', ms=5, mec='k', mfc='k')
+# plt.xlabel(r'No. of processors $p$', size=14)
+# plt.ylabel(r'Speed-up $\psi\,(n, p)$', size=14)
+# plt.title('Speed-up as a function of processor count', size=16)
+# plt.grid()
+# box = ax.get_position()
+# ax.set_position([box.x0, box.y0 + box.height * 0.1,
+#                  box.width, box.height * 0.9])
+# plt.legend(fontsize=14, loc="upper center", ncol=2, bbox_to_anchor=(0.5,-0.1))
+# fig8 = plt.gcf()
+# plt.show()
+# # fig8.savefig("./Res/Q2_d.png", dpi=300, bbox_inches='tight')
