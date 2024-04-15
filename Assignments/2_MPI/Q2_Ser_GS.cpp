@@ -2,13 +2,14 @@
 #include <fstream>
 #include <math.h>
 
-// Functions
+// RHS function
 double q (double x, double y) {
     double val = pow(x, 2) + pow(y, 2);
     return val;
 }
 
-double norm2 (double A[], int n) {
+// Norm function
+double norm (double A[], int n) {
     double res {};
     for (int i =0; i < n; i++) {
         res += pow(A[i],2);
@@ -75,7 +76,7 @@ int main (int argc, char* argv[]) {
             }
         }
         
-        err = norm2(errvec, N*N);
+        err = norm(errvec, N*N);
         if (cnt % 500 == 0) {printf("cnt = %d  err = %.6f\n",cnt,err);}
         cnt += 1;
     }
@@ -92,6 +93,7 @@ int main (int argc, char* argv[]) {
         phivsy0[i] = phik1[rind][i];
     }
 
+    // // Saving in a file for plotting
     // char fname[25];
     // sprintf(fname, "./Res/Q2_Ser_GS_e%d.txt",-int(log10(del)));
 

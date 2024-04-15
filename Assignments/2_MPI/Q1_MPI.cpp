@@ -4,6 +4,7 @@
 #include <fstream>
 #include <string.h>
 
+// Initial condition function
 double u0 (double x) {
     double res;
     if ((x <= 0.5) && (x >= 0)) {
@@ -15,6 +16,7 @@ double u0 (double x) {
 
     return res;
 }
+
 
 int main (int argc, char* argv[]) {
     double c = 1.0, L = 2.0, xi {}, ti {};
@@ -191,28 +193,7 @@ int main (int argc, char* argv[]) {
         memcpy(ui_t, ui_t1, lnxe*sizeof(double));
     }
 
-    // // Use for printing sequentially...
-    // int sts = 0;
-    // if (myid == 0) {
-    //     for (i = 0; i < lnx; i++) {
-    //         printf("uMatQK[%d] = %.4f\n",i,l_uMat_QK[i]);
-    //     }
-    //     MPI_Send(&sts, 1, MPI_INT, myid+1,10,MPI_COMM_WORLD);
-    // }
-    // else if (myid == np - 1) {
-    //     MPI_Recv(&sts, 1, MPI_INT,myid-1,MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-    //     for (i = 0; i < lnx; i++) {
-    //         printf("uMatQK[%d] = %.4f\n",dsplc[myid]+i,l_uMat_QK[i]);
-    //     }
-    // }
-    // else {
-    //     MPI_Recv(&sts, 1, MPI_INT,myid-1,MPI_ANY_TAG,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-    //     for (i = 0; i < lnx; i++) {
-    //         printf("uMatQK[%d] = %.4f\n",dsplc[myid]+i,l_uMat_QK[i]);
-    //     }
-    //     MPI_Send(&sts, 1, MPI_INT, myid+1,10,MPI_COMM_WORLD);
-    // }
-
+    // Collecting data for each in process 0
     MPI_Gatherv(&l_uMat[0], lnx, MPI_DOUBLE, &uMat[0], cnts, dsplc, MPI_DOUBLE, 0, MPI_COMM_WORLD);
     MPI_Gatherv(&l_uMat[lnx], lnx, MPI_DOUBLE, &uMat[nx], cnts, dsplc, MPI_DOUBLE, 0, MPI_COMM_WORLD);
     MPI_Gatherv(&l_uMat[2*lnx], lnx, MPI_DOUBLE, &uMat[2*nx], cnts, dsplc, MPI_DOUBLE, 0, MPI_COMM_WORLD);
@@ -223,6 +204,7 @@ int main (int argc, char* argv[]) {
     MPI_Gatherv(&l_uMat_QK[0], lnx, MPI_DOUBLE, &uMat_QK[0], cnts, dsplc, MPI_DOUBLE, 0, MPI_COMM_WORLD);
     MPI_Gatherv(&l_uMat_QK[lnx], lnx, MPI_DOUBLE, &uMat_QK[nx], cnts, dsplc, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
+    // Saving in a file for plotting
     if (myid == 0) {
         char fname[20] = "./Res/Q1_MPI.txt";
         std::ofstream oFile(fname);
@@ -252,6 +234,11 @@ int main (int argc, char* argv[]) {
 
     }
 
+    if (myid == 0) {
+        free(uMat);
+        free(uMat_UP);
+        free(uMat_QK);
+    }
     MPI_Finalize();
     return 0;
 }
