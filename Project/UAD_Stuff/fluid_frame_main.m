@@ -98,7 +98,7 @@ for m = 1:length(times) % time step index
     colc_locx = colc_loc*cs + xo;
     colc_locy = -colc_loc*sn + yo;
 
-     % B vectors and R (RHS) vector calculations
+    % B vectors and R (RHS) vector calculations
     for i = 1:N
         for j = 1:m-1
             [t1,t2] = getIndVel(1,colc_locx(i),colc_locy(i),xw(j),yw(j));
@@ -115,8 +115,8 @@ for m = 1:length(times) % time step index
     gbm(:,m) = U(1:N);
     gw(m) = U(end);
 
-    %  Wake Position Update
-    for p = 1:m %position of wake
+    % Wake Position Update
+    for p = 1:m % Position of wake
         [t1, t2] = getIndVel(gbm(:,m), xw(p), yw(p), vor_locx, vor_locy);       % Due to body vortices on wakes
         [t3, t4] = getIndVel(gw(setdiff(1:m,p)), xw(p), yw(p), xw(setdiff(1:m,p)), yw(setdiff(1:m,p)));         % Other wakes on TE wake
 

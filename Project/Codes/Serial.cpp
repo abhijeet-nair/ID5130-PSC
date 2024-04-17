@@ -41,20 +41,24 @@ double hdot (double t, int f1, int f2, int a) {
     return res;
 }
 
+double deg2rad (double x) {
+    return x*M_PI/180;
+}
+
 
 
 int main () {
     int i, j, k, m, p;  // Indices
 
-    int Nl = 10;        // No. of collocation points
+    int Nl     = 10;    // No. of collocation points
     double u   = 20;    // Freestream velocity
     double c   = 5;     // Chord length of the flat plate
     double alp = 0;     // Angle of attack of the plate
     double rho = 1.225; // Density
-    double dx  = c/Nl;   // Spacing between two points
+    double dx  = c/Nl;  // Spacing between two points
 
-    double sn = sin(alp*M_PI/180);
-    double cs = cos(alp*M_PI/180);
+    double sn = sin(deg2rad(alp));
+    double cs = cos(deg2rad(alp));
 
     double dt = 0.01;    // Time step
     double tf = 5;       // Final time
@@ -101,34 +105,48 @@ int main () {
         }
     }
 
-    double ydot, t_cur, extflow, x0, y0;
-    double xw[Nt], yw[Nt];
+    double ydot, t_cur, extflow;
+    double x0[Nt], y0[Nt], L[Nt], D[Nt];;
+    // double xw[Nt], yw[Nt];
+    double** xw = new double* [Nt];
+    double** yw = new double* [Nt];
     double clx, cly;
-    double R[Nl+1], gw[Nt], gbm[Nl];
+    double R[Nl+1], gw[Nt], gbm[2][Nl];
     double Bjs, uw, vw;
+    double dgbm_dt, vindw[Nl];
 
     double err, eps = 1e-6, sum;
     int cnt;
 
+    for (m = 0; m < Nt; m++) {
+        xw[m] = new double[Nt] {};
+        yw[m] = new double[Nt] {};
+    }
+
+    // For loop for time marching
     for (m = 0; m < Nt; m++) {
         t_cur = m*dt;
         ydot = hdot(t_cur, f1, f2, a);
 
         extflow = u*sn - ydot*cs;
 
-        x0 = -u*t_cur;
-        y0 = h(t_cur, f1, f2, a);
+        // Origin location at time t
+        x0[m] = -u*t_cur;
+        y0[m] = h(t_cur, f1, f2, a);
 
-        xw[m] = x0 + (c + 0.1*dx)*cs;
-        yw[m] = y0 - (c + 0.1*dx)*sn;
+        // New wake location
+        xw[m][m] = x0[m] + (c + 0.1*dx)*cs;
+        yw[m][m] = y0[m] - (c + 0.1*dx)*sn;
 
         for (i = 0; i < Nl; i++) {
-            clx = colcloc[i]*cs + x0;
-            cly = colcloc[i]*sn + y0;
+            // Collocation point location
+            clx = colcloc[i]*cs + x0[m];
+            cly = colcloc[i]*sn + y0[m];
 
+            // B vectors and R (RHS) vector calculations
             Bjs = 0;
             for (j = 0; j < m; j++) {
-                getIndVel(1, clx, cly, xw[j], yw[j], gIVRes);
+                getIndVel(1, clx, cly, xw[m-1][j], yw[m-1][j], gIVRes);
                 // Bj[i][j] = gIVRes[0]*sn + gIVRes[1]*cs;
                 Bjs += (gIVRes[0]*sn + gIVRes[1]*cs)*gw[j];
             }
@@ -139,6 +157,7 @@ int main () {
         }
         R[Nl] = -R[Nl];
 
+        // Computation of unknown gbm and gwm
         // Gauss-Seidel
         err = 1;
         cnt = 1;
@@ -166,32 +185,66 @@ int main () {
         }
         printf("m = %d\titer = %d\n",m,cnt-1);
 
+        // Solved body and wake circulations
         for (i = 0; i < Nl; i++) {
-            gbm[i] = U[i];
+            gbm[1][i] = U[i];
         }
         gw[m] = U[Nl];
 
+        // Wake Position Update
         for (k = 0; k < m; k++) {
             uw = 0;
             vw = 0;
+
             for (i = 0; i < Nl; i++) {
-                getIndVel(gbm[i], xw[k], yw[k], vorloc[i]*cs + x0, -vorloc[i]*sn + y0, gIVRes);
+                // Due to body vortices on wakes
+                getIndVel(gbm[1][i], xw[m-1][k], yw[m-1][k], vorloc[i]*cs + x0[m], -vorloc[i]*sn + y0[m], gIVRes);
                 uw += gIVRes[0];
                 vw += gIVRes[1];
             }
             
             for (p = 0; p < m; p++) {
+                // Other wakes on TE wake
                 if (p != k) {
-                    getIndVel(gw[p], xw[k], yw[k], xw[p], yw[p], gIVRes);
+                    getIndVel(gw[p], xw[m-1][k], yw[m-1][k], xw[m-1][p], yw[m-1][p], gIVRes);
                     uw += gIVRes[0];
                     vw += gIVRes[1];
                 }
             }
-            xw[k] += uw*dt;
-            yw[k] += vw*dt;
+            xw[m][k] += uw*dt;
+            yw[m][k] += vw*dt;
         }
 
+        // Aerodynamic Load Calculations
+        dgbm_dt = 0;
+        if (m == 1) {
+            for (i = 0; i < Nl; i++) {
+                dgbm_dt += gbm[1][i];
+            }
+            dgbm_dt /= dt;
+        }
+        else {
+            for (i = 0; i < Nl; i++) {
+                dgbm_dt += gbm[1][i] - gbm[0][i];
+            }
+            dgbm_dt /= dt;
+        }
+
+        L[m] = 0;
+        for (i = 0; i < Nl; i++) {
+            vindw[i] = 0;
+            for (p = 0; p < m; p++) {
+                getIndVel(gw[p], xw[m-1][k], yw[m-1][k], xw[m-1][p], yw[m-1][p], gIVRes);
+                vindw[i] += gIVRes[0]*sn + gIVRes[1]*cs;
+            }
+
+            L[m] += gbm[1][i];
+            D[m] += vindw[i]*gbm[1][i];
+        }
+        L[m] = rho*(u*L[m] + dgbm_dt*c);
+        D[m] = rho*(D[m] + dgbm_dt*c*deg2rad(alp));
     }
+    // platex and platey will be calculated in python
 
     return 0;
 }
