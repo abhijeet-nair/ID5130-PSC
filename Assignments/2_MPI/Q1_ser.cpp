@@ -3,6 +3,7 @@
 #include <fstream>
 #include <string.h>
 
+// Initial condition function
 double u0 (double x) {
     double res;
     if ((x <= 0.5) && (x >= 0)) {
@@ -98,6 +99,7 @@ int main (int argc, char* argv[]) {
         memcpy(ui_t, ui_t1, nx*sizeof(double));
     }
 
+    // Saving in a file for plotting
     char fname[20] = "./Res/Q1_Ser.txt";
 
     std::ofstream oFile(fname);
