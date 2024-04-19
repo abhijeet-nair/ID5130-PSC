@@ -1,0 +1,33 @@
+// Gauss-Seidel
+err = 1;
+cnt = 1;
+while (err > eps and cnt < lim) {
+    for (i = 0; i <= Nl; i++) {
+        sum = 0;
+        for (j = 0; j <= Nl; j++) {
+            if (j < i) {
+                sum += C[i][j]*U1[j];
+            }
+            else if (j > i) {
+                sum += C[i][j]*U[j];
+            }
+        }
+        U1[i] = (R[i] - sum)/C[i][i];
+    }
+
+    err = 0;
+    for (i = 0; i <= Nl; i++) {
+        err += pow(U1[i] - U[i], 2);
+        U[i] = U1[i];
+    }
+
+
+    err = sqrt(err);
+    cnt += 1;
+    // if (cnt%10 == 0) {printf("cnt = %d\n",cnt);}
+}
+printf("m = %d\titer = %d\n",m,cnt-1);
+for (i = 0; i <= Nl; i++) {
+    printf("%.4f\n",U[i]);
+}
+printf("\n");

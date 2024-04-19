@@ -108,6 +108,16 @@ int main () {
         }
     }
 
+    for (k = 0; k <= Nl; k++) {
+        for (i = k+1; i <= Nl; i++) {
+            C[i][k] = C[i][k]/C[k][k];
+
+            for (j = k+1; j <= Nl; j++) {
+                C[i][j] += -C[i][k]*C[k][j];
+            }
+        }
+    }
+
     double ydot, t_cur, extflow;
     // double x0[Nt], y0[Nt], L[Nt], D[Nt];
     double* x0 = new double[Nt];
@@ -127,7 +137,8 @@ int main () {
     double Bjs, uw, vw;
     double dgbm_dt, vindw[Nl];
 
-    double err, eps = 1e-6, lim = 1e7, sum;
+    double sum;
+    // double err, eps = 1e-6, lim = 1e7;
     int cnt;
 
     for (m = 0; m < Nt; m++) {
@@ -136,7 +147,8 @@ int main () {
     }
 
     // For loop for time marching
-    for (m = 0; m < 2; m++) {
+    for (m = 0; m < 4; m++) {
+        printf("m = %3.0f\n",double(m));
         t_cur = m*dt;
         ydot = hdot(t_cur, f1, f2, a);
 
@@ -171,39 +183,30 @@ int main () {
         R[Nl] = -R[Nl];
 
         // Computation of unknown gbm and gwm
-        // Gauss-Seidel
-        err = 1;
-        cnt = 1;
-        while (err > eps and cnt < lim) {
-            for (i = 0; i <= Nl; i++) {
-                sum = 0;
-                for (j = 0; j <= Nl; j++) {
-                    if (j < i) {
-                        sum += C[i][j]*U1[j];
-                    }
-                    else if (j > i) {
-                        sum += C[i][j]*U[j];
-                    }
-                }
-                U1[i] = (R[i] - sum)/C[i][i];
+        // Forward substitution
+        U1[0] = R[0];
+        for (i = 1; i <= Nl; i++) {
+            sum = 0;
+            for (j = 0; j < i; j++){
+                sum += C[i][j]*U1[j];
             }
-
-            err = 0;
-            for (i = 0; i <= Nl; i++) {
-                err += pow(U1[i] - U[i], 2);
-                U[i] = U1[i];
-            }
-            
-
-            err = sqrt(err);
-            cnt += 1;
-            // if (cnt%10 == 0) {printf("cnt = %d\n",cnt);}
+            U1[i] = R[i] - sum;
         }
-        printf("m = %d\titer = %d\n",m,cnt-1);
-        for (i = 0; i <= Nl; i++) {
-                printf("%.4f\n",U[i]);
+
+        // Backward substitution
+        U[Nl] = U1[Nl]/C[Nl][Nl];
+        for (i = Nl-1; i >= 0; i--) {
+            sum = 0;
+            for (j = i+1; j <= Nl; j++) {
+                sum += C[i][j]*U[j];
             }
-            printf("\n");
+            U[i] = (U1[i] - sum)/C[i][i];
+        }
+
+        for (i = 0; i <= Nl; i++) {
+            printf("%.4f\n",U[i]);
+        }
+        printf("\n");
 
         // Solved body and wake circulations
         for (i = 0; i < Nl; i++) {
