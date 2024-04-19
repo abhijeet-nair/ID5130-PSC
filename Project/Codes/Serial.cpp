@@ -150,8 +150,8 @@ int main () {
     }
 
     // For loop for time marching
-    for (m = 0; m < 5; m++) {
-        printf("m = %3.0f\n",double(m));
+    for (m = 0; m < Nt; m++) {
+        printf("m = %3.0f\t",double(m));
         t_cur = m*dt;
         ydot = hdot(t_cur, f1, f2, a);
 
@@ -180,8 +180,10 @@ int main () {
             R[i] = -extflow - Bjs;
         }
 
+        R[Nl] = 0;
         for (j = 0; j < m; j++) {
             R[Nl] += gw[j];
+            // printf("gw[%d] = %.4f\n",j,gw[j]);
         }
         R[Nl] = -R[Nl];
 
@@ -206,10 +208,10 @@ int main () {
             U[i] = (U1[i] - sum)/C[i][i];
         }
 
-        for (i = 0; i <= Nl; i++) {
-            printf("%.4f\n",U[i]);
-        }
-        printf("\n");
+        // for (i = 0; i <= Nl; i++) {
+        //     printf("%.4f\n",U[i]);
+        // }
+        // printf("\n");
 
         // Solved body and wake circulations
         for (i = 0; i < Nl; i++) {
@@ -260,7 +262,7 @@ int main () {
                 // printf("p = %d\tk = %d\tt[0] = %.4f\tt[1] = %.4f\n",p,k,gIVRes[0],gIVRes[1]);
                 // printf("gw[p] = %.4f\n",gw[p]);
             }
-            printf("k = %d\tuw = %.4f\tvw = %.4f\t",k,uw,vw);
+            // printf("k = %d\tuw = %.4f\tvw = %.4f\t",k,uw,vw);
             // if (m == 0) {
             //     xw[m][k] += uw*dt;
             //     yw[m][k] += vw*dt;
@@ -271,7 +273,7 @@ int main () {
             // }
             xw[k] += uw*dt;
             yw[k] += vw*dt;
-            printf("xw = %.4f\tyw = %.4f\n",xw[k],yw[k]);
+            // printf("xw = %.4f\tyw = %.4f\tgw = %.4f\n",xw[k],yw[k],gw[k]);
             xwM[m][k] = xw[k];
             ywM[m][k] = yw[k];
         }
@@ -291,78 +293,94 @@ int main () {
             dgbm_dt /= dt;
         }
 
+        // printf("dgbm_dt = %.4f\n",dgbm_dt);
         L[m] = 0;
+        D[m] = 0;
         for (i = 0; i < Nl; i++) {
+            gbm[0][i] = gbm[1][i];
             vindw[i] = 0;
-            for (p = 0; p < m; p++) {
-                getIndVel(gw[p], xw[k], yw[k], xw[p], yw[p], gIVRes);
+
+            // Collocation point location
+            clx = colcloc[i]*cs + x0[m];
+            cly = colcloc[i]*sn + y0[m];
+
+            for (p = 0; p <= m; p++) {
+                getIndVel(gw[p], clx, cly, xw[p], yw[p], gIVRes);
                 vindw[i] += gIVRes[0]*sn + gIVRes[1]*cs;
             }
+            // printf("%.4f\n",vindw[i]);
+
 
             L[m] += gbm[1][i];
             D[m] += vindw[i]*gbm[1][i];
         }
         L[m] = rho*(u*L[m] + dgbm_dt*c);
         D[m] = rho*(D[m] + dgbm_dt*c*deg2rad(alp));
+        // printf("L = %.4f\tD = %.4f\n",L[m],D[m]);
+        // printf("gw = %.4f\n",gw[m]);
         printf("\n");
     }
-    // Data needed finally:
-    // At each instant:
-    // x0, y0, platex, platey, xw, yw, L, D
+    /*
+    -------------------------------------------------------
+    Data needed finally:
+    At each instant:
+    x0, y0, platex, platey, xw, yw, L, D
     
-    // Common:
-    // times, rho, u, c
+    Common:
+    times, rho, u, c
 
-    // platex and platey will be calculated in python
-    // So, instead send plate, cs and sn also as common
-    // times is not there. So, send Nt and dt
+    platex and platey will be calculated in python
+    So, instead send plate, cs and sn also as common
+    times is not there. So, send Nt and dt
 
-    // Final List:
-    // At each instant:
-    // x0[Nt], y0[Nt], xw[Nt][Nt], yw[Nt][Nt], L[Nt], D[Nt]
+    Final List:
+    At each instant:
+    x0[Nt], y0[Nt], xw[Nt][Nt], yw[Nt][Nt], L[Nt], D[Nt]
 
-    // Common:
-    // Nt, Nl, dt, dx, rho, u, c, alp
+    Common:
+    Nt, Nl, dt, dx, rho, u, c, alp
+    -------------------------------------------------------
+    */
 
-    // // File writing
-    // char fname[25];
-    // sprintf(fname, "./Res/Ser_1.txt");
+    // File writing
+    char fname[25];
+    sprintf(fname, "./Res/Ser_1.txt");
 
-    // std::ofstream oFile(fname);
+    std::ofstream oFile(fname);
 
-    // if (oFile.is_open()) {
-    //     oFile << Nl << "\n" << Nt << "\n";
-    //     oFile << dt << "\n" << dx << "\n";
-    //     oFile << rho << "\n" << u << "\n";
-    //     oFile << c << "\n" << alp << "\n";
+    if (oFile.is_open()) {
+        oFile << Nl << "\n" << Nt << "\n";
+        oFile << dt << "\n" << dx << "\n";
+        oFile << rho << "\n" << u << "\n";
+        oFile << c << "\n" << alp << "\n";
 
-    //     oFile << "\n";
+        oFile << "\n";
 
-    //     for (i = 0; i < Nt; i++) {
-    //         oFile << x0[i] << "," << y0[i] << "\n";
-    //     }
+        for (i = 0; i < Nt; i++) {
+            oFile << x0[i] << "," << y0[i] << "\n";
+        }
 
-    //     oFile << "\n";
+        oFile << "\n";
 
-    //     for (i = 0; i < Nt; i++) {
-    //         oFile << L[i] << "," << D[i] << "\n";
-    //     }
+        for (i = 0; i < Nt; i++) {
+            oFile << L[i] << "," << D[i] << "\n";
+        }
 
-    //     oFile << "\n\n";
+        oFile << "\n\n";
 
-    //     for (i = 0; i < Nt; i++) {
-    //         for (j = 0; j < Nt; j++) {
-    //             oFile << xw[i][j] << "," << yw[i][j] << "\n";
-    //         }
-    //         oFile << "\n";
-    //     }
+        for (i = 0; i < Nt; i++) {
+            for (j = 0; j < Nt; j++) {
+                oFile << xwM[i][j] << "," << ywM[i][j] << "\n";
+            }
+            oFile << "\n";
+        }
 
-    //     oFile.close();
-    //     printf("Saved in file %s\n",fname);
-    // }
-    // else {
-    //     printf("Error opening file\n");
-    // }
+        oFile.close();
+        printf("Saved in file %s\n",fname);
+    }
+    else {
+        printf("Error opening file\n");
+    }
 
     delete x0, y0, L, D, xw, yw, R, gw, gbm;
     return 0;
