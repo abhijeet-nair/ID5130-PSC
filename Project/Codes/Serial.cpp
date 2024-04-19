@@ -215,27 +215,48 @@ int main () {
         gw[m] = U[Nl];
 
         // Wake Position Update
-        for (k = 0; k < m; k++) {
+        for (k = 0; k <= m; k++) {
             uw = 0;
             vw = 0;
 
             for (i = 0; i < Nl; i++) {
                 // Due to body vortices on wakes
-                getIndVel(gbm[1][i], xw[m-1][k], yw[m-1][k], vorloc[i]*cs + x0[m], -vorloc[i]*sn + y0[m], gIVRes);
+                if (m == 0) {
+                    getIndVel(gbm[1][i], xw[m][k], yw[m][k], vorloc[i]*cs + x0[m], -vorloc[i]*sn + y0[m], gIVRes);
+                }
+                else {
+                    getIndVel(gbm[1][i], xw[m-1][k], yw[m-1][k], vorloc[i]*cs + x0[m], -vorloc[i]*sn + y0[m], gIVRes);
+                }
                 uw += gIVRes[0];
                 vw += gIVRes[1];
             }
+            printf("uw = %.4f\tvw = %.4f\n",uw,vw);
             
-            for (p = 0; p < m; p++) {
+            for (p = 0; p <= m; p++) {
                 // Other wakes on TE wake
-                if (p != k) {
+                if (p < k) {
+                    getIndVel(gw[p], xw[m-1][k], yw[m-1][k], xw[m][p], yw[m][p], gIVRes);
+                    uw += gIVRes[0];
+                    vw += gIVRes[1];
+                    printf("HI1\n");
+                }
+                else if (p > k) {
                     getIndVel(gw[p], xw[m-1][k], yw[m-1][k], xw[m-1][p], yw[m-1][p], gIVRes);
                     uw += gIVRes[0];
                     vw += gIVRes[1];
+                    printf("HI2\n");
                 }
+                printf("p = %d\tt[0] = %.4f\tt[1] = %.4f\n",p,gIVRes[0],gIVRes[1]);
             }
-            xw[m][k] += uw*dt;
-            yw[m][k] += vw*dt;
+            printf("k = %d\tuw = %.4f\tvw = %.4f\n",k,uw,vw);
+            if (m == 0) {
+                xw[m][k] += uw*dt;
+                yw[m][k] += vw*dt;
+            }
+            else {
+                xw[m][k] = xw[m-1][k] + uw*dt;
+                yw[m][k] = yw[m-1][k] + vw*dt;
+            }
         }
 
         // Aerodynamic Load Calculations
@@ -266,6 +287,7 @@ int main () {
         }
         L[m] = rho*(u*L[m] + dgbm_dt*c);
         D[m] = rho*(D[m] + dgbm_dt*c*deg2rad(alp));
+        printf("\n");
     }
     // Data needed finally:
     // At each instant:
