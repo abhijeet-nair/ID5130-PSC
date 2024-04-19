@@ -6,6 +6,7 @@
 
 void getIndVel(double g, double x, double y, double x0, double y0, double uv[2]) {
     double den = pow((x - x0), 2) + pow((y - y0), 2);
+    // printf("den = %.4f\n",den);
     uv[0] = (g*(y - y0))/(2*M_PI*den);
     uv[1] = -(g*(x - x0))/(2*M_PI*den);
 }
@@ -125,8 +126,8 @@ int main () {
     double* L = new double[Nt];
     double* D = new double[Nt];
     // double xw[Nt], yw[Nt];
-    double** xw = new double* [Nt];
-    double** yw = new double* [Nt];
+    double** xwM = new double* [Nt];
+    double** ywM = new double* [Nt];
     double clx, cly;
     double* R = new double[Nl+1];
     double* gw = new double[Nt];
@@ -137,17 +138,19 @@ int main () {
     double Bjs, uw, vw;
     double dgbm_dt, vindw[Nl];
 
+    double xw[Nt] {}, yw[Nt] {};
+
     double sum;
     // double err, eps = 1e-6, lim = 1e7;
     int cnt;
 
     for (m = 0; m < Nt; m++) {
-        xw[m] = new double[Nt] {};
-        yw[m] = new double[Nt] {};
+        xwM[m] = new double[Nt] {};
+        ywM[m] = new double[Nt] {};
     }
 
     // For loop for time marching
-    for (m = 0; m < 4; m++) {
+    for (m = 0; m < 5; m++) {
         printf("m = %3.0f\n",double(m));
         t_cur = m*dt;
         ydot = hdot(t_cur, f1, f2, a);
@@ -159,8 +162,8 @@ int main () {
         y0[m] = h(t_cur, f1, f2, a);
 
         // New wake location
-        xw[m][m] = x0[m] + (c + 0.1*dx)*cs;
-        yw[m][m] = y0[m] - (c + 0.1*dx)*sn;
+        xw[m] = x0[m] + (c + 0.1*dx)*cs;
+        yw[m] = y0[m] - (c + 0.1*dx)*sn;
 
         for (i = 0; i < Nl; i++) {
             // Collocation point location
@@ -170,7 +173,7 @@ int main () {
             // B vectors and R (RHS) vector calculations
             Bjs = 0;
             for (j = 0; j < m; j++) {
-                getIndVel(1, clx, cly, xw[m-1][j], yw[m-1][j], gIVRes);
+                getIndVel(1, clx, cly, xw[j], yw[j], gIVRes);
                 // Bj[i][j] = gIVRes[0]*sn + gIVRes[1]*cs;
                 Bjs += (gIVRes[0]*sn + gIVRes[1]*cs)*gw[j];
             }
@@ -221,42 +224,56 @@ int main () {
 
             for (i = 0; i < Nl; i++) {
                 // Due to body vortices on wakes
-                if (m == 0) {
-                    getIndVel(gbm[1][i], xw[m][k], yw[m][k], vorloc[i]*cs + x0[m], -vorloc[i]*sn + y0[m], gIVRes);
-                }
-                else {
-                    getIndVel(gbm[1][i], xw[m-1][k], yw[m-1][k], vorloc[i]*cs + x0[m], -vorloc[i]*sn + y0[m], gIVRes);
-                }
+                // if (m == 0) {
+                //     getIndVel(gbm[1][i], xw[k], yw[k], vorloc[i]*cs + x0[m], -vorloc[i]*sn + y0[m], gIVRes);
+                // }
+                // else {
+                //     getIndVel(gbm[1][i], xw[k], yw[k], vorloc[i]*cs + x0[m], -vorloc[i]*sn + y0[m], gIVRes);
+                // }
+                getIndVel(gbm[1][i], xw[k], yw[k], vorloc[i]*cs + x0[m], -vorloc[i]*sn + y0[m], gIVRes);
                 uw += gIVRes[0];
                 vw += gIVRes[1];
             }
-            printf("uw = %.4f\tvw = %.4f\n",uw,vw);
+            // printf("uw = %.4f\tvw = %.4f\n",uw,vw);
             
             for (p = 0; p <= m; p++) {
                 // Other wakes on TE wake
-                if (p < k) {
-                    getIndVel(gw[p], xw[m-1][k], yw[m-1][k], xw[m][p], yw[m][p], gIVRes);
+                // if (p < k) {
+                //     getIndVel(gw[p], xw[k], yw[k], xw[p], yw[p], gIVRes);
+                //     uw += gIVRes[0];
+                //     vw += gIVRes[1];
+                //     // printf("HI1\txw[k] = %.4f\tyw[k] = %.4f\n",xw[m-1][k], yw[m-1][k]);
+                //     // printf("HI1\txw[p] = %.4f\tyw[p] = %.4f\n",xw[m][p], yw[m][p]);
+                // }
+                // else if (p > k) {
+                //     getIndVel(gw[p], xw[m-1][k], yw[m-1][k], xw[m-1][p], yw[m-1][p], gIVRes);
+                //     uw += gIVRes[0];
+                //     vw += gIVRes[1];
+                //     // printf("HI2\txw[k] = %.4f\tyw[k] = %.4f\n",xw[m-1][k], yw[m-1][k]);
+                //     // printf("HI2\txw[p] = %.4f\tyw[p] = %.4f\n",xw[m-1][p], yw[m-1][p]);
+                // }
+                if (p != k) {
+                    getIndVel(gw[p], xw[k], yw[k], xw[p], yw[p], gIVRes);
                     uw += gIVRes[0];
                     vw += gIVRes[1];
-                    printf("HI1\n");
                 }
-                else if (p > k) {
-                    getIndVel(gw[p], xw[m-1][k], yw[m-1][k], xw[m-1][p], yw[m-1][p], gIVRes);
-                    uw += gIVRes[0];
-                    vw += gIVRes[1];
-                    printf("HI2\n");
-                }
-                printf("p = %d\tt[0] = %.4f\tt[1] = %.4f\n",p,gIVRes[0],gIVRes[1]);
+                // printf("p = %d\tk = %d\tt[0] = %.4f\tt[1] = %.4f\n",p,k,gIVRes[0],gIVRes[1]);
+                // printf("gw[p] = %.4f\n",gw[p]);
             }
-            printf("k = %d\tuw = %.4f\tvw = %.4f\n",k,uw,vw);
-            if (m == 0) {
-                xw[m][k] += uw*dt;
-                yw[m][k] += vw*dt;
-            }
-            else {
-                xw[m][k] = xw[m-1][k] + uw*dt;
-                yw[m][k] = yw[m-1][k] + vw*dt;
-            }
+            printf("k = %d\tuw = %.4f\tvw = %.4f\t",k,uw,vw);
+            // if (m == 0) {
+            //     xw[m][k] += uw*dt;
+            //     yw[m][k] += vw*dt;
+            // }
+            // else {
+            //     xw[m][k] = xw[m-1][k] + uw*dt;
+            //     yw[m][k] = yw[m-1][k] + vw*dt;
+            // }
+            xw[k] += uw*dt;
+            yw[k] += vw*dt;
+            printf("xw = %.4f\tyw = %.4f\n",xw[k],yw[k]);
+            xwM[m][k] = xw[k];
+            ywM[m][k] = yw[k];
         }
 
         // Aerodynamic Load Calculations
@@ -278,7 +295,7 @@ int main () {
         for (i = 0; i < Nl; i++) {
             vindw[i] = 0;
             for (p = 0; p < m; p++) {
-                getIndVel(gw[p], xw[m-1][k], yw[m-1][k], xw[m][p], yw[m][p], gIVRes);
+                getIndVel(gw[p], xw[k], yw[k], xw[p], yw[p], gIVRes);
                 vindw[i] += gIVRes[0]*sn + gIVRes[1]*cs;
             }
 
