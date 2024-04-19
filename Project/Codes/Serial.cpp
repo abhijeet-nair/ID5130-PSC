@@ -344,7 +344,7 @@ int main () {
 
     // File writing
     char fname[25];
-    sprintf(fname, "./Res/Ser_1.txt");
+    sprintf(fname, "./Res/Ser.txt");
 
     std::ofstream oFile(fname);
 
