@@ -50,7 +50,7 @@ double deg2rad (double x) {
 
 
 int main (int argc, char* argv[]) {
-    int np = 1, cnt;
+    int np = 1, cnt, fs = 0;
 
     if (argc == 2) {
         np = strtol(argv[1], NULL, 10);
@@ -85,8 +85,8 @@ int main (int argc, char* argv[]) {
 
     // double A[Nl][Nl], B[Nl], gIVRes[2];
     // double C[Nl+1][Nl+1] {}, U[Nl+1] {}, U1[Nl+1] {};
-    double gIVRes[2], dgbm_dt, vindw[Nl], xw[Nt] {}, yw[Nt] {};
-    double ydot, t_cur, extflow, sum, Bjs, uw, vw, clx, cly;
+    double gIVRes[2], dgbm_dt, vindw, xw[Nt] {}, yw[Nt] {};
+    double t_cur, sum, Bjs, uw, vw, clx, cly;
     double* B = new double[Nl];
     double* U = new double[Nl+1];
     double* U1 = new double[Nl+1];
@@ -104,6 +104,7 @@ int main (int argc, char* argv[]) {
     // double x0[Nt], y0[Nt], L[Nt], D[Nt];
     double* x0 = new double[Nt];
     double* y0 = new double[Nt];
+    double* extflow = new double[Nt];
     double* L = new double[Nt];
     double* D = new double[Nt];
     // double xw[Nt], yw[Nt];
@@ -163,6 +164,7 @@ int main (int argc, char* argv[]) {
         }
     }
 
+    // LU Decomposition and save in the same matrix
     for (k = 0; k <= Nl; k++) {
         for (i = k+1; i <= Nl; i++) {
             C[i][k] = C[i][k]/C[k][k];
@@ -174,43 +176,209 @@ int main (int argc, char* argv[]) {
     }
 
     // For loop for time marching
-    for (m = 0; m < Nt; m++) {
-        printf("m = %3.0f\t",double(m));
-        t_cur = m*dt;
-        ydot = hdot(t_cur, f1, f2, a);
-
-        extflow = u*sn - ydot*cs;
+    #pragma omp parallel num_threads(np) default(shared) private(i, j, k, m, p,gIVRes, clx, cly)
+    {
+        int myid = omp_get_thread_num();
 
         // Origin location at time t
-        x0[m] = -u*t_cur;
-        y0[m] = h(t_cur, f1, f2, a);
-
-        // New wake location
-        xw[m] = x0[m] + (c + 0.1*dx)*cs;
-        yw[m] = y0[m] - (c + 0.1*dx)*sn;
-
-        for (i = 0; i < Nl; i++) {
-            // Collocation point location
-            clx = colcloc[i]*cs + x0[m];
-            cly = colcloc[i]*sn + y0[m];
-
-            // B vectors and R (RHS) vector calculations
-            Bjs = 0;
-            for (j = 0; j < m; j++) {
-                getIndVel(1, clx, cly, xw[j], yw[j], gIVRes);
-                // Bj[i][j] = gIVRes[0]*sn + gIVRes[1]*cs;
-                Bjs += (gIVRes[0]*sn + gIVRes[1]*cs)*gw[j];
+        #pragma omp for
+            for (i = 0; i < Nt; i++) {
+                t_cur = i*dt;
+                x0[i] = -u*t_cur;
+                y0[i] = h(t_cur, f1, f2, a);
+                extflow[i] = u*sn - hdot(t_cur, f1, f2, a)*cs;
             }
-            R[i] = -extflow - Bjs;
-        }
+        
 
-        R[Nl] = 0;
-        for (j = 0; j < m; j++) {
-            R[Nl] += gw[j];
-            // printf("gw[%d] = %.4f\n",j,gw[j]);
+        for (m = 0; m < Nt; m++) {
+            if (myid == 0) {printf("m = %3.0f\n",double(m));}
+
+            // New wake location
+            xw[m] = x0[m] + (c + 0.1*dx)*cs;
+            yw[m] = y0[m] - (c + 0.1*dx)*sn;
+
+            #pragma omp for
+                for (i = 0; i < Nl; i++) {
+                    // Collocation point location
+                    clx = colcloc[i]*cs + x0[m];
+                    cly = colcloc[i]*sn + y0[m];
+
+                    // B vectors and R (RHS) vector calculations
+                    Bjs = 0;
+                    for (j = 0; j < m; j++) {
+                        getIndVel(1, clx, cly, xw[j], yw[j], gIVRes);
+                        // Bj[i][j] = gIVRes[0]*sn + gIVRes[1]*cs;
+                        Bjs += (gIVRes[0]*sn + gIVRes[1]*cs)*gw[j];
+                    }
+                    R[i] = -extflow[m] - Bjs;
+                }
+
+            if (myid == 0) {R[Nl] = 0;}
+            
+            #pragma omp barrier
+
+            #pragma omp for reduction(+: R[Nl])
+                for (j = 0; j < m; j++) {
+                    R[Nl] += gw[j];
+                    // printf("gw[%d] = %.4f\n",j,gw[j]);
+                }
+            
+            if (myid == 0) {
+                R[Nl] = -R[Nl];
+
+                // Computation of unknown gbm and gwm
+                // Forward substitution
+                U1[0] = R[0];
+                for (i = 1; i <= Nl; i++) {
+                    sum = 0;
+                    for (j = 0; j < i; j++){
+                        sum += C[i][j]*U1[j];
+                    }
+                    U1[i] = R[i] - sum;
+                }
+
+                // Backward substitution
+                U[Nl] = U1[Nl]/C[Nl][Nl];
+                for (i = Nl-1; i >= 0; i--) {
+                    sum = 0;
+                    for (j = i+1; j <= Nl; j++) {
+                        sum += C[i][j]*U[j];
+                    }
+                    U[i] = (U1[i] - sum)/C[i][i];
+                }
+
+                // Solved wake circulation
+                gw[m] = U[Nl];
+            }
+
+            #pragma omp barrier
+
+            // Solved body circulations
+            #pragma omp for
+                for (i = 0; i < Nl; i++) {
+                    gbm[1][i] = U[i];
+                }
+            
+            for (k = 0; k <= m; k++) {
+                uw = 0;
+                vw = 0;
+
+                #pragma omp for reduction(+: uw, vw)
+                    for (i = 0; i < Nl; i++) {
+                        getIndVel(gbm[1][i], xw[k], yw[k], vorloc[i]*cs + x0[m], -vorloc[i]*sn + y0[m], gIVRes);
+                        uw += gIVRes[0];
+                        vw += gIVRes[1];
+                    }
+                
+                #pragma omp for reduction(+: uw, vw)
+                    for (p = 0; p <= m; p++) {
+                        if (p != k) {
+                            getIndVel(gw[p], xw[k], yw[k], xw[p], yw[p], gIVRes);
+                            uw += gIVRes[0];
+                            vw += gIVRes[1];
+                        }
+                    }
+                    
+                xw[k] += uw*dt;
+                yw[k] += vw*dt;
+                xwM[m][k] = xw[k];
+                ywM[m][k] = yw[k];
+            }
+
+            // Aerodynamic Load Calculations
+            if (myid == 0) {dgbm_dt = 0;}
+
+            #pragma omp barrier
+
+            if (m == 1) {
+                #pragma omp for reduction(+: dgbm_dt)
+                    for (i = 0; i < Nl; i++) {
+                        dgbm_dt += gbm[1][i];
+                    }
+            }
+            else {
+                #pragma omp for reduction(+: dgbm_dt)
+                    for (i = 0; i < Nl; i++) {
+                        dgbm_dt += gbm[1][i] - gbm[0][i];
+                    }
+            }
+            
+            if (myid == 0) {
+                dgbm_dt /= dt;
+                L[m] = 0;
+                D[m] = 0;
+            }
+
+            #pragma omp barrier
+
+            #pragma omp for reduction(+: L[m], D[m])
+                for (i = 0; i < Nl; i++) {
+                    gbm[0][i] = gbm[1][i];
+                    vindw = 0;
+
+                    // Collocation point location
+                    clx = colcloc[i]*cs + x0[m];
+                    cly = colcloc[i]*sn + y0[m];
+
+                    for (p = 0; p <= m; p++) {
+                        getIndVel(gw[p], clx, cly, xw[p], yw[p], gIVRes);
+                        vindw += gIVRes[0]*sn + gIVRes[1]*cs;
+                    }
+
+
+                    L[m] += gbm[1][i];
+                    D[m] += vindw*gbm[1][i];
+                }
+
+            L[m] = rho*(u*L[m] + dgbm_dt*c);
+            D[m] = rho*(D[m] + dgbm_dt*c*deg2rad(alp));
+        } // End of time loop
+    } // End of parallel
+
+
+    if (fs == 1) {
+        // File writing
+        char fname[25];
+        sprintf(fname, "./Res/Ser.txt");
+
+        std::ofstream oFile(fname);
+
+        if (oFile.is_open()) {
+            oFile << Nl << "\n" << Nt << "\n";
+            oFile << dt << "\n" << dx << "\n";
+            oFile << rho << "\n" << u << "\n";
+            oFile << c << "\n" << alp << "\n";
+
+            oFile << "\n";
+
+            for (i = 0; i < Nt; i++) {
+                oFile << x0[i] << "," << y0[i] << "\n";
+            }
+
+            oFile << "\n";
+
+            for (i = 0; i < Nt; i++) {
+                oFile << L[i] << "," << D[i] << "\n";
+            }
+
+            oFile << "\n\n";
+
+            for (i = 0; i < Nt; i++) {
+                for (j = 0; j < Nt; j++) {
+                    oFile << xwM[i][j] << "," << ywM[i][j] << "\n";
+                }
+                oFile << "\n";
+            }
+
+            oFile.close();
+            printf("Saved in file %s\n",fname);
         }
-        R[Nl] = -R[Nl];
+        else {
+            printf("Error opening file\n");
+        }
     }
+    else {printf("Not saving in file...\n");}
 
+    delete B, U, U1, A, C, x0, y0, extflow, L, D, xwM, ywM, R, gw, gbm;
     return 0;
 }

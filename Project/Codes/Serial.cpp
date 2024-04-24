@@ -49,11 +49,12 @@ double deg2rad (double x) {
 
 
 int main (int argc, char* argv[]) {
+    int fs = 0;
     int i, j, k, m, p;  // Indices
 
-    int Nl     = 10;    // No. of collocation points
+    int Nl     = 100;    // No. of collocation points
     double u   = 20;    // Freestream velocity
-    double c   = 5;     // Chord length of the flat plate
+    double c   = 10;     // Chord length of the flat plate
     double alp = 0;     // Angle of attack of the plate
     double rho = 1.225; // Density
     double dx  = c/Nl;  // Spacing between two points
@@ -61,7 +62,7 @@ int main (int argc, char* argv[]) {
     double sn = sin(deg2rad(alp));
     double cs = cos(deg2rad(alp));
 
-    double dt = 0.01;        // Time step
+    double dt = 0.005;        // Time step
     double tf = 5;           // Final time
     int Nt = int(tf/dt) + 1; // No. of time steps
 
@@ -341,46 +342,49 @@ int main (int argc, char* argv[]) {
     -------------------------------------------------------
     */
 
-    // File writing
-    char fname[25];
-    sprintf(fname, "./Res/Ser.txt");
+    if (fs == 1) {
+        // File writing
+        char fname[25];
+        sprintf(fname, "./Res/Ser.txt");
 
-    std::ofstream oFile(fname);
+        std::ofstream oFile(fname);
 
-    if (oFile.is_open()) {
-        oFile << Nl << "\n" << Nt << "\n";
-        oFile << dt << "\n" << dx << "\n";
-        oFile << rho << "\n" << u << "\n";
-        oFile << c << "\n" << alp << "\n";
+        if (oFile.is_open()) {
+            oFile << Nl << "\n" << Nt << "\n";
+            oFile << dt << "\n" << dx << "\n";
+            oFile << rho << "\n" << u << "\n";
+            oFile << c << "\n" << alp << "\n";
 
-        oFile << "\n";
-
-        for (i = 0; i < Nt; i++) {
-            oFile << x0[i] << "," << y0[i] << "\n";
-        }
-
-        oFile << "\n";
-
-        for (i = 0; i < Nt; i++) {
-            oFile << L[i] << "," << D[i] << "\n";
-        }
-
-        oFile << "\n\n";
-
-        for (i = 0; i < Nt; i++) {
-            for (j = 0; j < Nt; j++) {
-                oFile << xwM[i][j] << "," << ywM[i][j] << "\n";
-            }
             oFile << "\n";
+
+            for (i = 0; i < Nt; i++) {
+                oFile << x0[i] << "," << y0[i] << "\n";
+            }
+
+            oFile << "\n";
+
+            for (i = 0; i < Nt; i++) {
+                oFile << L[i] << "," << D[i] << "\n";
+            }
+
+            oFile << "\n\n";
+
+            for (i = 0; i < Nt; i++) {
+                for (j = 0; j < Nt; j++) {
+                    oFile << xwM[i][j] << "," << ywM[i][j] << "\n";
+                }
+                oFile << "\n";
+            }
+
+            oFile.close();
+            printf("Saved in file %s\n",fname);
         }
-
-        oFile.close();
-        printf("Saved in file %s\n",fname);
+        else {
+            printf("Error opening file\n");
+        }
     }
-    else {
-        printf("Error opening file\n");
-    }
+    else {printf("Not saving in file...\n");}
 
-    delete x0, y0, L, D, xw, yw, R, gw, gbm;
+    delete x0, y0, L, D, xwM, ywM, R, gw, gbm;
     return 0;
 }
