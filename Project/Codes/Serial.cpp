@@ -2,7 +2,6 @@
 #include <math.h>
 #include <string.h>
 #include <fstream>
-#include <omp.h>
 
 void getIndVel(double g, double x, double y, double x0, double y0, double uv[2]) {
     double den = pow((x - x0), 2) + pow((y - y0), 2);
@@ -49,7 +48,7 @@ double deg2rad (double x) {
 
 
 
-int main () {
+int main (int argc, char* argv[]) {
     int i, j, k, m, p;  // Indices
 
     int Nl     = 10;    // No. of collocation points
