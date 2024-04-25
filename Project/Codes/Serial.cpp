@@ -46,13 +46,28 @@ double deg2rad (double x) {
     return x*M_PI/180;
 }
 
+void printVector(double a[], int n) {
+   for (int i = 0; i < n; i++) {
+        printf("%.4f\n",a[i]);
+   }
+}
+
+void printMatrix (double** a, int m, int n) {
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++) {
+            printf("%.4f\t",a[i][j]);
+        }
+        printf("\n");
+    }
+}
+
 
 
 int main (int argc, char* argv[]) {
     int fs = 0;
     int i, j, k, m, p;  // Indices
 
-    int Nl     = 100;    // No. of collocation points
+    int Nl     = 10;    // No. of collocation points
     double u   = 20;    // Freestream velocity
     double c   = 10;     // Chord length of the flat plate
     double alp = 0;     // Angle of attack of the plate
@@ -62,7 +77,7 @@ int main (int argc, char* argv[]) {
     double sn = sin(deg2rad(alp));
     double cs = cos(deg2rad(alp));
 
-    double dt = 0.005;        // Time step
+    double dt = 0.01;        // Time step
     double tf = 5;           // Final time
     int Nt = int(tf/dt) + 1; // No. of time steps
 

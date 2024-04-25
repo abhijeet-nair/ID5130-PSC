@@ -47,6 +47,21 @@ double deg2rad (double x) {
     return x*M_PI/180;
 }
 
+void printVector(double a[], int n) {
+   for (int i = 0; i < n; i++) {
+        printf("%.4f\n",a[i]);
+   }
+}
+
+void printMatrix (double** a, int m, int n) {
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++) {
+            printf("%.4f\t",a[i][j]);
+        }
+        printf("\n");
+    }
+}
+
 
 
 int main (int argc, char* argv[]) {
@@ -339,7 +354,7 @@ int main (int argc, char* argv[]) {
     if (fs == 1) {
         // File writing
         char fname[25];
-        sprintf(fname, "./Res/Ser.txt");
+        sprintf(fname, "./Res/Par_OMP.txt");
 
         std::ofstream oFile(fname);
 
