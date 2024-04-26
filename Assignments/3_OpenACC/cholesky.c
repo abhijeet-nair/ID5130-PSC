@@ -7,7 +7,7 @@
 #include <math.h>
 
 #define TYPE		float
-#define N		100
+#define N		10
 #define SMALLVALUE	0.001
 
 void initmult(TYPE mat[][N])
@@ -51,7 +51,7 @@ int main()
 {
   TYPE a[N][N];
 
-  init(a);
+  initmult(a);
   cholesky(a);
   printMat(a);
 
