@@ -77,7 +77,7 @@ int main (int argc, char* argv[]) {
     double sn = sin(deg2rad(alp));
     double cs = cos(deg2rad(alp));
 
-    double dt = 0.01;        // Time step
+    double dt = 0.005;        // Time step
     double tf = 5;           // Final time
     int Nt = int(tf/dt) + 1; // No. of time steps
 
