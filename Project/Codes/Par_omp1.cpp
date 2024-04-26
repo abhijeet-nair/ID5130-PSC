@@ -191,7 +191,7 @@ int main (int argc, char* argv[]) {
     }
 
     // For loop for time marching
-    #pragma omp parallel num_threads(np) default(shared) private(i, j, k, m, p,gIVRes, clx, cly)
+    #pragma omp parallel num_threads(np) default(shared) private(i, j, k, m, p, t_cur, gIVRes, clx, cly)
     {
         int myid = omp_get_thread_num();
 
@@ -205,12 +205,30 @@ int main (int argc, char* argv[]) {
             }
         
 
-        for (m = 0; m < Nt; m++) {
-            if (myid == 0) {printf("m = %3.0f\n",double(m));}
+        for (m = 0; m < 4; m++) {
+            // if (myid == 0) {
+            //     if (m % 50 == 0) {printf("m = %3.0f\n",double(m));}
 
-            // New wake location
-            xw[m] = x0[m] + (c + 0.1*dx)*cs;
-            yw[m] = y0[m] - (c + 0.1*dx)*sn;
+            //     // New wake location
+            //     xw[m] = x0[m] + (c + 0.1*dx)*cs;
+            //     yw[m] = y0[m] - (c + 0.1*dx)*sn;
+
+            //     R[Nl] = 0;
+            //     printf("xw = %.4f\tyw = %.4f\n",xw[m],yw[m]);
+            // }
+            #pragma omp single
+            {
+                if (m % 50 == 0) {printf("m = %3.0f\n",double(m));}
+
+                // New wake location
+                xw[m] = x0[m] + (c + 0.1*dx)*cs;
+                yw[m] = y0[m] - (c + 0.1*dx)*sn;
+
+                R[Nl] = 0;
+                printf("xw = %.4f\tyw = %.4f\n",xw[m],yw[m]);
+            }
+
+            // #pragma omp barrier
 
             #pragma omp for
                 for (i = 0; i < Nl; i++) {
@@ -227,8 +245,6 @@ int main (int argc, char* argv[]) {
                     }
                     R[i] = -extflow[m] - Bjs;
                 }
-
-            if (myid == 0) {R[Nl] = 0;}
             
             #pragma omp barrier
 
@@ -238,8 +254,41 @@ int main (int argc, char* argv[]) {
                     // printf("gw[%d] = %.4f\n",j,gw[j]);
                 }
             
-            if (myid == 0) {
+            // if (myid == 0) {
+            //     R[Nl] = -R[Nl];
+            //     // printVector(R, Nl+1);
+
+            //     // Computation of unknown gbm and gwm
+            //     // Forward substitution
+            //     U1[0] = R[0];
+            //     for (i = 1; i <= Nl; i++) {
+            //         sum = 0;
+            //         for (j = 0; j < i; j++){
+            //             sum += C[i][j]*U1[j];
+            //         }
+            //         U1[i] = R[i] - sum;
+            //     }
+
+            //     // Backward substitution
+            //     U[Nl] = U1[Nl]/C[Nl][Nl];
+            //     for (i = Nl-1; i >= 0; i--) {
+            //         sum = 0;
+            //         for (j = i+1; j <= Nl; j++) {
+            //             sum += C[i][j]*U[j];
+            //         }
+            //         U[i] = (U1[i] - sum)/C[i][i];
+            //     }
+
+            //     // Solved wake circulation
+            //     gw[m] = U[Nl];
+            //     printVector(U, Nl+1);
+            // }
+
+            #pragma omp single
+            {
                 R[Nl] = -R[Nl];
+                printf("R = \n");
+                printVector(R, Nl+1);
 
                 // Computation of unknown gbm and gwm
                 // Forward substitution
@@ -264,9 +313,11 @@ int main (int argc, char* argv[]) {
 
                 // Solved wake circulation
                 gw[m] = U[Nl];
+                printf("U = \n");
+                printVector(U, Nl+1);
             }
 
-            #pragma omp barrier
+            // #pragma omp barrier
 
             // Solved body circulations
             #pragma omp for
@@ -275,8 +326,13 @@ int main (int argc, char* argv[]) {
                 }
             
             for (k = 0; k <= m; k++) {
-                uw = 0;
-                vw = 0;
+                #pragma omp single
+                {
+                    uw = 0;
+                    vw = 0;
+                }
+
+                // #pragma omp barrier
 
                 #pragma omp for reduction(+: uw, vw)
                     for (i = 0; i < Nl; i++) {
@@ -294,10 +350,18 @@ int main (int argc, char* argv[]) {
                         }
                     }
                     
-                xw[k] += uw*dt;
-                yw[k] += vw*dt;
-                xwM[m][k] = xw[k];
-                ywM[m][k] = yw[k];
+                #pragma omp single
+                {
+                    xw[k] += uw*dt;
+                    yw[k] += vw*dt;
+                    xwM[m][k] = xw[k];
+                    ywM[m][k] = yw[k];
+                    printf("uw = %.4f\tvw = %.4f\n",uw,vw);
+                    printVector(xw, 4);
+                    printf("\n");
+                    printVector(yw, 4);
+                    printf("\n\n");
+                }
             }
 
             // Aerodynamic Load Calculations
@@ -344,12 +408,21 @@ int main (int argc, char* argv[]) {
                     L[m] += gbm[1][i];
                     D[m] += vindw*gbm[1][i];
                 }
+            
+            #pragma omp single
+            {
+                L[m] = rho*(u*L[m] + dgbm_dt*c);
+                D[m] = rho*(D[m] + dgbm_dt*c*deg2rad(alp));
+            }
 
-            L[m] = rho*(u*L[m] + dgbm_dt*c);
-            D[m] = rho*(D[m] + dgbm_dt*c*deg2rad(alp));
+            // L[m] = rho*(u*L[m] + dgbm_dt*c);
+            // D[m] = rho*(D[m] + dgbm_dt*c*deg2rad(alp));
         } // End of time loop
     } // End of parallel
 
+    // printf("extflow = \n");
+    // printVector(extflow, 4);
+    // printMatrix(xwM, 10, 10);
 
     if (fs == 1) {
         // File writing

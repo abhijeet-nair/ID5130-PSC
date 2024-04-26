@@ -69,7 +69,7 @@ int main (int argc, char* argv[]) {
 
     int Nl     = 10;    // No. of collocation points
     double u   = 20;    // Freestream velocity
-    double c   = 10;     // Chord length of the flat plate
+    double c   = 5;     // Chord length of the flat plate
     double alp = 0;     // Angle of attack of the plate
     double rho = 1.225; // Density
     double dx  = c/Nl;  // Spacing between two points
@@ -88,7 +88,7 @@ int main (int argc, char* argv[]) {
 
     printf("Nl = %d\nNt = %d\n",Nl,Nt);
 
-    double vorloc[Nl], colcloc[Nl], plate[Nl+1];
+    double vorloc[Nl], colcloc[Nl], plate[Nl+1], gIVRes[2];
 
     for (i = 0; i < Nl; i++) {
         vorloc[i]  = (i + 0.25)*dx;
@@ -97,7 +97,19 @@ int main (int argc, char* argv[]) {
     }
     plate[Nl] = Nl*dx;
 
-    double A[Nl][Nl], B[Nl], gIVRes[2];
+    double* B = new double[Nl];
+    double* U = new double[Nl+1];
+    double* U1 = new double[Nl+1];
+    double** A = new double* [Nl];
+    double** C = new double* [Nl+1];
+
+    for (i = 0; i <= Nl; i++) {
+        if (i < Nl) {
+            A[i] = new double[Nl] {};
+            C[i] = new double[Nl+1] {};
+        }
+        C[i] = new double[Nl+1] {};
+    }
 
     for (i = 0; i < Nl; i++) {
         for (j = 0; j < Nl; j++) {
@@ -107,8 +119,6 @@ int main (int argc, char* argv[]) {
         getIndVel(1, colcloc[i], 0, (c + 0.1*dx), 0, gIVRes);
         B[i] = gIVRes[1];
     }
-
-    double C[Nl+1][Nl+1] {}, U[Nl+1] {}, U1[Nl+1] {};
 
     for (i = 0; i <= Nl; i++) {
         for (j = 0; j <= Nl; j++) {
@@ -165,12 +175,13 @@ int main (int argc, char* argv[]) {
     }
 
     // For loop for time marching
-    for (m = 0; m < Nt; m++) {
-        printf("m = %3.0f\t",double(m));
+    for (m = 0; m < 4; m++) {
+        // printf("m = %3.0f\t",double(m));
         t_cur = m*dt;
         ydot = hdot(t_cur, f1, f2, a);
 
         extflow = u*sn - ydot*cs;
+        // printf("extflow = %.4f\n",extflow);
 
         // Origin location at time t
         x0[m] = -u*t_cur;
@@ -179,6 +190,7 @@ int main (int argc, char* argv[]) {
         // New wake location
         xw[m] = x0[m] + (c + 0.1*dx)*cs;
         yw[m] = y0[m] - (c + 0.1*dx)*sn;
+        printf("xw = %.4f\tyw = %.4f\n",xw[m],yw[m]);
 
         for (i = 0; i < Nl; i++) {
             // Collocation point location
@@ -201,6 +213,8 @@ int main (int argc, char* argv[]) {
             // printf("gw[%d] = %.4f\n",j,gw[j]);
         }
         R[Nl] = -R[Nl];
+        printf("R = \n");
+        printVector(R, Nl+1);
 
         // Computation of unknown gbm and gwm
         // Forward substitution
@@ -222,6 +236,8 @@ int main (int argc, char* argv[]) {
             }
             U[i] = (U1[i] - sum)/C[i][i];
         }
+        printf("U = \n");
+        printVector(U, Nl+1);
 
         // for (i = 0; i <= Nl; i++) {
         //     printf("%.4f\n",U[i]);
@@ -291,6 +307,11 @@ int main (int argc, char* argv[]) {
             // printf("xw = %.4f\tyw = %.4f\tgw = %.4f\n",xw[k],yw[k],gw[k]);
             xwM[m][k] = xw[k];
             ywM[m][k] = yw[k];
+            printf("uw = %.4f\tvw = %.4f\n",uw,vw);
+            printVector(xw, 4);
+            printf("\n");
+            printVector(yw, 4);
+            printf("\n\n");
         }
 
         // Aerodynamic Load Calculations
@@ -333,8 +354,11 @@ int main (int argc, char* argv[]) {
         D[m] = rho*(D[m] + dgbm_dt*c*deg2rad(alp));
         // printf("L = %.4f\tD = %.4f\n",L[m],D[m]);
         // printf("gw = %.4f\n",gw[m]);
-        printf("\n");
+        // printf("\n");
     }
+
+    // printVector(y0, 10);
+    // printMatrix(xwM, 10, 10);
     /*
     -------------------------------------------------------
     Data needed finally:

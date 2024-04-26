@@ -1,11 +1,10 @@
-## CODE FOR PLOTTING THE WAKE STRUCTURE
+## CODE FOR PLOTTING THE WAKE STRUCTURE - PARALLEL CODE
 
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
-file1 = "./Res/Ser.txt"
-# file1 = "./Res/Par_OMP.txt"
+file1 = "./Res/Par_OMP.txt"
 print("Loading constants...")
 dat = np.loadtxt(file1, max_rows=8)
 Nl, Nt = map(int, dat[0:2])
@@ -26,8 +25,10 @@ xwM = np.zeros((Nt,Nt))
 ywM = np.zeros((Nt,Nt))
 
 print("Loading wake locations...")
-fcnt = 10
+fcnt = Nt
 for i in range(fcnt):
+    if i % 50 == 0:
+        print("m = ",i,"/",fcnt)
     sprw = (2 + i)*Nt + 11 + i # (2*Nt + 11) + i*(Nt+1)
     xwM[i][:] = np.loadtxt(file1, max_rows=Nt, skiprows=sprw, usecols=0 ,delimiter=',')
     ywM[i][:] = np.loadtxt(file1, max_rows=Nt, skiprows=sprw, usecols=1 ,delimiter=',')
@@ -40,6 +41,7 @@ fig1 = plt.figure(figsize=(8,6))
 pdats = plt.scatter([], [], s=4, c='r')
 plt.xlim(-110, 10*c)
 plt.ylim(-10, 10)
+plt.title("Parallel Code", fontsize=16)
 # pdat = pdats[0]
 
 def animFunc(i):
