@@ -24,5 +24,6 @@ int main (int argc, char* argv[]) {
     #pragma acc parallel num_gangs(ngangs/2)
         printf("Second pragma\n");
 
+    #pragma acc wait // So that CPU doesn't close IO Stream
     return 0;
 }
