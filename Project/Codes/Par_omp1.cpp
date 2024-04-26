@@ -65,7 +65,7 @@ void printMatrix (double** a, int m, int n) {
 
 
 int main (int argc, char* argv[]) {
-    int np = 1, cnt, fs = 0;
+    int np = 1, cnt, fs = 1;
 
     if (argc == 2) {
         np = strtol(argv[1], NULL, 10);
@@ -74,9 +74,9 @@ int main (int argc, char* argv[]) {
     
     int i, j, k, m, p;  // Indices
 
-    int Nl     = 10;    // No. of collocation points
+    int Nl     = 1000;    // No. of collocation points
     double u   = 20;    // Freestream velocity
-    double c   = 5;     // Chord length of the flat plate
+    double c   = 10;     // Chord length of the flat plate
     double alp = 0;     // Angle of attack of the plate
     double rho = 1.225; // Density
     double dx  = c/Nl;  // Spacing between two points
@@ -191,7 +191,7 @@ int main (int argc, char* argv[]) {
     }
 
     // For loop for time marching
-    #pragma omp parallel num_threads(np) default(shared) private(i, j, k, m, p, t_cur, gIVRes, clx, cly)
+    #pragma omp parallel num_threads(np) default(shared) private(i, j, k, m, p, t_cur, gIVRes, clx, cly, Bjs)
     {
         int myid = omp_get_thread_num();
 
@@ -205,7 +205,7 @@ int main (int argc, char* argv[]) {
             }
         
 
-        for (m = 0; m < 4; m++) {
+        for (m = 0; m < Nt; m++) {
             // if (myid == 0) {
             //     if (m % 50 == 0) {printf("m = %3.0f\n",double(m));}
 
@@ -225,7 +225,7 @@ int main (int argc, char* argv[]) {
                 yw[m] = y0[m] - (c + 0.1*dx)*sn;
 
                 R[Nl] = 0;
-                printf("xw = %.4f\tyw = %.4f\n",xw[m],yw[m]);
+                // printf("xw = %.4f\tyw = %.4f\n",xw[m],yw[m]);
             }
 
             // #pragma omp barrier
@@ -243,6 +243,7 @@ int main (int argc, char* argv[]) {
                         // Bj[i][j] = gIVRes[0]*sn + gIVRes[1]*cs;
                         Bjs += (gIVRes[0]*sn + gIVRes[1]*cs)*gw[j];
                     }
+                    // printf("i = %d\tBjs = %.4f\n",i,Bjs);
                     R[i] = -extflow[m] - Bjs;
                 }
             
@@ -287,8 +288,8 @@ int main (int argc, char* argv[]) {
             #pragma omp single
             {
                 R[Nl] = -R[Nl];
-                printf("R = \n");
-                printVector(R, Nl+1);
+                // printf("R = \n");
+                // printVector(R, Nl+1);
 
                 // Computation of unknown gbm and gwm
                 // Forward substitution
@@ -313,8 +314,8 @@ int main (int argc, char* argv[]) {
 
                 // Solved wake circulation
                 gw[m] = U[Nl];
-                printf("U = \n");
-                printVector(U, Nl+1);
+                // printf("U = \n");
+                // printVector(U, Nl+1);
             }
 
             // #pragma omp barrier
@@ -356,11 +357,11 @@ int main (int argc, char* argv[]) {
                     yw[k] += vw*dt;
                     xwM[m][k] = xw[k];
                     ywM[m][k] = yw[k];
-                    printf("uw = %.4f\tvw = %.4f\n",uw,vw);
-                    printVector(xw, 4);
-                    printf("\n");
-                    printVector(yw, 4);
-                    printf("\n\n");
+                    // printf("uw = %.4f\tvw = %.4f\n",uw,vw);
+                    // printVector(xw, 4);
+                    // printf("\n");
+                    // printVector(yw, 4);
+                    // printf("\n\n");
                 }
             }
 
@@ -426,6 +427,7 @@ int main (int argc, char* argv[]) {
 
     if (fs == 1) {
         // File writing
+        printf("Saving in file...\n");
         char fname[25];
         sprintf(fname, "./Res/Par_OMP.txt");
 
