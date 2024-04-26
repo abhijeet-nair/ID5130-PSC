@@ -10,7 +10,7 @@
 void initmult (TYPE mat[][N]) {
     for (int i = 0; i < N; i++) {
         for (int j = 0; j < i; j++) {
-            mat[i][j] = (i + j) / pow(N,1);
+            mat[i][j] = (i + j) / pow(N,2);
             mat[j][i] = mat[i][j];
         }
 
@@ -35,17 +35,18 @@ void printMat (TYPE a[][N]) {
 
 void cholesky (TYPE a[N][N], TYPE l[N][N]) {
     for (int i = 0; i < N; i++) {
-        for (int k = 0; k < i; k++) {
-            l[i][i] += pow(l[i][k],2);
-        }
+        // for (int k = 0; k < i; k++) {
+        //     l[i][i] += pow(l[i][k],2);
+        // }
 
-        if (a[i][i] - l[i][i] <=0) {
-            printf("Matrix is possibly not positive definite...\n");
-            return;
-        }
+        // if (a[i][i] - l[i][i] < 0) {
+        //     // printf("i = %d\tval = %.4f - %.4f = %.4f\n",i,a[i][i],l[i][i],a[i][i] - l[i][i]);
+        //     printf("Matrix is possibly not positive definite...\n");
+        //     return;
+        // }
 
-        l[i][i] = sqrt(a[i][i] - l[i][i]);
-
+        // l[i][i] = sqrt(a[i][i] - l[i][i]);
+        
         for (int j = 0; j < i; j++) {
             if (abs(a[i][j] - a[j][i]) > tol) {
                 // printf("(i,j) = (%d, %d)\tval = %.4f - %.4f = %.4f (log = %.4f)\n",i,j,a[i][j],a[j][i],abs(a[i][j] - a[j][i]),log10(abs(a[i][j] - a[j][i])));
@@ -61,6 +62,18 @@ void cholesky (TYPE a[N][N], TYPE l[N][N]) {
             
             l[i][j] /= (l[j][j] > sval ? l[j][j] : 1);
         }
+
+        for (int k = 0; k < i; k++) {
+            l[i][i] += pow(l[i][k],2);
+        }
+
+        if (a[i][i] - l[i][i] < 0) {
+            // printf("i = %d\tval = %.4f - %.4f = %.4f\n",i,a[i][i],l[i][i],a[i][i] - l[i][i]);
+            printf("Matrix is possibly not positive definite...\n");
+            return;
+        }
+
+        l[i][i] = sqrt(a[i][i] - l[i][i]);
     }
 }
 
