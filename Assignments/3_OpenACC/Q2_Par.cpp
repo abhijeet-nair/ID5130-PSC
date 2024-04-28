@@ -9,14 +9,17 @@
 
 // OG FUNCTION
 void initmult (TYPE mat[][N]) {
-    for (int i = 0; i < N; i++) {
-        for (int j = 0; j < i; j++) {
-            mat[i][j] = (i + j) / pow(N,2);
-            mat[j][i] = mat[i][j];
-        }
+    #pragma acc parallel loop present(mat[:][:])
+        for (int i = 0; i < N; i++) {
+            #pragma acc loop worker
+                for (int j = 0; j < i; j++) {
+                    // mat[i][j] = (i + j) / pow(N,2);
+                    mat[i][j] = (i + j) / (N * N);
+                    mat[j][i] = mat[i][j];
+                }
 
-        mat[i][i] = 1;
-    }
+            mat[i][i] = 1;
+        }
 }
 
 // // TEST FUNCTION ==> TEST PASSED
@@ -52,46 +55,49 @@ void printMat (TYPE a[][N]) {
     }
 }
 
-void cholesky (TYPE a[N][N], TYPE l[N][N]) {
-    for (int i = 0; i < N; i++) {        
-        for (int j = 0; j < i; j++) {
-            if (abs(a[i][j] - a[j][i]) > tol) {
-                printf("Matrix is not symmetric...\n");
-                return;
-            }
+// void cholesky (TYPE a[N][N], TYPE l[N][N]) {
+//     for (int i = 0; i < N; i++) {        
+//         for (int j = 0; j < i; j++) {
+//             if (abs(a[i][j] - a[j][i]) > tol) {
+//                 printf("Matrix is not symmetric...\n");
+//                 return;
+//             }
 
-            for (int k = 0; k < j; k++) {
-                l[i][j] += l[i][k] * l[j][k];
-            }
+//             for (int k = 0; k < j; k++) {
+//                 l[i][j] += l[i][k] * l[j][k];
+//             }
 
-            l[i][j] = a[i][j] - l[i][j];
+//             l[i][j] = a[i][j] - l[i][j];
             
-            l[i][j] /= (l[j][j] > sval ? l[j][j] : 1);
-        }
+//             l[i][j] /= (l[j][j] > sval ? l[j][j] : 1);
+//         }
 
-        for (int k = 0; k < i; k++) {
-            l[i][i] += pow(l[i][k],2);
-        }
+//         for (int k = 0; k < i; k++) {
+//             l[i][i] += pow(l[i][k],2);
+//         }
 
-        if (a[i][i] - l[i][i] < 0) {
-            printf("Matrix is not positive definite...\n");
-            return;
-        }
+//         if (a[i][i] - l[i][i] < 0) {
+//             printf("Matrix is not positive definite...\n");
+//             return;
+//         }
 
-        l[i][i] = sqrt(a[i][i] - l[i][i]);
-    }
-}
+//         l[i][i] = sqrt(a[i][i] - l[i][i]);
+//     }
+// }
 
 
 int main () {
     TYPE a[N][N];
+    TYPE l[N][N] {};
 
-    initmult(a);
+    #pragma acc data create(a[:][:], l[:][:]) copyout(a[:][:], l[:][:])
+    {
+        initmult(a);
+        // cholesky(a, l);
+    }
+    
     printMat(a);
     printf("\n");
-
-    TYPE l[N][N] {};
-    cholesky(a, l);
     printMat(l);
 
     return 0;
