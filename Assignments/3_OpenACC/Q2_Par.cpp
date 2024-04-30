@@ -93,19 +93,42 @@
 //         }
 // }
 
+// void test (TYPE a[N], TYPE l[N], TYPE sum) {
+//     #pragma acc parallel present(a[:], l[:], sum)
+//     {
+//         printf("sum = %.4f\n",sum);
+//         #pragma acc loop reduction(+: sum)
+//             for (int j = 0; j < N; j++) {
+//                 sum += a[j];
+//             }
+        
+//         #pragma acc wait
+//         printf("sum = %.4f\n",sum);
+
+//         #pragma acc loop
+//             for (int i = 0; i < N; i++) {
+//                 l[i] = sum + 1;
+//             }
+//     }
+// }
+
 void test (TYPE a[N], TYPE l[N]) {
     TYPE sum = 0;
-    #pragma acc parallel present(a[:], l[:]) copyin(sum)
+    #pragma acc parallel present(a[:], l[:])
     {
-        for (int i = 0; i < N; i++) {
-            sum = 0;
-            #pragma acc loop reduction(+: sum)
-                for (int j = 0; j < N; j++) {
-                    sum += a[j];
-                }
+        printf("sum = %.4f\n",sum);
+        #pragma acc loop reduction(+: sum)
+            for (int j = 0; j < N; j++) {
+                sum += a[j];
+            }
+        
+        #pragma acc wait
+        printf("sum = %.4f\n",sum);
 
-            l[i] = sum + 1;
-        }
+        #pragma acc loop
+            for (int i = 0; i < N; i++) {
+                l[i] = sum + 1;
+            }
     }
 }
 
@@ -134,6 +157,7 @@ int main () {
     // }
 
     TYPE a[N], l[N] {};
+    TYPE sum = 0;
     
     #pragma acc data create(a[:]) copy(l[:]) copyout(a[:])
     {
@@ -145,13 +169,14 @@ int main () {
         test(a, l);
     }
 
-    TYPE sum = 0;
+    #pragma acc wait
+    printf("sum from GPU = %.4f\n",sum);
     for (int i = 0; i < N; i++) {
         sum += a[i];
     }
 
     for (int i = 0; i < N; i++) {
-        printf("%d - a = %.4f\tl = %.4f\tcorr = %.4f",i,a[i],l[i],sum + 1);
+        printf("%d - a = %.4f\tl = %.4f\tcorr = %.4f\n",i,a[i],l[i],sum + 1);
     }
 
 
