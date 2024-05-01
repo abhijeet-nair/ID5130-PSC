@@ -2,10 +2,10 @@
 #include <math.h>
 #include <time.h>
 
-#define TYPE float
-#define N 500
-#define sval 0.001
-#define tol 1e-6
+#define TYPE float // Datatype
+#define N 500      // Problem size
+#define sval 0.001 // A small value
+#define tol 1e-6   // Tolerance
 
 void initmult (TYPE mat[N][N]) {
     #pragma acc parallel loop present(mat[:][:])

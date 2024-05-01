@@ -2,8 +2,9 @@
 #include <fstream>
 #include <math.h>
 
-#define N 10 // Problem size
-#define Ng 1 // No. of gangs
+#define N 10     // Problem size
+#define Ng 1     // No. of gangs
+#define tol 1e-6 // Tolerance
 
 // Functions
 double myfunc (double x) {
@@ -16,22 +17,64 @@ double myderv (double x) {
     return fdot;
 }
 
-void LUfunc (double A[N][N], double L[N][N], double U[N][N]) {
+void LUfunc1 (double A[N][N], double L[N][N], double U[N][N]) {
+    for (int k = 0; k < N; k++) {
+        L[k][k] = 1;
+        for (int i = k + 1; i < N; i++) {
+            L[i][k] = A[i][k]/A[k][k]; // Multiplier (L part)
+        }
 
+        for (int i = k + 1; i < N; i++) {
+            for (int j = k + 1; j < N; j++) {
+                U[i][j] += -L[i][k]*A[k][j]; // U part
+            }
+        }
+    }
 }
 
-void printVector(double a[], int n) {
-   for (int i = 0; i < n; i++) {
-        printf("%.4f\n",a[i]);
+// void LUfunc2 (double A[N][N], double L[N][N], double U[N][N]) {
+
+// }
+
+
+void multiplyMatrices (double A[N][N], double B[N][N], double C[N][N]) {
+    for (int i = 0; i < N; i ++) {
+		for (int j = 0; j < N; j ++) {
+			C[i][j] = 0;
+			for (int k = 0; k < N; k ++) {
+				C[i][j] += A[i][k]*B[k][j];
+			}
+		}
+	}
+}
+
+void printVector(double a[N]) {
+   for (int i = 0; i < N; i++) {
+        if (abs(a[i]) < tol) {
+            printf("0\n");
+        }
+        else {
+            printf("%.4f\n", a[i]);
+        }
    }
 }
 
-void printMatrix (double** a, int m, int n) {
-    for (int i = 0; i < m; i++) {
-        for (int j = 0; j < n; j++) {
-            printf("%.4f\t",a[i][j]);
+void printMat (double a[N][N]) {
+    if (N > 10) {
+        printf("Avoiding printing of large matrix...\n");
+    }
+    else {
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                if (abs(a[i][j]) < tol) {
+                    printf("0\t");
+                }
+                else {
+                    printf("%.4f ", a[i][j]);
+                }
+            }
+            printf("\n");
         }
-        printf("\n");
     }
 }
 
@@ -54,7 +97,7 @@ int main (int argc, char* argv[]) {
     }
 
     // Initializing A and b
-    for (int i = 0; i < N; i++)  {
+    for (i = 0; i < N; i++)  {
         if (i == 0) {
             A[i][0] = 1;
             A[i][1] = 2;
@@ -77,11 +120,39 @@ int main (int argc, char* argv[]) {
     }
 
     // Ax = b => LUx = b => Ly = b & Ux = y
+    LUfunc1(A, L, U);
+
+    double C[N][N];
+    multiplyMatrices(L, U, C);
+
+    printf("L = \n");
+    printMat(L);
+    printf("\n");
+
+    printf("U = \n");
+    printMat(U);
+    printf("\n");
+
+    printf("C = \n");
+    printMat(C);
+    printf("\n");
+
+    printf("A = \n");
+    printMat(A);
+    printf("\n");
+
+    for (i = 0; i < N; i++) {
+        for (j = 0; j < N; j++) {
+            printf("%.4f ", A[i][j] - C[i][j]);
+        }
+        printf("\n");
+    }
+
 
     printf("\nx = \n");
-    printVector(x, N);
+    printVector(x);
     printf("\ny = \n");
-    printVector(y, N);
+    printVector(y);
 
     // The following code is to output to a .txt file to plot the solution
     

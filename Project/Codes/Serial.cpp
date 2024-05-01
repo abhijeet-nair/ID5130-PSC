@@ -136,10 +136,10 @@ int main (int argc, char* argv[]) {
 
     for (k = 0; k <= Nl; k++) {
         for (i = k+1; i <= Nl; i++) {
-            C[i][k] = C[i][k]/C[k][k];
+            C[i][k] = C[i][k]/C[k][k]; // Multiplier (L part)
 
             for (j = k+1; j <= Nl; j++) {
-                C[i][j] += -C[i][k]*C[k][j];
+                C[i][j] += -C[i][k]*C[k][j]; // U part
             }
         }
     }
