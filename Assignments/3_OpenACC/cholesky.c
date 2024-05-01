@@ -7,7 +7,7 @@
 #include <math.h>
 
 #define TYPE		float
-#define N		10
+#define N		100
 #define SMALLVALUE	0.001
 
 void initmult(TYPE mat[][N])
@@ -37,7 +37,7 @@ void cholesky(TYPE a[][N])
   for (int ii = 0; ii < N; ++ii) {
     for (int jj = 0; jj < ii; ++jj) {
       for (int kk = 0; kk < jj; ++kk)
-	a[ii][jj] += a[ii][kk] * a[jj][kk];
+	a[ii][jj] += -a[ii][kk] * a[jj][kk];
       a[ii][jj] /= (a[jj][jj] > SMALLVALUE ? a[jj][jj] : 1);
       //a[ii][jj] /= a[jj][jj];	// divide by zero.
     }
@@ -51,7 +51,7 @@ int main()
 {
   TYPE a[N][N];
 
-  initmult(a);
+  init(a);
   cholesky(a);
   printMat(a);
 
