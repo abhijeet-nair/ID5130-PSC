@@ -52,6 +52,7 @@ void printMat (TYPE a[N][N]) {
 void cholesky (TYPE a[N][N], TYPE l[N][N], int stat) {
     // Ensure that stat is 0
     
+    // Symmetric Matrix Check
     #pragma acc parallel loop gang default(present) copyout(stat)
         for (int i = 0; i < N; i++) {        
             #pragma acc loop vector
@@ -66,9 +67,11 @@ void cholesky (TYPE a[N][N], TYPE l[N][N], int stat) {
         printf("Matrix is not symmetric...\n");
         return;
     }
-    stat = 0;
+
+    stat = 0; // Re-initializing, if modified
     double sum = 0;
 
+    // Main Cholesky Decomposition Code
     #pragma acc data present(a[:][:], l[:][:]) copyin(sum) copy(stat)
     {
         #pragma acc parallel num_gangs(1)
@@ -76,7 +79,7 @@ void cholesky (TYPE a[N][N], TYPE l[N][N], int stat) {
             for (int i = 0; i < N; i++) {        
                 for (int j = 0; j < i; j++) {
                     sum = 0;
-                    // can be parallelized
+                    // Can be parallelized
                     #pragma acc loop vector reduction(+: sum)
                         for (int k = 0; k < j; k++) {
                             sum += l[i][k] * l[j][k];
@@ -88,12 +91,13 @@ void cholesky (TYPE a[N][N], TYPE l[N][N], int stat) {
                 }
 
                 sum = 0;
-                // can be parallelized
+                // Can be parallelized
                 #pragma acc loop vector reduction(+: sum)
                     for (int k = 0; k < i; k++) {
                         sum += l[i][k] * l[i][k];
                     }
 
+                // Positive Definite Matrix Check
                 if (a[i][i] - sum < 0) {
                     stat = 1;
                 }
