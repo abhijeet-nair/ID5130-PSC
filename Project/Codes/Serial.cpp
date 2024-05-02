@@ -64,7 +64,7 @@ void printMatrix (double** a, int m, int n) {
 
 
 int main (int argc, char* argv[]) {
-    int fs = 0;
+    int fs = 1;
     int i, j, k, m, p;  // Indices
 
     int Nl     = 1000;    // No. of collocation points

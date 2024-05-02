@@ -64,7 +64,7 @@ void printMatrix (double** a, int m, int n) {
 
 
 int main (int argc, char* argv[]) {
-    int np = 1, cnt, fs = 0;
+    int np = 1, cnt, fs = 1;
 
     if (argc == 2) {
         np = strtol(argv[1], NULL, 10);
@@ -186,7 +186,7 @@ int main (int argc, char* argv[]) {
                 }
         }
 
-        int myid = omp_get_thread_num();
+        // int myid = omp_get_thread_num();
 
         // Origin location at time t
         #pragma omp for
@@ -223,9 +223,7 @@ int main (int argc, char* argv[]) {
                         Bjs += (gIVRes[0]*sn + gIVRes[1]*cs)*gw[j];
                     }
                     R[i] = -extflow[m] - Bjs;
-                }
-            
-            #pragma omp barrier
+                } 
 
             #pragma omp for reduction(+: R[Nl])
                 for (j = 0; j < m; j++) {
@@ -259,6 +257,8 @@ int main (int argc, char* argv[]) {
 
                 // Solved wake circulation
                 gw[m] = U[Nl];
+
+                dgbm_dt = 0;
             }
 
             // Solved body circulations
@@ -302,10 +302,7 @@ int main (int argc, char* argv[]) {
             }
 
             // Aerodynamic Load Calculations
-            if (myid == 0) {dgbm_dt = 0;}
-
-            #pragma omp barrier
-
+            // dgbm_dt has been made 0 in the last single section
             if (m == 1) {
                 #pragma omp for reduction(+: dgbm_dt)
                     for (i = 0; i < Nl; i++) {
@@ -319,13 +316,19 @@ int main (int argc, char* argv[]) {
                     }
             }
             
-            if (myid == 0) {
+            // if (myid == 0) {
+            //     dgbm_dt /= dt;
+            //     L[m] = 0;
+            //     D[m] = 0;
+            // }
+
+            // #pragma omp barrier
+            #pragma omp single
+            {
                 dgbm_dt /= dt;
                 L[m] = 0;
                 D[m] = 0;
             }
-
-            #pragma omp barrier
 
             #pragma omp for reduction(+: L[m], D[m])
                 for (i = 0; i < Nl; i++) {
@@ -340,7 +343,6 @@ int main (int argc, char* argv[]) {
                         getIndVel(gw[p], clx, cly, xw[p], yw[p], gIVRes);
                         vindw += gIVRes[0]*sn + gIVRes[1]*cs;
                     }
-
 
                     L[m] += gbm[1][i];
                     D[m] += vindw*gbm[1][i];

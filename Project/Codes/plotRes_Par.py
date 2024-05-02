@@ -35,22 +35,36 @@ for i in range(fcnt):
 # print(xwM[Nt-1][-10:],ywM[Nt-1][-10:])
 print("Loaded wake locations!!!")
 
-# fig1, ax1 = plt.subplots()
-# pdats = ax1.scatter([],[], s=3)
-fig1 = plt.figure(figsize=(8,6))
-pdats = plt.scatter([], [], s=4, c='r')
-plt.xlim(-110, 10*c)
-plt.ylim(-10, 10)
-plt.title("Parallel Code", fontsize=16)
-# pdat = pdats[0]
+# # fig1, ax1 = plt.subplots()
+# # pdats = ax1.scatter([],[], s=3)
+# fig1 = plt.figure(figsize=(8,6))
+# pdats = plt.scatter([], [], s=4, c='r')
+# plt.xlim(-110, 10*c)
+# plt.ylim(-10, 10)
+# plt.title("Parallel Code", fontsize=16)
+# # pdat = pdats[0]
 
-def animFunc(i):
-    pdats.set_offsets(np.c_[xwM[i][:i+1], ywM[i][:i+1]])
+# def animFunc(i):
+#     pdats.set_offsets(np.c_[xwM[i][:i+1], ywM[i][:i+1]])
     
     
-# for i in range(fcnt):
-#     print(np.c_[xwM[i][:], ywM[i][:]])
-#     print("\n")
+# # for i in range(fcnt):
+# #     print(np.c_[xwM[i][:], ywM[i][:]])
+# #     print("\n")
 
-anim = FuncAnimation(fig1, animFunc, frames=fcnt, interval=25)
+# anim = FuncAnimation(fig1, animFunc, frames=fcnt, interval=25)
+# plt.show()
+
+xte = x0[Nt-1] + c*np.cos(alp)
+yte = y0[Nt-1] - c*np.sin(alp)
+
+plt.figure(figsize=(8,6))
+plt.scatter(x0[Nt-1],y0[Nt-1],c='k',s=8)
+plt.plot([x0[Nt-1],xte],[y0[Nt-1],yte],c='k',lw=1)
+plt.scatter(xwM[Nt-1][:],ywM[Nt-1][:],s=4, c='r')
+plt.xlabel("x (in m)",size=14)
+plt.ylabel("x (in m)",size=14)
+plt.title("Wake structure (Parallel)",size=16)
+fig2 = plt.gcf()
 plt.show()
+fig2.savefig("./Res/Par.png", dpi=300, bbox_inches='tight')
