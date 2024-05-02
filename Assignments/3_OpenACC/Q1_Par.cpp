@@ -2,9 +2,12 @@
 #include <fstream>
 #include <math.h>
 
-#define N 10     // Problem size
-#define Ng 1     // No. of gangs
-#define tol 1e-6 // Tolerance
+// Problem size
+#define N 100
+// No. of gangs
+#define Ng 10
+// Tolerance
+#define tol 1e-6
 
 // Functions
 double myfunc (double x) {
@@ -18,7 +21,7 @@ double myderv (double x) {
 }
 
 void initFunc (double A[N][N], double b[N], double xgrid[N], double fvec[N], double fdvec[N], double h) {
-    #pragma acc parallel loop default(present)
+    #pragma acc parallel loop num_gangs(Ng) default(present)
         for (int i = 0; i < N; i++) {
             xgrid[i] = i*h;
             fvec[i] = myfunc(xgrid[i]);
@@ -27,7 +30,7 @@ void initFunc (double A[N][N], double b[N], double xgrid[N], double fvec[N], dou
 
     
     // Initializing A and b. Compiler thought it needed fvec[-1:12] here.
-    #pragma acc parallel loop default(present) present(fvec[0:N])
+    #pragma acc parallel loop num_gangs(Ng) default(present) present(fvec[0:N])
         for (int i = 0; i < N; i++)  {
             if (i == 0) {
                 A[i][0] = 1;
@@ -89,7 +92,7 @@ void subsFunc (double b[N], double L[N][N], double U[N][N], double x[N], double 
 }
 
 void multiplyMatrices (double A[N][N], double B[N][N], double C[N][N]) {
-    #pragma acc parallel loop collapse(2) default(present)
+    #pragma acc parallel loop num_gangs(Ng) collapse(2) default(present)
         for (int i = 0; i < N; i ++) {
             for (int j = 0; j < N; j ++) {
                 double sum = 0;
@@ -106,12 +109,13 @@ void multiplyMatrices (double A[N][N], double B[N][N], double C[N][N]) {
 void printVector(double a[N]) {
    for (int i = 0; i < N; i++) {
         if (abs(a[i]) < tol) {
-            printf("0\n");
+            printf("0      ");
         }
         else {
-            printf("%.4f\n", a[i]);
+            printf("%.4f ", a[i]);
         }
    }
+   printf("\n");
 }
 
 void printMat (double a[N][N]) {
@@ -173,19 +177,31 @@ int main (int argc, char* argv[]) {
     printf("\n");
 
     double val;
-    printf("res = \n");
-    for (int i = 0; i < N; i++) {
-        for (int j = 0; j < N; j++) {
-            val = A[i][j] - C[i][j];
-            if (abs(val) < tol) {
-                printf("0      ");
+    if (N <= 10) {
+        printf("res = \n");
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                val = A[i][j] - C[i][j];
+                if (abs(val) < tol) {
+                    printf("0      ");
+                }
+                else {
+                    printf("%.4f ",val);
+                }
             }
-            else {
-                printf("%.4f ",val);
+            printf("\n");
+        }
+    }
+    else {
+        val = 0;
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                val += pow(A[i][j] - C[i][j], 2);
             }
         }
-        printf("\n");
+        printf("Norm of res = %.4f",sqrt(val));
     }
+    
 
     
 
@@ -195,15 +211,15 @@ int main (int argc, char* argv[]) {
     // printVector(y);
 
     // The following code is to output to a .txt file to plot the solution
-    
-    // std::ofstream oFile("./Res/LU.txt");
+    // printf("\n");
+    // std::ofstream oFile("./ParLU.txt");
 
     // if (oFile.is_open()) {
-    //     for (i = 0; i < N; i++) {
+    //     for (int i = 0; i < N; i++) {
     //         oFile << x[i] << "," << fdvec[i] << "\n";
     //     }
     //     oFile.close();
-    //     printf("Saved in file ./Res/LU.txt\n");
+    //     printf("Saved in file ./ParLU.txt\n");
     // }
     // else {
     //     printf("Error opening file\n");

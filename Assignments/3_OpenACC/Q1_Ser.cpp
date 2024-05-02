@@ -86,12 +86,13 @@ void multiplyMatrices (double A[N][N], double B[N][N], double C[N][N]) {
 void printVector(double a[N]) {
    for (int i = 0; i < N; i++) {
         if (abs(a[i]) < tol) {
-            printf("0\n");
+            printf("0      ");
         }
         else {
-            printf("%.4f\n", a[i]);
+            printf("%.4f ", a[i]);
         }
    }
+   printf("\n");
 }
 
 void printMat (double a[N][N]) {
@@ -137,8 +138,8 @@ int main (int argc, char* argv[]) {
     LUfunc(A, L, U);
     subsFunc(b, L, U, x, y);
 
-    // double C[N][N];
-    // multiplyMatrices(L, U, C);
+    double C[N][N];
+    multiplyMatrices(L, U, C);
 
     printf("L = \n");
     printMat(L);
@@ -156,19 +157,31 @@ int main (int argc, char* argv[]) {
     printMat(A);
     printf("\n");
 
-    // double val;
-    // for (i = 0; i < N; i++) {
-    //     for (j = 0; j < N; j++) {
-    //         val = A[i][j] - C[i][j];
-    //         if (abs(val) < tol) {
-    //             printf("0      ");
-    //         }
-    //         else {
-    //             printf("%.4f ",val);
-    //         }
-    //     }
-    //     printf("\n");
-    // }
+    double val;
+    if (N <= 10) {
+        printf("res = \n");
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                val = A[i][j] - C[i][j];
+                if (abs(val) < tol) {
+                    printf("0      ");
+                }
+                else {
+                    printf("%.4f ",val);
+                }
+            }
+            printf("\n");
+        }
+    }
+    else {
+        val = 0;
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                val += pow(A[i][j] - C[i][j], 2);
+            }
+        }
+        printf("Norm of res = %.4f",sqrt(val));
+    }
 
     
 
@@ -178,19 +191,19 @@ int main (int argc, char* argv[]) {
     // printVector(y);
 
     // The following code is to output to a .txt file to plot the solution
-    
-    // std::ofstream oFile("./Res/LU.txt");
+    printf("\n");
+    std::ofstream oFile("./SerLU.txt");
 
-    // if (oFile.is_open()) {
-    //     for (i = 0; i < N; i++) {
-    //         oFile << x[i] << "," << fdvec[i] << "\n";
-    //     }
-    //     oFile.close();
-    //     printf("Saved in file ./Res/LU.txt\n");
-    // }
-    // else {
-    //     printf("Error opening file\n");
-    // }
+    if (oFile.is_open()) {
+        for (int i = 0; i < N; i++) {
+            oFile << x[i] << "," << fdvec[i] << "\n";
+        }
+        oFile.close();
+        printf("Saved in file ./SerLU.txt\n");
+    }
+    else {
+        printf("Error opening file\n");
+    }
 
     return 0;
 }
