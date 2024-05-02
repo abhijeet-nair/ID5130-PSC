@@ -2,9 +2,10 @@
 #include <fstream>
 #include <math.h>
 
-#define N 10     // Problem size
-#define Ng 1     // No. of gangs
-#define tol 1e-6 // Tolerance
+// Problem size
+#define N 750
+// Tolerance
+#define tol 1e-6
 
 // Functions
 double myfunc (double x) {
@@ -185,25 +186,25 @@ int main (int argc, char* argv[]) {
 
     
 
-    printf("\nx = \n");
-    printVector(x);
+    // printf("\nx = \n");
+    // printVector(x);
     // printf("\ny = \n");
     // printVector(y);
 
     // The following code is to output to a .txt file to plot the solution
-    printf("\n");
-    std::ofstream oFile("./SerLU.txt");
+    // printf("\n");
+    // std::ofstream oFile("./SerLU.txt");
 
-    if (oFile.is_open()) {
-        for (int i = 0; i < N; i++) {
-            oFile << x[i] << "," << fdvec[i] << "\n";
-        }
-        oFile.close();
-        printf("Saved in file ./SerLU.txt\n");
-    }
-    else {
-        printf("Error opening file\n");
-    }
+    // if (oFile.is_open()) {
+    //     for (int i = 0; i < N; i++) {
+    //         oFile << x[i] << "," << fdvec[i] << "\n";
+    //     }
+    //     oFile.close();
+    //     printf("Saved in file ./SerLU.txt\n");
+    // }
+    // else {
+    //     printf("Error opening file\n");
+    // }
 
     return 0;
 }

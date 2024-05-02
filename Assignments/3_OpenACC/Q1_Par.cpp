@@ -3,7 +3,7 @@
 #include <math.h>
 
 // Problem size
-#define N 100
+#define N 750
 // No. of gangs
 #define Ng 10
 // Tolerance
@@ -205,8 +205,8 @@ int main (int argc, char* argv[]) {
 
     
 
-    printf("\nx = \n");
-    printVector(x);
+    // printf("\nx = \n");
+    // printVector(x);
     // printf("\ny = \n");
     // printVector(y);
 
