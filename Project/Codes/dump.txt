@@ -31,3 +31,28 @@ for (i = 0; i <= Nl; i++) {
     printf("%.4f\n",U[i]);
 }
 printf("\n");
+
+
+
+
+    /*
+    -------------------------------------------------------
+    Data needed finally:
+    At each instant:
+    x0, y0, platex, platey, xw, yw, L, D
+    
+    Common:
+    times, rho, u, c
+
+    platex and platey will be calculated in python
+    So, instead send plate, cs and sn also as common
+    times is not there. So, send Nt and dt
+
+    Final List:
+    At each instant:
+    x0[Nt], y0[Nt], xw[Nt][Nt], yw[Nt][Nt], L[Nt], D[Nt]
+
+    Common:
+    Nt, Nl, dt, dx, rho, u, c, alp
+    -------------------------------------------------------
+    */

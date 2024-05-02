@@ -6,7 +6,6 @@
 
 void getIndVel(double g, double x, double y, double x0, double y0, double uv[2]) {
     double den = pow((x - x0), 2) + pow((y - y0), 2);
-    // printf("den = %.4f\n",den);
     uv[0] = (g*(y - y0))/(2*M_PI*den);
     uv[1] = -(g*(x - x0))/(2*M_PI*den);
 }
@@ -65,7 +64,7 @@ void printMatrix (double** a, int m, int n) {
 
 
 int main (int argc, char* argv[]) {
-    int np = 1, cnt, fs = 1;
+    int np = 1, cnt, fs = 0;
 
     if (argc == 2) {
         np = strtol(argv[1], NULL, 10);
@@ -74,32 +73,31 @@ int main (int argc, char* argv[]) {
     
     int i, j, k, m, p;  // Indices
 
-    int Nl     = 1000;    // No. of collocation points
-    double u   = 20;    // Freestream velocity
+    int Nl     = 100;    // No. of collocation points
+    double u   = 20;     // Freestream velocity
     double c   = 10;     // Chord length of the flat plate
-    double alp = 0;     // Angle of attack of the plate
-    double rho = 1.225; // Density
-    double dx  = c/Nl;  // Spacing between two points
+    double alp = 0;      // Angle of attack of the plate
+    double rho = 1.225;  // Density
+    double dx  = c/Nl;   // Spacing between two points
 
     double sn = sin(deg2rad(alp));
     double cs = cos(deg2rad(alp));
 
     double dt = 0.005;        // Time step
-    double tf = 5;           // Final time
-    int Nt = int(tf/dt) + 1; // No. of time steps
+    double tf = 5;            // Final time
+    int Nt = int(tf/dt) + 1;  // No. of time steps
 
     int n  = 1;
     int f1 = 1;
     int f2 = n*f1;
     int a  = 1;
 
-    printf("Nl = %d\nNt = %d\n",Nl,Nt);
+    printf("Nl = %d\nNt = %d\n\n",Nl,Nt);
+    double myTime = omp_get_wtime();
 
     double vorloc[Nl], colcloc[Nl], plate[Nl+1];
     plate[Nl] = Nl*dx;
 
-    // double A[Nl][Nl], B[Nl], gIVRes[2];
-    // double C[Nl+1][Nl+1] {}, U[Nl+1] {}, U1[Nl+1] {};
     double gIVRes[2], dgbm_dt, vindw, xw[Nt] {}, yw[Nt] {};
     double t_cur, sum, Bjs, uw, vw, clx, cly;
     double* B = new double[Nl];
@@ -116,13 +114,11 @@ int main (int argc, char* argv[]) {
         C[i] = new double[Nl+1] {};
     }
 
-    // double x0[Nt], y0[Nt], L[Nt], D[Nt];
     double* x0 = new double[Nt];
     double* y0 = new double[Nt];
     double* extflow = new double[Nt];
     double* L = new double[Nt];
     double* D = new double[Nt];
-    // double xw[Nt], yw[Nt];
     double** xwM = new double* [Nt];
     double** ywM = new double* [Nt];
     double* R = new double[Nl+1];
@@ -130,17 +126,14 @@ int main (int argc, char* argv[]) {
     double** gbm = new double* [2];
     gbm[0] = new double[Nl];
     gbm[1] = new double[Nl];
-    // double R[Nl+1], gw[Nt], gbm[2][Nl];
-
-    // double err, eps = 1e-6, lim = 1e7;
 
     for (m = 0; m < Nt; m++) {
         xwM[m] = new double[Nt] {};
         ywM[m] = new double[Nt] {};
     }
 
-
-    #pragma omp parallel num_threads(np) default(shared) private(i, j, gIVRes)
+    #pragma omp parallel num_threads(np) default(shared) \
+    private(i, j, k, m, p, t_cur, gIVRes, clx, cly, Bjs)
     {
         #pragma omp for
         for (i = 0; i < Nl; i++) {
@@ -177,22 +170,22 @@ int main (int argc, char* argv[]) {
                 }
             }
         }
-    }
 
-    // LU Decomposition and save in the same matrix
-    for (k = 0; k <= Nl; k++) {
-        for (i = k+1; i <= Nl; i++) {
-            C[i][k] = C[i][k]/C[k][k];
-
-            for (j = k+1; j <= Nl; j++) {
-                C[i][j] += -C[i][k]*C[k][j];
-            }
+        // LU Decomposition and save in the same matrix
+        for (k = 0; k <= Nl; k++) {
+            #pragma omp for
+                for (i = k+1; i <= Nl; i++) {
+                    C[i][k] = C[i][k]/C[k][k];
+                }
+            
+            #pragma omp for collapse(2)
+                for (i = k+1; i <= Nl; i++) {
+                    for (j = k+1; j <= Nl; j++) {
+                        C[i][j] += -C[i][k]*C[k][j];
+                    }
+                }
         }
-    }
 
-    // For loop for time marching
-    #pragma omp parallel num_threads(np) default(shared) private(i, j, k, m, p, t_cur, gIVRes, clx, cly, Bjs)
-    {
         int myid = omp_get_thread_num();
 
         // Origin location at time t
@@ -204,18 +197,8 @@ int main (int argc, char* argv[]) {
                 extflow[i] = u*sn - hdot(t_cur, f1, f2, a)*cs;
             }
         
-
+        // For loop for time marching
         for (m = 0; m < Nt; m++) {
-            // if (myid == 0) {
-            //     if (m % 50 == 0) {printf("m = %3.0f\n",double(m));}
-
-            //     // New wake location
-            //     xw[m] = x0[m] + (c + 0.1*dx)*cs;
-            //     yw[m] = y0[m] - (c + 0.1*dx)*sn;
-
-            //     R[Nl] = 0;
-            //     printf("xw = %.4f\tyw = %.4f\n",xw[m],yw[m]);
-            // }
             #pragma omp single
             {
                 if (m % 50 == 0) {printf("m = %3.0f\n",double(m));}
@@ -225,10 +208,7 @@ int main (int argc, char* argv[]) {
                 yw[m] = y0[m] - (c + 0.1*dx)*sn;
 
                 R[Nl] = 0;
-                // printf("xw = %.4f\tyw = %.4f\n",xw[m],yw[m]);
             }
-
-            // #pragma omp barrier
 
             #pragma omp for
                 for (i = 0; i < Nl; i++) {
@@ -240,10 +220,8 @@ int main (int argc, char* argv[]) {
                     Bjs = 0;
                     for (j = 0; j < m; j++) {
                         getIndVel(1, clx, cly, xw[j], yw[j], gIVRes);
-                        // Bj[i][j] = gIVRes[0]*sn + gIVRes[1]*cs;
                         Bjs += (gIVRes[0]*sn + gIVRes[1]*cs)*gw[j];
                     }
-                    // printf("i = %d\tBjs = %.4f\n",i,Bjs);
                     R[i] = -extflow[m] - Bjs;
                 }
             
@@ -252,44 +230,11 @@ int main (int argc, char* argv[]) {
             #pragma omp for reduction(+: R[Nl])
                 for (j = 0; j < m; j++) {
                     R[Nl] += gw[j];
-                    // printf("gw[%d] = %.4f\n",j,gw[j]);
                 }
-            
-            // if (myid == 0) {
-            //     R[Nl] = -R[Nl];
-            //     // printVector(R, Nl+1);
-
-            //     // Computation of unknown gbm and gwm
-            //     // Forward substitution
-            //     U1[0] = R[0];
-            //     for (i = 1; i <= Nl; i++) {
-            //         sum = 0;
-            //         for (j = 0; j < i; j++){
-            //             sum += C[i][j]*U1[j];
-            //         }
-            //         U1[i] = R[i] - sum;
-            //     }
-
-            //     // Backward substitution
-            //     U[Nl] = U1[Nl]/C[Nl][Nl];
-            //     for (i = Nl-1; i >= 0; i--) {
-            //         sum = 0;
-            //         for (j = i+1; j <= Nl; j++) {
-            //             sum += C[i][j]*U[j];
-            //         }
-            //         U[i] = (U1[i] - sum)/C[i][i];
-            //     }
-
-            //     // Solved wake circulation
-            //     gw[m] = U[Nl];
-            //     printVector(U, Nl+1);
-            // }
 
             #pragma omp single
             {
                 R[Nl] = -R[Nl];
-                // printf("R = \n");
-                // printVector(R, Nl+1);
 
                 // Computation of unknown gbm and gwm
                 // Forward substitution
@@ -314,11 +259,7 @@ int main (int argc, char* argv[]) {
 
                 // Solved wake circulation
                 gw[m] = U[Nl];
-                // printf("U = \n");
-                // printVector(U, Nl+1);
             }
-
-            // #pragma omp barrier
 
             // Solved body circulations
             #pragma omp for
@@ -333,10 +274,9 @@ int main (int argc, char* argv[]) {
                     vw = 0;
                 }
 
-                // #pragma omp barrier
-
                 #pragma omp for reduction(+: uw, vw)
                     for (i = 0; i < Nl; i++) {
+                        // Due to body vortices on wakes
                         getIndVel(gbm[1][i], xw[k], yw[k], vorloc[i]*cs + x0[m], -vorloc[i]*sn + y0[m], gIVRes);
                         uw += gIVRes[0];
                         vw += gIVRes[1];
@@ -344,6 +284,7 @@ int main (int argc, char* argv[]) {
                 
                 #pragma omp for reduction(+: uw, vw)
                     for (p = 0; p <= m; p++) {
+                        // Other wakes on TE wake
                         if (p != k) {
                             getIndVel(gw[p], xw[k], yw[k], xw[p], yw[p], gIVRes);
                             uw += gIVRes[0];
@@ -357,11 +298,6 @@ int main (int argc, char* argv[]) {
                     yw[k] += vw*dt;
                     xwM[m][k] = xw[k];
                     ywM[m][k] = yw[k];
-                    // printf("uw = %.4f\tvw = %.4f\n",uw,vw);
-                    // printVector(xw, 4);
-                    // printf("\n");
-                    // printVector(yw, 4);
-                    // printf("\n\n");
                 }
             }
 
@@ -415,16 +351,10 @@ int main (int argc, char* argv[]) {
                 L[m] = rho*(u*L[m] + dgbm_dt*c);
                 D[m] = rho*(D[m] + dgbm_dt*c*deg2rad(alp));
             }
-
-            // L[m] = rho*(u*L[m] + dgbm_dt*c);
-            // D[m] = rho*(D[m] + dgbm_dt*c*deg2rad(alp));
         } // End of time loop
     } // End of parallel
 
-    // printf("extflow = \n");
-    // printVector(extflow, 4);
-    // printMatrix(xwM, 10, 10);
-
+    printf("\n");
     if (fs == 1) {
         // File writing
         printf("Saving in file...\n");
@@ -470,5 +400,7 @@ int main (int argc, char* argv[]) {
     else {printf("Not saving in file...\n");}
 
     delete B, U, U1, A, C, x0, y0, extflow, L, D, xwM, ywM, R, gw, gbm;
+    myTime = omp_get_wtime() - myTime;
+    printf("\nTotal time = %.4f s\n",myTime);
     return 0;
 }
