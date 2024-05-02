@@ -1,0 +1,5 @@
+Pg 37:
+The current focus of low-speed aerodynamics will be limited to flows which are assumed to be inviscid and incompressible.
+
+From notes:
+In the field of low-speed aerodynamics, it is generally assumed that the flow is incompressible. This
