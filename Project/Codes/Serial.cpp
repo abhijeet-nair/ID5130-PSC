@@ -64,10 +64,10 @@ void printMatrix (double** a, int m, int n) {
 
 
 int main (int argc, char* argv[]) {
-    int fs = 1;
+    int fs = 0;
     int i, j, k, m, p;  // Indices
 
-    int Nl     = 100;    // No. of collocation points
+    int Nl     = 1000;    // No. of collocation points
     double u   = 20;    // Freestream velocity
     double c   = 10;     // Chord length of the flat plate
     double alp = 0;     // Angle of attack of the plate

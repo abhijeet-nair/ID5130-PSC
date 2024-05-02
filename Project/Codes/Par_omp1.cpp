@@ -64,16 +64,16 @@ void printMatrix (double** a, int m, int n) {
 
 
 int main (int argc, char* argv[]) {
-    int np = 1, cnt, fs = 1;
+    int np = 1, cnt, fs = 0;
 
     if (argc == 2) {
         np = strtol(argv[1], NULL, 10);
     }
-    printf("Running in code with %d processors...\n",np);
+    printf("Running the code with %d processors...\n",np);
     
     int i, j, k, m, p;  // Indices
 
-    int Nl     = 100;    // No. of collocation points
+    int Nl     = 1000;    // No. of collocation points
     double u   = 20;     // Freestream velocity
     double c   = 10;     // Chord length of the flat plate
     double alp = 0;      // Angle of attack of the plate
