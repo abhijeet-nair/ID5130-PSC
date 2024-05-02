@@ -64,7 +64,7 @@ void printMatrix (double** a, int m, int n) {
 
 
 int main (int argc, char* argv[]) {
-    int np = 1, cnt, fs = 0;
+    int np = 1, cnt, fs = 1;
 
     if (argc == 2) {
         np = strtol(argv[1], NULL, 10);
