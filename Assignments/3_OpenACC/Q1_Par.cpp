@@ -17,25 +17,59 @@ double myderv (double x) {
     return fdot;
 }
 
-void LUfunc1 (double A[N][N], double L[N][N], double U[N][N]) {
-    for (int k = 0; k < N; k++) {
-        L[k][k] = 1;
-        for (int i = k + 1; i < N; i++) {
-            L[i][k] = A[i][k]/A[k][k]; // Multiplier (L part)
-        }
+// void LUfunc1 (double A[N][N], double L[N][N], double U[N][N]) {
+//     for (int k = 0; k < N; k++) {
+//         L[k][k] = 1;
+//         for (int i = k + 1; i < N; i++) {
+//             L[i][k] = A[i][k]/A[k][k]; // Multiplier (L part)
+//         }
 
-        for (int i = k + 1; i < N; i++) {
-            for (int j = k + 1; j < N; j++) {
-                U[i][j] += -L[i][k]*A[k][j]; // U part
-            }
-        }
-    }
-}
-
-// void LUfunc2 (double A[N][N], double L[N][N], double U[N][N]) {
-
+//         for (int i = k + 1; i < N; i++) {
+//             for (int j = k + 1; j < N; j++) {
+//                 U[i][j] += -L[i][k]*A[k][j]; // U part
+//             }
+//         }
+//     }
 // }
 
+void LUfunc2 (double A[N][N], double L[N][N], double U[N][N]) {
+    int i = 0, j = 0, k = 0;
+    // for (i = 0; i < N; i++)
+    // {
+    //     for (j = 0; j < N; j++)
+    //     {
+    //         if (j < i)
+    //             L[j][i] = 0;
+    //         else
+    //         {
+    //             L[j][i] = A[j][i];
+
+    //             for (k = 0; k < i; k++)
+    //             {
+    //                 L[j][i] = L[j][i] - L[j][k] * U[k][i];
+    //             }
+    //         }
+    //     }
+    //     for (j = 0; j < N; j++)
+    //     {
+    //         if (j < i)
+    //             U[i][j] = 0;
+    //         else if (j == i)
+    //             U[i][j] = 1;
+    //         else
+    //         {
+    //             U[i][j] = A[i][j] / L[i][i];
+    //             for (k = 0; k < i; k++)
+    //             {
+    //                 U[i][j] = U[i][j] - ((L[i][k] * U[k][j]) / L[i][i]);
+    //             }
+    //         }
+    //     }
+    // }
+    for (i = 0; i < N; i++) {
+        for (j = 0; j < i; )
+    }
+}
 
 void multiplyMatrices (double A[N][N], double B[N][N], double C[N][N]) {
     for (int i = 0; i < N; i ++) {
@@ -120,7 +154,7 @@ int main (int argc, char* argv[]) {
     }
 
     // Ax = b => LUx = b => Ly = b & Ux = y
-    LUfunc1(A, L, U);
+    LUfunc2(A, L, U);
 
     double C[N][N];
     multiplyMatrices(L, U, C);
