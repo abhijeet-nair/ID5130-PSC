@@ -51,3 +51,93 @@
 //         for (j = 0; j < i; )
 //     }
 // }
+
+// // TEST FUNCTION ==> TEST PASSED
+// void initmult (TYPE mat[][N]) {
+//     for (int i = 0; i < N; i++) {
+//         for (int j = 0; j < i; j++) {
+//             mat[i][j] = abs(i - j) / pow(N,2);
+//             mat[j][i] = mat[i][j];
+//         }
+
+//         // PD
+//         // mat[i][i] = i + 1;
+
+//         // PSD
+//         // if (i < N-1) {
+//         //     mat[i][i] = i + 1;
+//         // }
+//         // else {
+//         //     mat[i][i] = 0;
+//         // }
+
+//         // ND
+//         // mat[i][i] = -(i + 1);
+//     }
+// }
+
+
+void cholesky (TYPE a[N][N], TYPE l[N][N], int stat) {
+    // Ensure that stat is 0
+    
+    // Symmetric Matrix Check
+    #pragma acc parallel loop gang default(present) copyout(stat)
+        for (int i = 0; i < N; i++) {        
+            #pragma acc loop vector
+                for (int j = 0; j < i; j++) {
+                    if (myabs(a[i][j] - a[j][i]) > tol) {
+                        stat = 1;
+                    }
+                }
+        }
+    
+    if (stat == 1) {
+        printf("Matrix is not symmetric...\n");
+        return;
+    }
+
+    stat = 0; // Re-initializing, if modified
+    double sum = 0;
+
+    // Main Cholesky Decomposition Code
+    #pragma acc data present(a[:][:], l[:][:]) copyin(sum) copy(stat)
+    {
+        #pragma acc parallel num_gangs(1)
+        {
+            for (int i = 0; i < N; i++) {        
+                for (int j = 0; j < i; j++) {
+                    sum = 0;
+                    // Can be parallelized
+                    #pragma acc loop vector reduction(+: sum)
+                        for (int k = 0; k < j; k++) {
+                            sum += l[i][k] * l[j][k];
+                        }
+
+                    l[i][j] = a[i][j] - sum;
+                    
+                    l[i][j] /= (l[j][j] > sval ? l[j][j] : 1);
+                }
+
+                sum = 0;
+                // Can be parallelized
+                #pragma acc loop vector reduction(+: sum)
+                    for (int k = 0; k < i; k++) {
+                        sum += l[i][k] * l[i][k];
+                    }
+
+                // Positive Definite Matrix Check
+                if (a[i][i] - sum < 0) {
+                    stat = 1;
+                }
+
+                l[i][i] = sqrt(a[i][i] - sum);
+            }
+        }
+    }
+}
+
+
+tSer = np.array([0.000027, 0.003533, 0.799138])
+tCLK = np.array([0.232028, 0.285190, 2.862648])
+# tPGI = np.array([17, 43, 959])*1e-6
+tPGI = np.array([0.000243, 0.02583, 2.627272])

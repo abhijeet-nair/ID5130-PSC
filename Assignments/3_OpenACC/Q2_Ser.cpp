@@ -2,9 +2,13 @@
 #include <math.h>
 #include <time.h>
 
+// Datatype
 #define TYPE float
+// Problem size
 #define N 10
+// A small value
 #define sval 0.001
+// Tolerance
 #define tol 1e-6
 
 // OG FUNCTION
@@ -19,36 +23,22 @@ void initmult (TYPE mat[][N]) {
     }
 }
 
-// // TEST FUNCTION ==> TEST PASSED
-// void initmult (TYPE mat[][N]) {
-//     for (int i = 0; i < N; i++) {
-//         for (int j = 0; j < i; j++) {
-//             mat[i][j] = abs(i - j) / pow(N,2);
-//             mat[j][i] = mat[i][j];
-//         }
-
-//         // PD
-//         // mat[i][i] = i + 1;
-
-//         // PSD
-//         // if (i < N-1) {
-//         //     mat[i][i] = i + 1;
-//         // }
-//         // else {
-//         //     mat[i][i] = 0;
-//         // }
-
-//         // ND
-//         // mat[i][i] = -(i + 1);
-//     }
-// }
-
-void printMat (TYPE a[][N]) {
-    for (int i = 0; i < N; i++) {
-        for (int j = 0; j < N; j++) {
-            printf("%.4f ", a[i][j]);
+void printMat (TYPE a[N][N]) {
+    if (N > 10) {
+        printf("Avoiding printing of large matrix...\n");
+    }
+    else {
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                if (abs(a[i][j]) < tol) {
+                    printf("0      ");
+                }
+                else {
+                    printf("%.4f ", a[i][j]);
+                }
+            }
+            printf("\n");
         }
-        printf("\n");
     }
 }
 
@@ -84,15 +74,24 @@ void cholesky (TYPE a[N][N], TYPE l[N][N]) {
 
 
 int main () {
-    TYPE a[N][N];
+    clock_t t;
+    
+    TYPE a[N][N], l[N][N] {};
+    t = clock();
 
     initmult(a);
+    cholesky(a, l);
+
+    t = clock() - t;
+
+    printf("A = \n");
     printMat(a);
     printf("\n");
-
-    TYPE l[N][N] {};
-    cholesky(a, l);
+    
+    printf("L = \n");
     printMat(l);
 
+    double time_taken = double(t) / double(CLOCKS_PER_SEC);
+    printf("\nTime taken = %.6f secs\n", time_taken);
     return 0;
 }

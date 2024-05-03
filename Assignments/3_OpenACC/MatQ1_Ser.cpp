@@ -1,14 +1,11 @@
 #include <iostream>
 #include <fstream>
 #include <math.h>
-#include <time.h>
 
 // Problem size
-#define N 1000
+#define N 750
 // Tolerance
 #define tol 1e-6
-// For timing
-#define billion 1000000000L
 
 // Functions
 double myfunc (double x) {
@@ -46,46 +43,57 @@ void initFunc (double A[N][N], double b[N], double fvec[N], double h) {
     }
 }
 
-void LUfunc (double A[N][N], double L[N], double U[N]) {
-    U[0] = A[0][0];
-    
+void LUfunc (double A[N][N], double L[N][N], double U[N][N]) {
+    U[0][0] = A[0][0];
+    U[0][1] = A[0][1];
+    L[0][0] = 1;
     for (int i = 1; i < N; i++) {
-        L[i] = A[i][i-1] / U[i-1];
-        U[i] = A[i][i] - L[i] * A[i-1][i];
+        L[i][i] = 1;
+        L[i][i-1] = A[i][i-1] / U[i-1][i-1];
+        U[i][i] = A[i][i] - L[i][i-1] * A[i-1][i];
+        if (i < N-1) {
+            U[i][i+1] = A[i][i+1];
+        }
     }
 }
 
-void subsFunc (double A[N][N], double b[N], double L[N], double U[N], double x[N], double y[N]) {
+void subsFunc (double b[N], double L[N][N], double U[N][N], double x[N], double y[N]) {
     // Ly = b
-    y[0] = b[0];
+    y[0] = b[0] / L[0][0];
     
     for (int i = 1; i < N; i++) {
-        y[i] = b[i] - L[i] * y[i-1];
+        y[i] = b[i] - L[i][i-1] * y[i-1];
     }
 
     // Ux = y
-    x[N-1] = y[N-1] / U[N-1];
+    x[N-1] = y[N-1] / U[N-1][N-1];
 
     for (int i = N-2; i >= 0; i--) {
-        x[i] = (y[i] - A[i][i+1] * x[i+1]) / U[i];
+        x[i] = (y[i] - U[i][i+1] * x[i+1]) / U[i][i];
     }
 }
 
+void multiplyMatrices (double A[N][N], double B[N][N], double C[N][N]) {
+    for (int i = 0; i < N; i ++) {
+		for (int j = 0; j < N; j ++) {
+			C[i][j] = 0;
+			for (int k = 0; k < N; k ++) {
+				C[i][j] += A[i][k]*B[k][j];
+			}
+		}
+	}
+}
+
 void printVector(double a[N]) {
-    if (N > 10) {
-        printf("Avoiding printing of large vector...\n");
-    }
-    else {
-        for (int i = 0; i < N; i++) {
-                if (abs(a[i]) < tol) {
-                    printf("0      ");
-                }
-                else {
-                    printf("%.4f ", a[i]);
-                }
+   for (int i = 0; i < N; i++) {
+        if (abs(a[i]) < tol) {
+            printf("0      ");
         }
-        printf("\n");
-    }
+        else {
+            printf("%.4f ", a[i]);
+        }
+   }
+   printf("\n");
 }
 
 void printMat (double a[N][N]) {
@@ -110,20 +118,14 @@ void printMat (double a[N][N]) {
 
 
 int main (int argc, char* argv[]) {
-    struct timespec start_t, end_t;
-    uint64_t diff;
-    
     int i {}, j {};
-    printf("N = %d\n\n",N);
+    printf("\n");
 
     double A[N][N] {}, xgrid[N];
     double b[N], x[N], y[N];
     double fvec[N], fdvec[N];
-    double L[N] {}, U[N] {};
+    double L[N][N] {}, U[N][N] {};
     double h = 3/(double(N-1));
-    int fs = 0;
-
-    clock_gettime(CLOCK_MONOTONIC, &start_t);
 
     for (i = 0; i < N; i++) {
         xgrid[i] = i*h;
@@ -135,75 +137,74 @@ int main (int argc, char* argv[]) {
 
     // Ax = b => LUx = b => Ly = b & Ux = y
     LUfunc(A, L, U);
-    subsFunc(A, b, L, U, x, y);
+    subsFunc(b, L, U, x, y);
 
-    clock_gettime(CLOCK_MONOTONIC, &end_t);
+    double C[N][N];
+    multiplyMatrices(L, U, C);
+
+    printf("L = \n");
+    printMat(L);
+    printf("\n");
+
+    printf("U = \n");
+    printMat(U);
+    printf("\n");
+
+    // printf("C = \n");
+    // printMat(C);
+    // printf("\n");
 
     printf("A = \n");
     printMat(A);
     printf("\n");
 
-    printf("L = \n");
-    printVector(L);
-    printf("\n");
-
-    printf("U = \n");
-    printVector(U);
-    printf("\n");
-
-    printf("\nx = \n");
-    printVector(x);
-    printf("\n");
-
-    // printf("\ny = \n");
-    // printVector(y);
-    // printf("\n");
-
     double val;
     if (N <= 10) {
         printf("res = \n");
-
         for (int i = 0; i < N; i++) {
-            val = x[i] = fdvec[i];
-            
-            if (abs(val) < tol) {
-                printf("0\n");
+            for (int j = 0; j < N; j++) {
+                val = A[i][j] - C[i][j];
+                if (abs(val) < tol) {
+                    printf("0      ");
+                }
+                else {
+                    printf("%.4f ",val);
+                }
             }
-            else {
-                printf("%.4f\n",val);
-            }
+            printf("\n");
         }
     }
     else {
         val = 0;
-
         for (int i = 0; i < N; i++) {
-            val += pow(x[i] - fdvec[i], 2);
+            for (int j = 0; j < N; j++) {
+                val += pow(A[i][j] - C[i][j], 2);
+            }
         }
-
-        printf("Norm of res = %.4f (log = %.4f)\n",sqrt(val),0.5*log10(val));
+        printf("Norm of res = %.4f",sqrt(val));
     }
+
+    
+
+    // printf("\nx = \n");
+    // printVector(x);
+    // printf("\ny = \n");
+    // printVector(y);
 
     // The following code is to output to a .txt file to plot the solution
-    if (fs == 1) {
-        printf("\n");
-        std::ofstream oFile("./SerLU.txt");
+    // printf("\n");
+    // std::ofstream oFile("./SerLU.txt");
 
-        if (oFile.is_open()) {
-            for (int i = 0; i < N; i++) {
-                oFile << x[i] << "," << fdvec[i] << "\n";
-            }
-            oFile.close();
-            printf("Saved in file ./SerLU.txt\n");
-        }
-        else {
-            printf("Error opening file\n");
-        }
-    }
-    else {printf("Not saving in file...\n");}
+    // if (oFile.is_open()) {
+    //     for (int i = 0; i < N; i++) {
+    //         oFile << x[i] << "," << fdvec[i] << "\n";
+    //     }
+    //     oFile.close();
+    //     printf("Saved in file ./SerLU.txt\n");
+    // }
+    // else {
+    //     printf("Error opening file\n");
+    // }
 
-
-    diff = billion * (end_t.tv_sec - start_t.tv_sec) + end_t.tv_nsec - start_t.tv_nsec;
-    printf("\nTime taken = %.6f secs\n", double(diff)/100000000.0);
     return 0;
 }
