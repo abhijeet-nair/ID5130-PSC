@@ -1,0 +1,214 @@
+#include <iostream>
+string
+iomanip
+ios
+limits
+cmath
+
+All std::-
+cout - o/p
+cin - i/p
+cerr - error
+clog - log
+string (with string lib)
+getline (to get entire line, with spaces)
+setprecision(20) (with iomanip, used as std::cout << std::setprecision)
+boolalpha
+{
+	Printing bool directly prints it as 0, 1
+	(to force boolean o/p, used as std::cout << std::boolalpha)
+	complement- noboolalpha
+}
+endl - New line
+
+sizeof - Size
+int 4
+short 2
+long 4 or 8  (suffix ul, not needed)
+long long 8  (suffix ll, not needed)
+unsigned (suffix u, not needed)
+signed
+double 8 
+float 4 (put suffix f at end of number)
+long double 16 (put suffix L at end of number)
+bool 1
+char 1 (' ', for ASCII, char var = 65)
+static_cast<int>(var) - to print as integer
+auto
+const
+
++
+-
+*
+/ - quotient
+% - remainder
+
+Assignment:
+type var {val}; (use this with empty val to get 0)
+type var (val);
+type var = val;
+
+a++ - postfix (after use increment)
+++a - prefix (before use increment)
+
++=, -=, *=, /=, %= (modification in place)
+
+<, >, <=, >=, ==, !=
+&&, ||, !a
+
+Output Formatting: (needs iomanip, ios libraries)
+std::endl - newline
+"\n" - newline
+std::flush - Flush out to terminal directly
+std::setw(n) - Set width of n characters in output
+std::left - left justification
+std::right - right justification
+std::internal - sign is left justified, text is right justified
+std::setfill(char) - what to print in empty space
+std::boolalpha - print as bool
+std::noboolalpha - print as number
+std::showpos - show the + symbol for positive number
+std::dec - print as decimal
+std::oct - print as octal (doesnt work for floating)
+std::hex - print as hex (doesnt work for floating)
+std::showbase - to show the base (0x, 0)
+std::uppercase - to print as uppercase
+std::scientific - scientific format (is default)
+std::fixed - without scientific format
+std::cout.unsetf(std::ios::scientific | std::ios::fixed); - to reset to default
+std::setprecision - set precision to display
+std::point - show decimal point for floating number
+
+Numeric limits - limits library
+func - min(), max(), lowest()
+min - smallest number (for float it is smallest +ve number)
+max - largest number
+lowest - largest (mag) -ve number (for float)
+types - short, unsigned short, int, unsigned int, long, float, double, long double
+
+std::numeric_limits<type>::func
+check numeric_limits doc
+
+Math - cmath library (all with std::)
+floor
+ceil
+abs
+exp
+pow(a,b) = a^b
+log - ln
+log10
+sqrt
+round - halfway rounded away from zero
+
+check cmath doc for other functions
+
+Flow control:
+if (condition) {
+
+}
+else {
+
+}
+
+if (cond) {
+
+}
+else if (cond) {
+
+}
+
+switch (cond) {	// condition is integral types or enums
+
+	case c1: {
+
+	}
+	break;
+
+	case c2: {
+
+	}
+	break;
+
+	default: {
+
+	}
+}
+
+can group cases -
+case c1:
+case c2:
+case c3: {
+
+}
+break;
+
+Ternary- (opt1 and opt2 must be same type, can use for assignment)
+result = (cond) ? opt1 : opt2;
+
+Equivalent if else-
+if (cond) {
+	result = opt1;
+}
+else {
+	result = opt2;
+}
+
+Loops: (i++ and ++i doesnt matter)
+iterator for for loops can be declared inside or outside, affecting its scope
+for(int i{}; i <= 10; ++i) { // size_t can used instead of unsigned int
+
+}
+
+while - CHECK THEN DO
+iterator for while loops is defined outside
+size_t i {0};
+
+while (i < COUNT) {
+	commands...
+	++i;
+}
+
+do while - DO THEN CHECK
+iterator for do while loops is defined outside
+size_t i {0};
+
+do {
+	commands...
+	++i;
+} while (i < COUNT);
+
+Range based for loop:
+for (auto value : array) {
+
+}
+
+Arrays:
+Declaration - type name[size];
+or
+type name[size] {element1, element2, ..., lastelement}; // those left out made zero
+or
+type name[] {element1, element2, ..., lastelement};
+can make it const
+
+Reading - name[0], name[1], ...
+
+Get size in runtime - std::size(array)
+
+char name[size] {elements}
+Can print it directly with std::cout without loop
+std::cout << name;
+
+But this can lead to unwanted stuff printed at the end.
+So, add a null terminating character '\0' at the end, or, initialize with one extra length.
+Eg: char msg[6] {'H', 'e', 'l', 'l', 'o'};
+std::cout << msg;
+
+Can define a literal C string (string of character, defined with " ")
+char msg[] {"Hello"};
+This comes with a \0 added implicitly
+
+
+Pointers: (denoted by a *)
+Points to the address of another variable
+
+int * pntr --> Pointer to 

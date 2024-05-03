@@ -1,0 +1,25 @@
+#include <iostream>
+string
+iomanip
+
+All std::-
+cout
+cin
+cerr
+clog
+string (with string lib)
+getline (to get entire line, with spaces)
+setprecision(20) (with iomanip, used as std::cout << std::setprecision)
+boolalpha (to force boolean o/p, used as std::cout << std::boolalpha)
+
+sizeof - Size
+int 4
+short 2
+long 4 or 8
+long long 8
+unsigned
+signed
+double 8 
+float 4 (put suffix f at end of number)
+long double 16 (put suffix L at end of number)
+bool 1
