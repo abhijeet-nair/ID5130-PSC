@@ -6,7 +6,7 @@
 // Problem size
 #define N 1000
 // No. of gangs
-#define Ng 1000
+#define Ng 10
 // Tolerance
 #define tol 1e-6
 // For timing

@@ -62,7 +62,7 @@ import matplotlib.pyplot as plt
 # tSer = 0.002691
 # nG = np.array([10,100,1000])
 # tCLK = np.array([2.464049, 2.386697, 2.414653])
-# tPGI = np.array([53, 50, 50])*1e-6
+# tPGI = np.array([3089, 2692, 2746])*1e-6
 
 # plt.figure(figsize=(8,6))
 # plt.semilogx(nG, tPGI*1e6, 'r', lw=1, marker='o', ms=5, mec='k', mfc='k')
@@ -70,7 +70,7 @@ import matplotlib.pyplot as plt
 # plt.ylabel("Time taken (in us)", size=14)
 # plt.title("Time taken vs. Number of gangs", size=16)
 # plt.grid()
-# plt.ylim(40,60)
+# plt.ylim(2500,3500)
 # fig3 = plt.gcf()
 # plt.show()
 # # fig3.savefig("./Q1T.png", dpi=300, bbox_inches='tight')
