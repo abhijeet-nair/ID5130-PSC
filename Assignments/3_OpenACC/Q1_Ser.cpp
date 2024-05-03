@@ -7,20 +7,20 @@
 #define N 1000
 // Tolerance
 #define tol 1e-6
-// For timing
-#define billion 1000000000L
 
-// Functions
+// Given function
 double myfunc (double x) {
     double f = sin(5*x);
     return f;
 }
 
+// Actual derivative function
 double myderv (double x) {
     double fdot = 5*cos(5*x);
     return fdot;
 }
 
+// Initialization Function
 void initFunc (double A[N][N], double b[N], double fvec[N], double h) {
     // Initializing A and b
     for (int i = 0; i < N; i++)  {
@@ -46,6 +46,7 @@ void initFunc (double A[N][N], double b[N], double fvec[N], double h) {
     }
 }
 
+// LU Decomposition for Tridiagonal systems (Check notes)
 void LUfunc (double A[N][N], double L[N], double U[N]) {
     U[0] = A[0][0];
     
@@ -55,6 +56,7 @@ void LUfunc (double A[N][N], double L[N], double U[N]) {
     }
 }
 
+// Forward and backward substitution to get final solution
 void subsFunc (double A[N][N], double b[N], double L[N], double U[N], double x[N], double y[N]) {
     // Ly = b
     y[0] = b[0];
@@ -71,6 +73,7 @@ void subsFunc (double A[N][N], double b[N], double L[N], double U[N], double x[N
     }
 }
 
+// Vector printing
 void printVector(double a[N]) {
     if (N > 10) {
         printf("Avoiding printing of large vector...\n");
@@ -88,6 +91,7 @@ void printVector(double a[N]) {
     }
 }
 
+// Matrix printing
 void printMat (double a[N][N]) {
     if (N > 10) {
         printf("Avoiding printing of large matrix...\n");
@@ -110,8 +114,7 @@ void printMat (double a[N][N]) {
 
 
 int main (int argc, char* argv[]) {
-    struct timespec start_t, end_t;
-    uint64_t diff;
+    clock_t t;
     
     int i {}, j {};
     printf("N = %d\n\n",N);
@@ -123,7 +126,7 @@ int main (int argc, char* argv[]) {
     double h = 3/(double(N-1));
     int fs = 0;
 
-    clock_gettime(CLOCK_MONOTONIC, &start_t);
+    t = clock();
 
     for (i = 0; i < N; i++) {
         xgrid[i] = i*h;
@@ -137,7 +140,7 @@ int main (int argc, char* argv[]) {
     LUfunc(A, L, U);
     subsFunc(A, b, L, U, x, y);
 
-    clock_gettime(CLOCK_MONOTONIC, &end_t);
+    t = clock() - t;
 
     printf("A = \n");
     printMat(A);
@@ -203,7 +206,7 @@ int main (int argc, char* argv[]) {
     else {printf("Not saving in file...\n");}
 
 
-    diff = billion * (end_t.tv_sec - start_t.tv_sec) + end_t.tv_nsec - start_t.tv_nsec;
-    printf("\nTime taken = %.6f secs\n", double(diff)/100000000.0);
+    double time_taken = double(t) / double(CLOCKS_PER_SEC);
+    printf("\nTime taken = %.6f secs\n", time_taken);
     return 0;
 }

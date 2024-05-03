@@ -9,20 +9,20 @@
 #define Ng 10
 // Tolerance
 #define tol 1e-6
-// For timing
-#define billion 1000000000L
 
-// Functions
+// Given function
 double myfunc (double x) {
     double f = sin(5*x);
     return f;
 }
 
+// Actual derivative function
 double myderv (double x) {
     double fdot = 5*cos(5*x);
     return fdot;
 }
 
+// Function to make all elements of a matrix zero
 void nullFunc (double A[N][N]) {
     #pragma acc parallel loop num_gangs(Ng) collapse(2) default(present)
         for (int i = 0; i < N; i++) {
@@ -32,6 +32,7 @@ void nullFunc (double A[N][N]) {
         }
 }
 
+// Initialization Function
 void initFunc (double A[N][N], double b[N], double xgrid[N], double fvec[N], double fdvec[N], double h) {
     #pragma acc parallel num_gangs(Ng) default(present)  present(fvec[0:N])
     {
@@ -68,6 +69,7 @@ void initFunc (double A[N][N], double b[N], double xgrid[N], double fvec[N], dou
     }
 }
 
+// LU Decomposition for Tridiagonal systems (Check notes)
 void LUfunc (double A[N][N], double L[N], double U[N]) {
     #pragma acc serial default(present)
     {    
@@ -81,6 +83,7 @@ void LUfunc (double A[N][N], double L[N], double U[N]) {
     }
 }
 
+// Forward and backward substitution to get final solution
 void subsFunc (double A[N][N], double b[N], double L[N], double U[N], double x[N], double y[N]) {
     #pragma acc serial default(present)
     {
@@ -100,6 +103,7 @@ void subsFunc (double A[N][N], double b[N], double L[N], double U[N], double x[N
     }
 }
 
+// Vector printing
 void printVector(double a[N]) {
     if (N > 10) {
         printf("Avoiding printing of large vector...\n");
@@ -117,6 +121,7 @@ void printVector(double a[N]) {
     }
 }
 
+// Matrix printing
 void printMat (double a[N][N]) {
     if (N > 10) {
         printf("Avoiding printing of large matrix...\n");
@@ -139,8 +144,7 @@ void printMat (double a[N][N]) {
 
 
 int main (int argc, char* argv[]) {
-    struct timespec start_t, end_t;
-    uint64_t diff;
+    clock_t t;
 
     printf("N = %d\n\n",N);
 
@@ -151,7 +155,7 @@ int main (int argc, char* argv[]) {
     double h = 3/(double(N-1));
     int fs = 0;
 
-    clock_gettime(CLOCK_MONOTONIC, &start_t);
+    t = clock();
 
     #pragma acc data create(A[0:N][0:N], b[0:N], xgrid[0:N], y[0:N], fvec[0:N]) \
     copyin(h) copyout(L[0:N], U[0:N], x[0:N], fdvec[0:N])
@@ -164,7 +168,7 @@ int main (int argc, char* argv[]) {
         subsFunc(A, b, L, U, x, y);
     }
 
-    clock_gettime(CLOCK_MONOTONIC, &end_t);
+    t = clock() - t;
 
     // printf("A = \n");
     // printMat(A);
@@ -230,7 +234,7 @@ int main (int argc, char* argv[]) {
     else {printf("Not saving in file...\n");}
 
 
-    diff = billion * (end_t.tv_sec - start_t.tv_sec) + end_t.tv_nsec - start_t.tv_nsec;
-    printf("\nTime taken = %.6f secs\n", double(diff)/100000000.0);
+    double time_taken = double(t) / double(CLOCKS_PER_SEC);
+    printf("\nTime taken = %.6f secs\n", time_taken);
     return 0;
 }

@@ -11,7 +11,7 @@
 // Tolerance
 #define tol 1e-6
 
-// OG FUNCTION
+// Initialization Function
 void initmult (TYPE mat[][N]) {
     for (int i = 0; i < N; i++) {
         for (int j = 0; j < i; j++) {
@@ -23,6 +23,7 @@ void initmult (TYPE mat[][N]) {
     }
 }
 
+// Matrix printing
 void printMat (TYPE a[N][N]) {
     if (N > 10) {
         printf("Avoiding printing of large matrix...\n");
@@ -42,6 +43,7 @@ void printMat (TYPE a[N][N]) {
     }
 }
 
+// Cholesky Decomposition. Also, checks for Positive Definiteness
 void cholesky (TYPE a[N][N], TYPE l[N][N]) {
     for (int i = 0; i < N; i++) {        
         for (int j = 0; j < i; j++) {

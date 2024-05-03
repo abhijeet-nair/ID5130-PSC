@@ -4,12 +4,19 @@
 #include <fstream>
 #include <omp.h>
 
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+// Compile with OpenMP also. I am using the timing
+// function from the omp.h library.
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+// Function to get induced velocity
 void getIndVel(double g, double x, double y, double x0, double y0, double uv[2]) {
     double den = pow((x - x0), 2) + pow((y - y0), 2);
     uv[0] = (g*(y - y0))/(2*M_PI*den);
     uv[1] = -(g*(x - x0))/(2*M_PI*den);
 }
 
+// Function to get the motion of the flat plate
 double h (double t, int f1, int f2, int a) {
     double T1 = 1/double(f1);
     double T  = 0.5*(T1 + 1/double(f2));
@@ -26,6 +33,7 @@ double h (double t, int f1, int f2, int a) {
     return res;
 }
 
+// Function to get the motion of the flat plate
 double hdot (double t, int f1, int f2, int a) {
     double T1 = 1/double(f1);
     double T  = 0.5*(T1 + 1/double(f2));
@@ -42,16 +50,19 @@ double hdot (double t, int f1, int f2, int a) {
     return res;
 }
 
+// Degrees to radians
 double deg2rad (double x) {
     return x*M_PI/180;
 }
 
+// Vector Printing
 void printVector(double a[], int n) {
    for (int i = 0; i < n; i++) {
         printf("%.4f\n",a[i]);
    }
 }
 
+// Matrix Printing
 void printMatrix (double** a, int m, int n) {
     for (int i = 0; i < m; i++) {
         for (int j = 0; j < n; j++) {
@@ -65,21 +76,21 @@ void printMatrix (double** a, int m, int n) {
 
 int main (int argc, char* argv[]) {
     int fs = 1;
-    int i, j, k, m, p;  // Indices
+    int i, j, k, m, p;   // Indices
 
-    int Nl     = 1000;    // No. of collocation points
-    double u   = 20;    // Freestream velocity
+    int Nl     = 1000;   // No. of collocation points
+    double u   = 20;     // Freestream velocity
     double c   = 10;     // Chord length of the flat plate
-    double alp = 0;     // Angle of attack of the plate
-    double rho = 1.225; // Density
-    double dx  = c/Nl;  // Spacing between two points
+    double alp = 0;      // Angle of attack of the plate
+    double rho = 1.225;  // Density
+    double dx  = c/Nl;   // Spacing between two points
 
     double sn = sin(deg2rad(alp));
     double cs = cos(deg2rad(alp));
 
     double dt = 0.005;        // Time step
-    double tf = 5;           // Final time
-    int Nt = int(tf/dt) + 1; // No. of time steps
+    double tf = 5;            // Final time
+    int Nt = int(tf/dt) + 1;  // No. of time steps
 
     int n  = 1;
     int f1 = 1;

@@ -11,6 +11,7 @@
 // Tolerance
 #define tol 1e-6
 
+// Initialization Function
 void initmult (TYPE mat[N][N]) {
     #pragma acc parallel loop present(mat[:][:])
         for (int i = 0; i < N; i++) {
@@ -25,6 +26,7 @@ void initmult (TYPE mat[N][N]) {
         }
 }
 
+// Function to make all elements of a matrix zero
 void nullFunc (TYPE A[N][N]) {
     #pragma acc parallel loop num_gangs(10) collapse(2) default(present)
         for (int i = 0; i < N; i++) {
@@ -34,6 +36,7 @@ void nullFunc (TYPE A[N][N]) {
         }
 }
 
+// Custom absolute value function (to avoid header issue in GPU)
 TYPE myabs(TYPE a) {
     if (a >= 0) {
         return a;
@@ -43,6 +46,7 @@ TYPE myabs(TYPE a) {
     }
 }
 
+// Matrix printing
 void printMat (TYPE a[N][N]) {
     if (N > 10) {
         printf("Avoiding printing of large matrix...\n");
@@ -62,6 +66,7 @@ void printMat (TYPE a[N][N]) {
     }
 }
 
+// Cholesky Decomposition. Also, checks for Positive Definiteness
 void cholesky (TYPE a[N][N], TYPE l[N][N], int stat[2], TYPE sum) {
     // Ensure that stat is 0
     

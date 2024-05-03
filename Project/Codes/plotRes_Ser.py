@@ -24,7 +24,8 @@ print("Loaded forces!!!")
 xwM = np.zeros((Nt,Nt))
 ywM = np.zeros((Nt,Nt))
 
-print("Loading wake locations...")
+# The following sections takes some time
+print("Loading wake locations...(Might take some time!!!)")
 fcnt = Nt
 for i in range(fcnt):
     if i % 50 == 0:
@@ -35,6 +36,7 @@ for i in range(fcnt):
 # print(xwM[Nt-1][-10:],ywM[Nt-1][-10:])
 print("Loaded wake locations!!!")
 
+# # Animation plot generator
 # # fig1, ax1 = plt.subplots()
 # # pdats = ax1.scatter([],[], s=3)
 # fig1 = plt.figure(figsize=(8,6))
@@ -55,6 +57,7 @@ print("Loaded wake locations!!!")
 # anim = FuncAnimation(fig1, animFunc, frames=fcnt, interval=25)
 # plt.show()
 
+# Plot of wake at the last instant
 xte = x0[Nt-1] + c*np.cos(alp)
 yte = y0[Nt-1] - c*np.sin(alp)
 
